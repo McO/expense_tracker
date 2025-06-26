@@ -66,13 +66,13 @@ class ExpenseDetailScreen extends StatelessWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
-                            '\$${expense.amount.toStringAsFixed(2)}',
-                            style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                              fontWeight: FontWeight.bold,
-                              color: Theme.of(context).colorScheme.onPrimaryContainer,
-                            ),
-                          ),
+                                                     Text(
+                             expense.formattedAmount,
+                             style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                               fontWeight: FontWeight.bold,
+                               color: Theme.of(context).colorScheme.onPrimaryContainer,
+                             ),
+                           ),
                           Text(
                             expense.category.displayName,
                             style: Theme.of(context).textTheme.titleMedium?.copyWith(

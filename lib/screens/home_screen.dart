@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 import '../models/expense.dart';
+import '../models/currency.dart';
 import '../services/expense_service.dart';
 import 'add_expense_screen.dart';
 import 'expenses_list_screen.dart';
 import 'expense_detail_screen.dart';
+import 'settings_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -49,6 +51,30 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
+  Future<String> _getFormattedTotal() async {
+    final expenses = await _expenseService.getExpenses();
+    if (expenses.isEmpty) {
+      return '\$0.00';
+    }
+    
+    // Group by currency and calculate totals
+    final Map<String, double> currencyTotals = {};
+    for (final expense in expenses) {
+      currencyTotals[expense.currency.code] = 
+          (currencyTotals[expense.currency.code] ?? 0) + expense.amount;
+    }
+    
+    // If all expenses are in the same currency, show that currency
+    if (currencyTotals.length == 1) {
+      final currencyCode = currencyTotals.keys.first;
+      final currency = Currency.fromCode(currencyCode);
+      return '${currency.symbol}${currencyTotals[currencyCode]!.toStringAsFixed(2)}';
+    }
+    
+    // If multiple currencies, show a summary
+    return '${currencyTotals.length} currencies';
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -64,6 +90,16 @@ class _HomeScreenState extends State<HomeScreen> {
               await Navigator.push(
                 context,
                 MaterialPageRoute(builder: (context) => const ExpensesListScreen()),
+              );
+              _loadData();
+            },
+          ),
+          IconButton(
+            icon: const Icon(Icons.settings),
+            onPressed: () async {
+              await Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const SettingsScreen()),
               );
               _loadData();
             },
@@ -121,12 +157,17 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
             const SizedBox(height: 8),
-            Text(
-              '\$${_totalExpenses.toStringAsFixed(2)}',
-              style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-                color: Theme.of(context).colorScheme.onPrimaryContainer,
-              ),
+            FutureBuilder<String>(
+              future: _getFormattedTotal(),
+              builder: (context, snapshot) {
+                return Text(
+                  snapshot.data ?? '\$${_totalExpenses.toStringAsFixed(2)}',
+                  style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: Theme.of(context).colorScheme.onPrimaryContainer,
+                  ),
+                );
+              },
             ),
             const SizedBox(height: 8),
             Text(
@@ -186,7 +227,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                   style: Theme.of(context).textTheme.bodyLarge,
                                 ),
                                 Text(
-                                  '\$${entry.value.toStringAsFixed(2)}',
+                                  'Mixed currencies',
                                   style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                                     fontWeight: FontWeight.bold,
                                   ),
@@ -290,7 +331,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         '${expense.category.displayName} • ${DateFormat('MMM d, yyyy').format(expense.date)}',
                       ),
                       trailing: Text(
-                        '\$${expense.amount.toStringAsFixed(2)}',
+                        expense.formattedAmount,
                         style: Theme.of(context).textTheme.titleMedium?.copyWith(
                           fontWeight: FontWeight.bold,
                           color: Theme.of(context).colorScheme.primary,

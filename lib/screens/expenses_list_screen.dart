@@ -315,13 +315,13 @@ class _ExpensesListScreenState extends State<ExpensesListScreen> {
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
-            Text(
-              '\$${expense.amount.toStringAsFixed(2)}',
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-                color: Theme.of(context).colorScheme.primary,
-              ),
-            ),
+                         Text(
+               expense.formattedAmount,
+               style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                 fontWeight: FontWeight.bold,
+                 color: Theme.of(context).colorScheme.primary,
+               ),
+             ),
             PopupMenuButton<String>(
               onSelected: (value) {
                 if (value == 'edit') {

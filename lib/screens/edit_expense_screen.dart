@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../models/expense.dart';
+import '../models/currency.dart';
 import '../services/expense_service.dart';
 
 class EditExpenseScreen extends StatefulWidget {
@@ -23,6 +24,7 @@ class _EditExpenseScreenState extends State<EditExpenseScreen> {
   final ExpenseService _expenseService = ExpenseService();
 
   ExpenseCategory _selectedCategory = ExpenseCategory.other;
+  Currency _selectedCurrency = Currency.usd;
   DateTime _selectedDate = DateTime.now();
   bool _isLoading = false;
 
@@ -37,6 +39,7 @@ class _EditExpenseScreenState extends State<EditExpenseScreen> {
     _amountController.text = widget.expense.amount.toString();
     _descriptionController.text = widget.expense.description;
     _selectedCategory = widget.expense.category;
+    _selectedCurrency = widget.expense.currency;
     _selectedDate = widget.expense.date;
   }
 
@@ -72,6 +75,7 @@ class _EditExpenseScreenState extends State<EditExpenseScreen> {
         final updatedExpense = widget.expense.copyWith(
           title: _titleController.text.trim(),
           amount: double.parse(_amountController.text),
+          currency: _selectedCurrency,
           category: _selectedCategory,
           date: _selectedDate,
           description: _descriptionController.text.trim(),
@@ -166,12 +170,12 @@ class _EditExpenseScreenState extends State<EditExpenseScreen> {
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
-                            Text(
-                              'Original: \$${widget.expense.amount.toStringAsFixed(2)} • ${DateFormat('MMM d, yyyy').format(widget.expense.date)}',
-                              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                color: Colors.grey[600],
-                              ),
-                            ),
+                                                         Text(
+                               'Original: ${widget.expense.formattedAmount} • ${DateFormat('MMM d, yyyy').format(widget.expense.date)}',
+                               style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                 color: Colors.grey[600],
+                               ),
+                             ),
                           ],
                         ),
                       ),
@@ -241,6 +245,64 @@ class _EditExpenseScreenState extends State<EditExpenseScreen> {
                           border: OutlineInputBorder(),
                         ),
                         maxLines: 3,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+
+              // Currency Selection
+              Card(
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Currency',
+                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.symmetric(horizontal: 12),
+                        decoration: BoxDecoration(
+                          border: Border.all(color: Colors.grey),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: DropdownButtonHideUnderline(
+                          child: DropdownButton<Currency>(
+                            value: _selectedCurrency,
+                            isExpanded: true,
+                            onChanged: (Currency? newValue) {
+                              if (newValue != null) {
+                                setState(() {
+                                  _selectedCurrency = newValue;
+                                });
+                              }
+                            },
+                            items: Currency.values.map<DropdownMenuItem<Currency>>((Currency currency) {
+                              return DropdownMenuItem<Currency>(
+                                value: currency,
+                                child: Row(
+                                  children: [
+                                    Text(
+                                      currency.symbol,
+                                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                    const SizedBox(width: 12),
+                                    Expanded(child: Text(currency.displayName)),
+                                  ],
+                                ),
+                              );
+                            }).toList(),
+                          ),
+                        ),
                       ),
                     ],
                   ),
