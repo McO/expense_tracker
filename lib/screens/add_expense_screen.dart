@@ -178,25 +178,70 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                         },
                       ),
                       const SizedBox(height: 16),
-                      TextFormField(
-                        controller: _amountController,
-                        decoration: const InputDecoration(
-                          labelText: 'Amount',
-                          hintText: 'Enter amount',
-                          prefixIcon: Icon(Icons.attach_money),
-                          border: OutlineInputBorder(),
-                        ),
-                        keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                        validator: (value) {
-                          if (value == null || value.trim().isEmpty) {
-                            return 'Please enter an amount';
-                          }
-                          final amount = double.tryParse(value);
-                          if (amount == null || amount <= 0) {
-                            return 'Please enter a valid positive amount';
-                          }
-                          return null;
-                        },
+                      
+                      // Amount and Currency Row
+                      Row(
+                        children: [
+                          Expanded(
+                            flex: 2,
+                            child: TextFormField(
+                              controller: _amountController,
+                              decoration: const InputDecoration(
+                                labelText: 'Amount',
+                                hintText: 'Enter amount',
+                                prefixIcon: Icon(Icons.attach_money),
+                                border: OutlineInputBorder(),
+                              ),
+                              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                              validator: (value) {
+                                if (value == null || value.trim().isEmpty) {
+                                  return 'Please enter an amount';
+                                }
+                                final amount = double.tryParse(value);
+                                if (amount == null || amount <= 0) {
+                                  return 'Please enter a valid positive amount';
+                                }
+                                return null;
+                              },
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            flex: 1,
+                            child: Container(
+                              height: 56, // Match TextFormField height
+                              padding: const EdgeInsets.symmetric(horizontal: 12),
+                              decoration: BoxDecoration(
+                                border: Border.all(color: Colors.grey),
+                                borderRadius: BorderRadius.circular(4),
+                              ),
+                              child: DropdownButtonHideUnderline(
+                                child: DropdownButton<Currency>(
+                                  value: _selectedCurrency,
+                                  isExpanded: true,
+                                  onChanged: (Currency? newValue) {
+                                    if (newValue != null) {
+                                      setState(() {
+                                        _selectedCurrency = newValue;
+                                      });
+                                    }
+                                  },
+                                  items: Currency.values.map<DropdownMenuItem<Currency>>((Currency currency) {
+                                    return DropdownMenuItem<Currency>(
+                                      value: currency,
+                                      child: Text(
+                                        currency.symbol,
+                                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    );
+                                  }).toList(),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                       const SizedBox(height: 16),
                       TextFormField(
@@ -208,64 +253,6 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                           border: OutlineInputBorder(),
                         ),
                         maxLines: 3,
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              const SizedBox(height: 16),
-
-              // Currency Selection
-              Card(
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Currency',
-                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-                      Container(
-                        width: double.infinity,
-                        padding: const EdgeInsets.symmetric(horizontal: 12),
-                        decoration: BoxDecoration(
-                          border: Border.all(color: Colors.grey),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: DropdownButtonHideUnderline(
-                          child: DropdownButton<Currency>(
-                            value: _selectedCurrency,
-                            isExpanded: true,
-                            onChanged: (Currency? newValue) {
-                              if (newValue != null) {
-                                setState(() {
-                                  _selectedCurrency = newValue;
-                                });
-                              }
-                            },
-                            items: Currency.values.map<DropdownMenuItem<Currency>>((Currency currency) {
-                              return DropdownMenuItem<Currency>(
-                                value: currency,
-                                child: Row(
-                                  children: [
-                                    Text(
-                                      currency.symbol,
-                                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                    const SizedBox(width: 12),
-                                    Expanded(child: Text(currency.displayName)),
-                                  ],
-                                ),
-                              );
-                            }).toList(),
-                          ),
-                        ),
                       ),
                     ],
                   ),
@@ -287,28 +274,41 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                         ),
                       ),
                       const SizedBox(height: 16),
-                      Wrap(
-                        spacing: 8,
-                        runSpacing: 8,
-                        children: ExpenseCategory.values.map((category) {
-                          final isSelected = _selectedCategory == category;
-                          return FilterChip(
-                            selected: isSelected,
-                            onSelected: (selected) {
-                              setState(() {
-                                _selectedCategory = category;
-                              });
+                      Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.symmetric(horizontal: 12),
+                        decoration: BoxDecoration(
+                          border: Border.all(color: Colors.grey),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: DropdownButtonHideUnderline(
+                          child: DropdownButton<ExpenseCategory>(
+                            value: _selectedCategory,
+                            isExpanded: true,
+                            onChanged: (ExpenseCategory? newValue) {
+                              if (newValue != null) {
+                                setState(() {
+                                  _selectedCategory = newValue;
+                                });
+                              }
                             },
-                            label: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Text(category.icon),
-                                const SizedBox(width: 4),
-                                Text(category.displayName),
-                              ],
-                            ),
-                          );
-                        }).toList(),
+                            items: ExpenseCategory.values.map<DropdownMenuItem<ExpenseCategory>>((ExpenseCategory category) {
+                              return DropdownMenuItem<ExpenseCategory>(
+                                value: category,
+                                child: Row(
+                                  children: [
+                                    Text(
+                                      category.icon,
+                                      style: const TextStyle(fontSize: 20),
+                                    ),
+                                    const SizedBox(width: 12),
+                                    Expanded(child: Text(category.displayName)),
+                                  ],
+                                ),
+                              );
+                            }).toList(),
+                          ),
+                        ),
                       ),
                     ],
                   ),
