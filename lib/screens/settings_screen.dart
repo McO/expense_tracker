@@ -1,9 +1,17 @@
 import 'package:flutter/material.dart';
 import '../models/currency.dart';
 import '../services/settings_service.dart';
+import '../services/theme_service.dart';
 
 class SettingsScreen extends StatefulWidget {
-  const SettingsScreen({super.key});
+  final VoidCallback? onThemeToggle;
+  final bool isDarkMode;
+
+  const SettingsScreen({
+    super.key,
+    this.onThemeToggle,
+    this.isDarkMode = false,
+  });
 
   @override
   State<SettingsScreen> createState() => _SettingsScreenState();
@@ -11,8 +19,10 @@ class SettingsScreen extends StatefulWidget {
 
 class _SettingsScreenState extends State<SettingsScreen> {
   final SettingsService _settingsService = SettingsService();
+  final ThemeService _themeService = ThemeService();
   Currency _selectedCurrency = Currency.usd;
   bool _isLoading = true;
+  bool _isDarkMode = false;
 
   @override
   void initState() {
@@ -23,8 +33,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
   Future<void> _loadSettings() async {
     try {
       final currency = await _settingsService.getDefaultCurrency();
+      final isDarkMode = await _themeService.isDarkMode();
       setState(() {
         _selectedCurrency = currency;
+        _isDarkMode = isDarkMode;
         _isLoading = false;
       });
     } catch (e) {
@@ -40,7 +52,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       setState(() {
         _selectedCurrency = currency;
       });
-      
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -54,6 +66,36 @@ class _SettingsScreenState extends State<SettingsScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Error updating currency: ${e.toString()}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
+  Future<void> _toggleDarkMode() async {
+    try {
+      await _themeService.toggleTheme();
+      setState(() {
+        _isDarkMode = !_isDarkMode;
+      });
+
+      // Call the parent's theme toggle callback if provided
+      widget.onThemeToggle?.call();
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Theme changed to ${_isDarkMode ? 'Dark' : 'Light'} mode'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error updating theme: ${e.toString()}'),
             backgroundColor: Colors.red,
           ),
         );
@@ -93,8 +135,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                               Text(
                                 'Default Currency',
                                 style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                                  fontWeight: FontWeight.bold,
-                                ),
+                                      fontWeight: FontWeight.bold,
+                                    ),
                               ),
                             ],
                           ),
@@ -102,8 +144,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           Text(
                             'This currency will be used for new expenses',
                             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                              color: Colors.grey[600],
-                            ),
+                                  color: Colors.grey[600],
+                                ),
                           ),
                           const SizedBox(height: 16),
                           Container(
@@ -130,8 +172,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                         Text(
                                           currency.symbol,
                                           style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                            fontWeight: FontWeight.bold,
-                                          ),
+                                                fontWeight: FontWeight.bold,
+                                              ),
                                         ),
                                         const SizedBox(width: 12),
                                         Expanded(child: Text(currency.displayName)),
@@ -147,7 +189,55 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     ),
                   ),
                   const SizedBox(height: 16),
-                  
+                  Card(
+                    child: Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Icon(
+                                _isDarkMode ? Icons.dark_mode : Icons.light_mode,
+                                color: Theme.of(context).colorScheme.primary,
+                              ),
+                              const SizedBox(width: 12),
+                              Text(
+                                'Appearance',
+                                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            'Choose between light and dark theme',
+                            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                  color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
+                                ),
+                          ),
+                          const SizedBox(height: 16),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  'Dark Mode',
+                                  style: Theme.of(context).textTheme.bodyLarge,
+                                ),
+                              ),
+                              Switch(
+                                value: _isDarkMode,
+                                onChanged: (value) => _toggleDarkMode(),
+                                activeColor: Theme.of(context).colorScheme.primary,
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
                   Card(
                     child: Padding(
                       padding: const EdgeInsets.all(16),
@@ -164,8 +254,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                               Text(
                                 'Currency Information',
                                 style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                                  fontWeight: FontWeight.bold,
-                                ),
+                                      fontWeight: FontWeight.bold,
+                                    ),
                               ),
                             ],
                           ),
@@ -179,9 +269,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       ),
                     ),
                   ),
-                  
                   const SizedBox(height: 24),
-                  
                   Card(
                     color: Theme.of(context).colorScheme.surfaceVariant,
                     child: Padding(
@@ -200,8 +288,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                 Text(
                                   'Tip',
                                   style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                                    fontWeight: FontWeight.bold,
-                                  ),
+                                        fontWeight: FontWeight.bold,
+                                      ),
                                 ),
                                 const SizedBox(height: 4),
                                 Text(
@@ -230,17 +318,17 @@ class _SettingsScreenState extends State<SettingsScreen> {
           Text(
             label,
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: Colors.grey[600],
-            ),
+                  color: Colors.grey[600],
+                ),
           ),
           Text(
             value,
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              fontWeight: FontWeight.bold,
-            ),
+                  fontWeight: FontWeight.bold,
+                ),
           ),
         ],
       ),
     );
   }
-} 
+}

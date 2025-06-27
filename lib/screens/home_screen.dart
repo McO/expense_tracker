@@ -10,7 +10,14 @@ import 'expense_detail_screen.dart';
 import 'settings_screen.dart';
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
+  final VoidCallback? onThemeToggle;
+  final bool isDarkMode;
+
+  const HomeScreen({
+    super.key,
+    this.onThemeToggle,
+    this.isDarkMode = false,
+  });
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -34,7 +41,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<void> _loadData() async {
     final expenses = await _expenseService.getExpenses();
-    
+
     // Get available currencies
     final Set<Currency> availableCurrencies = {};
     for (final expense in expenses) {
@@ -45,20 +52,19 @@ class _HomeScreenState extends State<HomeScreen> {
       _allExpenses = expenses;
       _availableCurrencies = availableCurrencies;
     });
-    
+
     _applyFilter();
   }
 
   void _applyFilter() {
     List<Expense> filteredExpenses;
-    
+
     if (_selectedCurrencyFilter == null) {
       // Show all expenses
       filteredExpenses = _allExpenses;
     } else {
       // Filter by selected currency
-      filteredExpenses = _allExpenses.where((expense) => 
-          expense.currency == _selectedCurrencyFilter).toList();
+      filteredExpenses = _allExpenses.where((expense) => expense.currency == _selectedCurrencyFilter).toList();
     }
 
     // Calculate totals for filtered data
@@ -68,10 +74,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
     for (final expense in filteredExpenses) {
       total += expense.amount;
-      categoryTotals[expense.category] = 
-          (categoryTotals[expense.category] ?? 0) + expense.amount;
-      currencyTotals[expense.currency] = 
-          (currencyTotals[expense.currency] ?? 0) + expense.amount;
+      categoryTotals[expense.category] = (categoryTotals[expense.category] ?? 0) + expense.amount;
+      currencyTotals[expense.currency] = (currencyTotals[expense.currency] ?? 0) + expense.amount;
     }
 
     setState(() {
@@ -116,8 +120,8 @@ class _HomeScreenState extends State<HomeScreen> {
           Text(
             'Filter:',
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              fontWeight: FontWeight.w500,
-            ),
+                  fontWeight: FontWeight.w500,
+                ),
           ),
           const SizedBox(width: 8),
           DropdownButtonHideUnderline(
@@ -148,8 +152,8 @@ class _HomeScreenState extends State<HomeScreen> {
                     child: Text(
                       currency.code,
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
+                            fontWeight: FontWeight.bold,
+                          ),
                     ),
                   );
                 }).toList(),
@@ -185,10 +189,18 @@ class _HomeScreenState extends State<HomeScreen> {
             onPressed: () async {
               await Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => const SettingsScreen()),
+                MaterialPageRoute(
+                    builder: (context) => SettingsScreen(
+                          onThemeToggle: widget.onThemeToggle,
+                          isDarkMode: widget.isDarkMode,
+                        )),
               );
               _loadData();
             },
+          ),
+          IconButton(
+            icon: const Icon(Icons.brightness_6),
+            onPressed: widget.onThemeToggle,
           ),
         ],
       ),
@@ -242,23 +254,23 @@ class _HomeScreenState extends State<HomeScreen> {
               Text(
                 'Total Expenses',
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  color: Theme.of(context).colorScheme.onPrimaryContainer,
-                ),
+                      color: Theme.of(context).colorScheme.onPrimaryContainer,
+                    ),
               ),
               const SizedBox(height: 8),
               Text(
                 '\$0.00',
                 style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: Theme.of(context).colorScheme.onPrimaryContainer,
-                ),
+                      fontWeight: FontWeight.bold,
+                      color: Theme.of(context).colorScheme.onPrimaryContainer,
+                    ),
               ),
               const SizedBox(height: 8),
               Text(
                 'This month',
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: Theme.of(context).colorScheme.onPrimaryContainer,
-                ),
+                      color: Theme.of(context).colorScheme.onPrimaryContainer,
+                    ),
               ),
             ],
           ),
@@ -272,8 +284,8 @@ class _HomeScreenState extends State<HomeScreen> {
         Text(
           'Total Expenses',
           style: Theme.of(context).textTheme.titleLarge?.copyWith(
-            fontWeight: FontWeight.bold,
-          ),
+                fontWeight: FontWeight.bold,
+              ),
         ),
         const SizedBox(height: 16),
         SizedBox(
@@ -281,60 +293,62 @@ class _HomeScreenState extends State<HomeScreen> {
           child: SingleChildScrollView(
             scrollDirection: Axis.horizontal,
             child: Row(
-              children: _currencyTotals.entries.map((entry) => Padding(
-                padding: const EdgeInsets.only(right: 12),
-                child: SizedBox(
-                  width: 200,
-                  child: Card(
-                    color: Theme.of(context).colorScheme.primaryContainer,
-                    child: Padding(
-                      padding: const EdgeInsets.all(16),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Row(
-                            children: [
-                              Container(
-                                padding: const EdgeInsets.all(8),
-                                decoration: BoxDecoration(
-                                  color: Theme.of(context).colorScheme.primary,
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                                child: Text(
-                                  entry.key.symbol,
-                                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                    color: Theme.of(context).colorScheme.onPrimary,
-                                    fontWeight: FontWeight.bold,
+              children: _currencyTotals.entries
+                  .map((entry) => Padding(
+                        padding: const EdgeInsets.only(right: 12),
+                        child: SizedBox(
+                          width: 200,
+                          child: Card(
+                            color: Theme.of(context).colorScheme.primaryContainer,
+                            child: Padding(
+                              padding: const EdgeInsets.all(16),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Row(
+                                    children: [
+                                      Container(
+                                        padding: const EdgeInsets.all(8),
+                                        decoration: BoxDecoration(
+                                          color: Theme.of(context).colorScheme.primary,
+                                          borderRadius: BorderRadius.circular(8),
+                                        ),
+                                        child: Text(
+                                          entry.key.symbol,
+                                          style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                                                color: Theme.of(context).colorScheme.onPrimary,
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                        ),
+                                      ),
+                                      const SizedBox(width: 8),
+                                      Expanded(
+                                        child: Text(
+                                          entry.key.code,
+                                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                                color: Theme.of(context).colorScheme.onPrimaryContainer,
+                                                fontWeight: FontWeight.w500,
+                                              ),
+                                        ),
+                                      ),
+                                    ],
                                   ),
-                                ),
-                              ),
-                              const SizedBox(width: 8),
-                              Expanded(
-                                child: Text(
-                                  entry.key.code,
-                                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                    color: Theme.of(context).colorScheme.onPrimaryContainer,
-                                    fontWeight: FontWeight.w500,
+                                  const SizedBox(height: 8),
+                                  Text(
+                                    '${entry.key.symbol}${entry.value.toStringAsFixed(2)}',
+                                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                                          fontWeight: FontWeight.bold,
+                                          color: Theme.of(context).colorScheme.onPrimaryContainer,
+                                        ),
                                   ),
-                                ),
+                                ],
                               ),
-                            ],
-                          ),
-                          const SizedBox(height: 8),
-                          Text(
-                            '${entry.key.symbol}${entry.value.toStringAsFixed(2)}',
-                            style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                              fontWeight: FontWeight.bold,
-                              color: Theme.of(context).colorScheme.onPrimaryContainer,
                             ),
                           ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-              )).toList(),
+                        ),
+                      ))
+                  .toList(),
             ),
           ),
         ),
@@ -355,7 +369,7 @@ class _HomeScreenState extends State<HomeScreen> {
         // When showing all currencies, check if category has mixed currencies
         final categoryExpenses = _allExpenses.where((e) => e.category == category);
         final categoryCurrencies = categoryExpenses.map((e) => e.currency).toSet();
-        
+
         if (categoryCurrencies.length == 1) {
           // Single currency for this category
           final currency = categoryCurrencies.first;
@@ -376,8 +390,8 @@ class _HomeScreenState extends State<HomeScreen> {
             Text(
               'Category Breakdown',
               style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+                    fontWeight: FontWeight.bold,
+                  ),
             ),
             if (_selectedCurrencyFilter != null)
               Container(
@@ -389,9 +403,9 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: Text(
                   _selectedCurrencyFilter!.code,
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: Theme.of(context).colorScheme.onPrimaryContainer,
-                  ),
+                        fontWeight: FontWeight.bold,
+                        color: Theme.of(context).colorScheme.onPrimaryContainer,
+                      ),
                 ),
               ),
           ],
@@ -402,10 +416,8 @@ class _HomeScreenState extends State<HomeScreen> {
             padding: const EdgeInsets.all(16),
             child: Column(
               children: _categoryTotals.entries.map((entry) {
-                final percentage = _totalExpenses > 0 
-                    ? (entry.value / _totalExpenses) * 100 
-                    : 0.0;
-                
+                final percentage = _totalExpenses > 0 ? (entry.value / _totalExpenses) * 100 : 0.0;
+
                 return Padding(
                   padding: const EdgeInsets.symmetric(vertical: 8),
                   child: Row(
@@ -429,8 +441,8 @@ class _HomeScreenState extends State<HomeScreen> {
                                 Text(
                                   _formatCategoryAmount(entry.key, entry.value),
                                   style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                                    fontWeight: FontWeight.bold,
-                                  ),
+                                        fontWeight: FontWeight.bold,
+                                      ),
                                 ),
                               ],
                             ),
@@ -463,8 +475,8 @@ class _HomeScreenState extends State<HomeScreen> {
             Text(
               'Recent Expenses',
               style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+                    fontWeight: FontWeight.bold,
+                  ),
             ),
             if (_recentExpenses.isNotEmpty)
               TextButton(
@@ -496,15 +508,15 @@ class _HomeScreenState extends State<HomeScreen> {
                         Text(
                           'No expenses yet',
                           style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                            color: Colors.grey[600],
-                          ),
+                                color: Colors.grey[600],
+                              ),
                         ),
                         const SizedBox(height: 8),
                         Text(
                           'Tap the + button to add your first expense',
                           style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            color: Colors.grey[500],
-                          ),
+                                color: Colors.grey[500],
+                              ),
                           textAlign: TextAlign.center,
                         ),
                       ],
@@ -533,9 +545,9 @@ class _HomeScreenState extends State<HomeScreen> {
                       trailing: Text(
                         expense.formattedAmount,
                         style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: Theme.of(context).colorScheme.primary,
-                        ),
+                              fontWeight: FontWeight.bold,
+                              color: Theme.of(context).colorScheme.primary,
+                            ),
                       ),
                       onTap: () async {
                         final result = await Navigator.push(
@@ -544,7 +556,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             builder: (context) => ExpenseDetailScreen(expense: expense),
                           ),
                         );
-                        
+
                         if (result == true) {
                           _loadData();
                         }
@@ -556,4 +568,4 @@ class _HomeScreenState extends State<HomeScreen> {
       ],
     );
   }
-} 
+}
