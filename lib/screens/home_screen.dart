@@ -21,6 +21,7 @@ class _HomeScreenState extends State<HomeScreen> {
   List<Expense> _recentExpenses = [];
   double _totalExpenses = 0.0;
   Map<ExpenseCategory, double> _categoryTotals = {};
+  Map<Currency, double> _currencyTotals = {};
 
   @override
   void initState() {
@@ -33,10 +34,18 @@ class _HomeScreenState extends State<HomeScreen> {
     final total = await _expenseService.getTotalExpenses();
     final categoryTotals = await _expenseService.getExpensesByCategory();
 
+    // Calculate currency totals
+    final Map<Currency, double> currencyTotals = {};
+    for (final expense in expenses) {
+      currencyTotals[expense.currency] = 
+          (currencyTotals[expense.currency] ?? 0) + expense.amount;
+    }
+
     setState(() {
       _recentExpenses = expenses.take(5).toList();
       _totalExpenses = total;
       _categoryTotals = categoryTotals;
+      _currencyTotals = currencyTotals;
     });
   }
 
@@ -51,29 +60,7 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
-  Future<String> _getFormattedTotal() async {
-    final expenses = await _expenseService.getExpenses();
-    if (expenses.isEmpty) {
-      return '\$0.00';
-    }
-    
-    // Group by currency and calculate totals
-    final Map<String, double> currencyTotals = {};
-    for (final expense in expenses) {
-      currencyTotals[expense.currency.code] = 
-          (currencyTotals[expense.currency.code] ?? 0) + expense.amount;
-    }
-    
-    // If all expenses are in the same currency, show that currency
-    if (currencyTotals.length == 1) {
-      final currencyCode = currencyTotals.keys.first;
-      final currency = Currency.fromCode(currencyCode);
-      return '${currency.symbol}${currencyTotals[currencyCode]!.toStringAsFixed(2)}';
-    }
-    
-    // If multiple currencies, show a summary
-    return '${currencyTotals.length} currencies';
-  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -143,42 +130,114 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildTotalExpenseCard() {
-    return Card(
-      color: Theme.of(context).colorScheme.primaryContainer,
-      child: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Total Expenses',
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                color: Theme.of(context).colorScheme.onPrimaryContainer,
+    if (_currencyTotals.isEmpty) {
+      return Card(
+        color: Theme.of(context).colorScheme.primaryContainer,
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Total Expenses',
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  color: Theme.of(context).colorScheme.onPrimaryContainer,
+                ),
               ),
-            ),
-            const SizedBox(height: 8),
-            FutureBuilder<String>(
-              future: _getFormattedTotal(),
-              builder: (context, snapshot) {
-                return Text(
-                  snapshot.data ?? '\$${_totalExpenses.toStringAsFixed(2)}',
-                  style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: Theme.of(context).colorScheme.onPrimaryContainer,
-                  ),
-                );
-              },
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'This month',
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: Theme.of(context).colorScheme.onPrimaryContainer,
+              const SizedBox(height: 8),
+              Text(
+                '\$0.00',
+                style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: Theme.of(context).colorScheme.onPrimaryContainer,
+                ),
               ),
-            ),
-          ],
+              const SizedBox(height: 8),
+              Text(
+                'This month',
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: Theme.of(context).colorScheme.onPrimaryContainer,
+                ),
+              ),
+            ],
+          ),
         ),
-      ),
+      );
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Total Expenses',
+          style: Theme.of(context).textTheme.titleLarge?.copyWith(
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        const SizedBox(height: 16),
+        SizedBox(
+          height: 120,
+          child: SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(
+              children: _currencyTotals.entries.map((entry) => Padding(
+                padding: const EdgeInsets.only(right: 12),
+                child: SizedBox(
+                  width: 200,
+                  child: Card(
+                    color: Theme.of(context).colorScheme.primaryContainer,
+                    child: Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Row(
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.all(8),
+                                decoration: BoxDecoration(
+                                  color: Theme.of(context).colorScheme.primary,
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: Text(
+                                  entry.key.symbol,
+                                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                                    color: Theme.of(context).colorScheme.onPrimary,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: Text(
+                                  entry.key.code,
+                                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                    color: Theme.of(context).colorScheme.onPrimaryContainer,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            '${entry.key.symbol}${entry.value.toStringAsFixed(2)}',
+                            style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                              fontWeight: FontWeight.bold,
+                              color: Theme.of(context).colorScheme.onPrimaryContainer,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              )).toList(),
+            ),
+          ),
+        ),
+      ],
     );
   }
 
