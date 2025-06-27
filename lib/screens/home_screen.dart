@@ -19,9 +19,12 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   final ExpenseService _expenseService = ExpenseService();
   List<Expense> _recentExpenses = [];
+  List<Expense> _allExpenses = [];
   double _totalExpenses = 0.0;
   Map<ExpenseCategory, double> _categoryTotals = {};
   Map<Currency, double> _currencyTotals = {};
+  Set<Currency> _availableCurrencies = {};
+  Currency? _selectedCurrencyFilter;
 
   @override
   void initState() {
@@ -31,18 +34,48 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<void> _loadData() async {
     final expenses = await _expenseService.getExpenses();
-    final total = await _expenseService.getTotalExpenses();
-    final categoryTotals = await _expenseService.getExpensesByCategory();
-
-    // Calculate currency totals
-    final Map<Currency, double> currencyTotals = {};
+    
+    // Get available currencies
+    final Set<Currency> availableCurrencies = {};
     for (final expense in expenses) {
+      availableCurrencies.add(expense.currency);
+    }
+
+    setState(() {
+      _allExpenses = expenses;
+      _availableCurrencies = availableCurrencies;
+    });
+    
+    _applyFilter();
+  }
+
+  void _applyFilter() {
+    List<Expense> filteredExpenses;
+    
+    if (_selectedCurrencyFilter == null) {
+      // Show all expenses
+      filteredExpenses = _allExpenses;
+    } else {
+      // Filter by selected currency
+      filteredExpenses = _allExpenses.where((expense) => 
+          expense.currency == _selectedCurrencyFilter).toList();
+    }
+
+    // Calculate totals for filtered data
+    double total = 0.0;
+    final Map<ExpenseCategory, double> categoryTotals = {};
+    final Map<Currency, double> currencyTotals = {};
+
+    for (final expense in filteredExpenses) {
+      total += expense.amount;
+      categoryTotals[expense.category] = 
+          (categoryTotals[expense.category] ?? 0) + expense.amount;
       currencyTotals[expense.currency] = 
           (currencyTotals[expense.currency] ?? 0) + expense.amount;
     }
 
     setState(() {
-      _recentExpenses = expenses.take(5).toList();
+      _recentExpenses = filteredExpenses.take(5).toList();
       _totalExpenses = total;
       _categoryTotals = categoryTotals;
       _currencyTotals = currencyTotals;
@@ -60,7 +93,73 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
+  Widget _buildCurrencyFilter() {
+    if (_availableCurrencies.isEmpty) {
+      return const SizedBox.shrink();
+    }
 
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surfaceVariant,
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            Icons.filter_list,
+            size: 18,
+            color: Theme.of(context).colorScheme.primary,
+          ),
+          const SizedBox(width: 8),
+          Text(
+            'Filter:',
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          const SizedBox(width: 8),
+          DropdownButtonHideUnderline(
+            child: DropdownButton<Currency?>(
+              value: _selectedCurrencyFilter,
+              isDense: true,
+              hint: Text(
+                'All',
+                style: Theme.of(context).textTheme.bodySmall,
+              ),
+              onChanged: (Currency? newValue) {
+                setState(() {
+                  _selectedCurrencyFilter = newValue;
+                });
+                _applyFilter();
+              },
+              items: [
+                DropdownMenuItem<Currency?>(
+                  value: null,
+                  child: Text(
+                    'All',
+                    style: Theme.of(context).textTheme.bodySmall,
+                  ),
+                ),
+                ..._availableCurrencies.map<DropdownMenuItem<Currency?>>((Currency currency) {
+                  return DropdownMenuItem<Currency?>(
+                    value: currency,
+                    child: Text(
+                      currency.code,
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  );
+                }).toList(),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -110,6 +209,8 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                 ),
                 children: [
+                  _buildCurrencyFilter(),
+                  const SizedBox(height: 16),
                   _buildTotalExpenseCard(),
                   const SizedBox(height: 24),
                   _buildCategoryBreakdown(),
@@ -246,14 +347,54 @@ class _HomeScreenState extends State<HomeScreen> {
       return const SizedBox.shrink();
     }
 
+    String _formatCategoryAmount(ExpenseCategory category, double amount) {
+      if (_selectedCurrencyFilter != null) {
+        // When filtered by currency, show the amount in that currency
+        return '${_selectedCurrencyFilter!.symbol}${amount.toStringAsFixed(2)}';
+      } else {
+        // When showing all currencies, check if category has mixed currencies
+        final categoryExpenses = _allExpenses.where((e) => e.category == category);
+        final categoryCurrencies = categoryExpenses.map((e) => e.currency).toSet();
+        
+        if (categoryCurrencies.length == 1) {
+          // Single currency for this category
+          final currency = categoryCurrencies.first;
+          return '${currency.symbol}${amount.toStringAsFixed(2)}';
+        } else {
+          // Mixed currencies
+          return 'Mixed currencies';
+        }
+      }
+    }
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          'Category Breakdown',
-          style: Theme.of(context).textTheme.titleLarge?.copyWith(
-            fontWeight: FontWeight.bold,
-          ),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              'Category Breakdown',
+              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            if (_selectedCurrencyFilter != null)
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.primaryContainer,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Text(
+                  _selectedCurrencyFilter!.code,
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: Theme.of(context).colorScheme.onPrimaryContainer,
+                  ),
+                ),
+              ),
+          ],
         ),
         const SizedBox(height: 16),
         Card(
@@ -286,7 +427,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                   style: Theme.of(context).textTheme.bodyLarge,
                                 ),
                                 Text(
-                                  'Mixed currencies',
+                                  _formatCategoryAmount(entry.key, entry.value),
                                   style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                                     fontWeight: FontWeight.bold,
                                   ),
