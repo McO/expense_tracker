@@ -4,19 +4,20 @@ import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 import '../models/expense.dart';
 import '../models/currency.dart';
 import '../services/expense_service.dart';
+import '../services/theme_service.dart';
 import 'add_expense_screen.dart';
 import 'expenses_list_screen.dart';
 import 'expense_detail_screen.dart';
 import 'settings_screen.dart';
 
 class HomeScreen extends StatefulWidget {
-  final VoidCallback? onThemeToggle;
-  final bool isDarkMode;
+  final Function(AppThemeMode)? onThemeModeChanged;
+  final AppThemeMode currentThemeMode;
 
   const HomeScreen({
     super.key,
-    this.onThemeToggle,
-    this.isDarkMode = false,
+    this.onThemeModeChanged,
+    this.currentThemeMode = AppThemeMode.system,
   });
 
   @override
@@ -191,16 +192,33 @@ class _HomeScreenState extends State<HomeScreen> {
                 context,
                 MaterialPageRoute(
                     builder: (context) => SettingsScreen(
-                          onThemeToggle: widget.onThemeToggle,
-                          isDarkMode: widget.isDarkMode,
+                          onThemeModeChanged: widget.onThemeModeChanged,
+                          currentThemeMode: widget.currentThemeMode,
                         )),
               );
               _loadData();
             },
           ),
           IconButton(
-            icon: const Icon(Icons.brightness_6),
-            onPressed: widget.onThemeToggle,
+            icon: Icon(_getThemeIcon()),
+            onPressed: () {
+              final currentMode = widget.currentThemeMode;
+              AppThemeMode nextMode;
+
+              switch (currentMode) {
+                case AppThemeMode.light:
+                  nextMode = AppThemeMode.dark;
+                  break;
+                case AppThemeMode.dark:
+                  nextMode = AppThemeMode.system;
+                  break;
+                case AppThemeMode.system:
+                  nextMode = AppThemeMode.light;
+                  break;
+              }
+
+              widget.onThemeModeChanged?.call(nextMode);
+            },
           ),
         ],
       ),
@@ -567,5 +585,17 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
       ],
     );
+  }
+
+  IconData _getThemeIcon() {
+    final currentMode = widget.currentThemeMode;
+    switch (currentMode) {
+      case AppThemeMode.light:
+        return Icons.brightness_5;
+      case AppThemeMode.dark:
+        return Icons.brightness_6;
+      case AppThemeMode.system:
+        return Icons.brightness_7;
+    }
   }
 }

@@ -4,13 +4,13 @@ import '../services/settings_service.dart';
 import '../services/theme_service.dart';
 
 class SettingsScreen extends StatefulWidget {
-  final VoidCallback? onThemeToggle;
-  final bool isDarkMode;
+  final Function(AppThemeMode)? onThemeModeChanged;
+  final AppThemeMode currentThemeMode;
 
   const SettingsScreen({
     super.key,
-    this.onThemeToggle,
-    this.isDarkMode = false,
+    this.onThemeModeChanged,
+    this.currentThemeMode = AppThemeMode.system,
   });
 
   @override
@@ -22,7 +22,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   final ThemeService _themeService = ThemeService();
   Currency _selectedCurrency = Currency.usd;
   bool _isLoading = true;
-  bool _isDarkMode = false;
+  AppThemeMode _currentThemeMode = AppThemeMode.system;
 
   @override
   void initState() {
@@ -33,10 +33,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
   Future<void> _loadSettings() async {
     try {
       final currency = await _settingsService.getDefaultCurrency();
-      final isDarkMode = await _themeService.isDarkMode();
+      final themeMode = await _themeService.getThemeMode();
       setState(() {
         _selectedCurrency = currency;
-        _isDarkMode = isDarkMode;
+        _currentThemeMode = themeMode;
         _isLoading = false;
       });
     } catch (e) {
@@ -73,20 +73,33 @@ class _SettingsScreenState extends State<SettingsScreen> {
     }
   }
 
-  Future<void> _toggleDarkMode() async {
+  Future<void> _updateThemeMode(AppThemeMode mode) async {
     try {
-      await _themeService.toggleTheme();
+      await _themeService.setThemeMode(mode);
       setState(() {
-        _isDarkMode = !_isDarkMode;
+        _currentThemeMode = mode;
       });
 
-      // Call the parent's theme toggle callback if provided
-      widget.onThemeToggle?.call();
+      // Call the parent's theme mode change callback if provided
+      widget.onThemeModeChanged?.call(mode);
 
       if (mounted) {
+        String modeText;
+        switch (mode) {
+          case AppThemeMode.light:
+            modeText = 'Light mode';
+            break;
+          case AppThemeMode.dark:
+            modeText = 'Dark mode';
+            break;
+          case AppThemeMode.system:
+            modeText = 'System mode';
+            break;
+        }
+
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Theme changed to ${_isDarkMode ? 'Dark' : 'Light'} mode'),
+            content: Text('Theme changed to $modeText'),
             backgroundColor: Colors.green,
           ),
         );
@@ -198,7 +211,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           Row(
                             children: [
                               Icon(
-                                _isDarkMode ? Icons.dark_mode : Icons.light_mode,
+                                _getThemeIcon(),
                                 color: Theme.of(context).colorScheme.primary,
                               ),
                               const SizedBox(width: 12),
@@ -212,26 +225,31 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           ),
                           const SizedBox(height: 8),
                           Text(
-                            'Choose between light and dark theme',
+                            'Choose your preferred theme',
                             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                                   color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
                                 ),
                           ),
                           const SizedBox(height: 16),
-                          Row(
-                            children: [
-                              Expanded(
-                                child: Text(
-                                  'Dark Mode',
-                                  style: Theme.of(context).textTheme.bodyLarge,
-                                ),
-                              ),
-                              Switch(
-                                value: _isDarkMode,
-                                onChanged: (value) => _toggleDarkMode(),
-                                activeColor: Theme.of(context).colorScheme.primary,
-                              ),
-                            ],
+                          _buildThemeOption(
+                            AppThemeMode.light,
+                            'Light',
+                            'Use light theme',
+                            Icons.light_mode,
+                          ),
+                          const SizedBox(height: 8),
+                          _buildThemeOption(
+                            AppThemeMode.dark,
+                            'Dark',
+                            'Use dark theme',
+                            Icons.dark_mode,
+                          ),
+                          const SizedBox(height: 8),
+                          _buildThemeOption(
+                            AppThemeMode.system,
+                            'System',
+                            'Follow device settings',
+                            Icons.settings_system_daydream,
                           ),
                         ],
                       ),
@@ -330,5 +348,80 @@ class _SettingsScreenState extends State<SettingsScreen> {
         ],
       ),
     );
+  }
+
+  Widget _buildThemeOption(AppThemeMode mode, String label, String description, IconData icon) {
+    final isSelected = _currentThemeMode == mode;
+
+    return InkWell(
+      onTap: () => _updateThemeMode(mode),
+      borderRadius: BorderRadius.circular(12),
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: isSelected ? Theme.of(context).colorScheme.primaryContainer : Theme.of(context).colorScheme.surface,
+          border: Border.all(
+            color: isSelected
+                ? Theme.of(context).colorScheme.primary
+                : Theme.of(context).colorScheme.outline.withOpacity(0.3),
+            width: isSelected ? 2 : 1,
+          ),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Row(
+          children: [
+            Icon(
+              icon,
+              color:
+                  isSelected ? Theme.of(context).colorScheme.onPrimaryContainer : Theme.of(context).colorScheme.primary,
+              size: 24,
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    label,
+                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                          fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                          color: isSelected
+                              ? Theme.of(context).colorScheme.onPrimaryContainer
+                              : Theme.of(context).colorScheme.onSurface,
+                        ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    description,
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: isSelected
+                              ? Theme.of(context).colorScheme.onPrimaryContainer.withOpacity(0.8)
+                              : Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
+                        ),
+                  ),
+                ],
+              ),
+            ),
+            if (isSelected)
+              Icon(
+                Icons.check_circle,
+                color: Theme.of(context).colorScheme.primary,
+                size: 20,
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  IconData _getThemeIcon() {
+    switch (_currentThemeMode) {
+      case AppThemeMode.light:
+        return Icons.light_mode;
+      case AppThemeMode.dark:
+        return Icons.dark_mode;
+      case AppThemeMode.system:
+        return Icons.settings_system_daydream;
+    }
   }
 }

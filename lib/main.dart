@@ -15,7 +15,7 @@ class ExpenseTrackerApp extends StatefulWidget {
 
 class _ExpenseTrackerAppState extends State<ExpenseTrackerApp> {
   final ThemeService _themeService = ThemeService();
-  bool _isDarkMode = false;
+  AppThemeMode _currentThemeMode = AppThemeMode.system;
 
   @override
   void initState() {
@@ -24,17 +24,17 @@ class _ExpenseTrackerAppState extends State<ExpenseTrackerApp> {
   }
 
   Future<void> _loadThemeMode() async {
-    final isDark = await _themeService.isDarkMode();
+    final themeMode = await _themeService.getThemeMode();
     setState(() {
-      _isDarkMode = isDark;
+      _currentThemeMode = themeMode;
     });
   }
 
-  void _toggleTheme() {
+  void _updateThemeMode(AppThemeMode mode) {
     setState(() {
-      _isDarkMode = !_isDarkMode;
+      _currentThemeMode = mode;
     });
-    _themeService.setDarkMode(_isDarkMode);
+    _themeService.setThemeMode(mode);
   }
 
   @override
@@ -43,13 +43,24 @@ class _ExpenseTrackerAppState extends State<ExpenseTrackerApp> {
       title: 'Expense Tracker',
       theme: _buildLightTheme(),
       darkTheme: _buildDarkTheme(),
-      themeMode: _isDarkMode ? ThemeMode.dark : ThemeMode.light,
+      themeMode: _getFlutterThemeMode(),
       home: HomeScreen(
-        onThemeToggle: _toggleTheme,
-        isDarkMode: _isDarkMode,
+        onThemeModeChanged: _updateThemeMode,
+        currentThemeMode: _currentThemeMode,
       ),
       debugShowCheckedModeBanner: false,
     );
+  }
+
+  ThemeMode _getFlutterThemeMode() {
+    switch (_currentThemeMode) {
+      case AppThemeMode.light:
+        return ThemeMode.light;
+      case AppThemeMode.dark:
+        return ThemeMode.dark;
+      case AppThemeMode.system:
+        return ThemeMode.system;
+    }
   }
 
   ThemeData _buildLightTheme() {
