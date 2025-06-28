@@ -261,63 +261,44 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
-          'Expense Tracker',
-          style: TextStyle(fontWeight: FontWeight.bold),
+        title: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(6),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(8),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.1),
+                    blurRadius: 4,
+                    offset: const Offset(0, 1),
+                  ),
+                ],
+              ),
+              child: Icon(
+                Icons.account_balance_wallet,
+                size: 20,
+                color: Theme.of(context).colorScheme.primary,
+              ),
+            ),
+            const SizedBox(width: 12),
+            const Text(
+              'Expense Tracker',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+          ],
         ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.file_download),
-            onPressed: _exportToCSV,
-            tooltip: 'Export to CSV',
-          ),
-          IconButton(
-            icon: const Icon(Icons.list),
-            onPressed: () async {
-              await Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const ExpensesListScreen()),
-              );
-              _loadData();
-            },
-          ),
-          IconButton(
-            icon: const Icon(Icons.settings),
-            onPressed: () async {
-              await Navigator.push(
-                context,
-                MaterialPageRoute(
-                    builder: (context) => SettingsScreen(
-                          onThemeModeChanged: widget.onThemeModeChanged,
-                          currentThemeMode: widget.currentThemeMode,
-                        )),
-              );
-              _loadData();
-            },
-          ),
-          IconButton(
-            icon: Icon(_getThemeIcon()),
+        leading: Builder(
+          builder: (context) => IconButton(
+            icon: const Icon(Icons.menu),
             onPressed: () {
-              final currentMode = widget.currentThemeMode;
-              AppThemeMode nextMode;
-
-              switch (currentMode) {
-                case AppThemeMode.light:
-                  nextMode = AppThemeMode.dark;
-                  break;
-                case AppThemeMode.dark:
-                  nextMode = AppThemeMode.system;
-                  break;
-                case AppThemeMode.system:
-                  nextMode = AppThemeMode.light;
-                  break;
-              }
-
-              widget.onThemeModeChanged?.call(nextMode);
+              Scaffold.of(context).openDrawer();
             },
           ),
-        ],
+        ),
       ),
+      drawer: _buildDrawer(),
       body: RefreshIndicator(
         onRefresh: _loadData,
         child: SingleChildScrollView(
@@ -693,5 +674,139 @@ class _HomeScreenState extends State<HomeScreen> {
       case AppThemeMode.system:
         return Icons.brightness_7;
     }
+  }
+
+  Widget _buildDrawer() {
+    return Drawer(
+      child: ListView(
+        padding: EdgeInsets.zero,
+        children: [
+          DrawerHeader(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  Theme.of(context).colorScheme.primary,
+                  Theme.of(context).colorScheme.primary.withOpacity(0.8),
+                ],
+              ),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(12),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.1),
+                            blurRadius: 8,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                      child: Icon(
+                        Icons.account_balance_wallet,
+                        size: 32,
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Expense Tracker',
+                            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            'Manage your finances',
+                            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                  color: Colors.white.withOpacity(0.9),
+                                ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+          ListTile(
+            leading: const Icon(Icons.list),
+            title: const Text('All Expenses'),
+            onTap: () async {
+              Navigator.pop(context); // Close drawer
+              await Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const ExpensesListScreen()),
+              );
+              _loadData();
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.file_download),
+            title: const Text('Export to CSV'),
+            onTap: () async {
+              Navigator.pop(context); // Close drawer
+              await _exportToCSV();
+            },
+          ),
+          const Divider(),
+          ListTile(
+            leading: const Icon(Icons.settings),
+            title: const Text('Settings'),
+            onTap: () async {
+              Navigator.pop(context); // Close drawer
+              await Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => SettingsScreen(
+                    onThemeModeChanged: widget.onThemeModeChanged,
+                    currentThemeMode: widget.currentThemeMode,
+                  ),
+                ),
+              );
+              _loadData();
+            },
+          ),
+          ListTile(
+            leading: Icon(_getThemeIcon()),
+            title: const Text('Toggle Theme'),
+            onTap: () {
+              Navigator.pop(context); // Close drawer
+              final currentMode = widget.currentThemeMode;
+              AppThemeMode nextMode;
+
+              switch (currentMode) {
+                case AppThemeMode.light:
+                  nextMode = AppThemeMode.dark;
+                  break;
+                case AppThemeMode.dark:
+                  nextMode = AppThemeMode.system;
+                  break;
+                case AppThemeMode.system:
+                  nextMode = AppThemeMode.light;
+                  break;
+              }
+
+              widget.onThemeModeChanged?.call(nextMode);
+            },
+          ),
+        ],
+      ),
+    );
   }
 }
