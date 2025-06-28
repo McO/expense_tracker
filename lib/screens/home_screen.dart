@@ -98,6 +98,97 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
+  Future<void> _exportToCSV() async {
+    try {
+      // Show loading indicator
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (BuildContext context) {
+          return const AlertDialog(
+            content: Row(
+              children: [
+                CircularProgressIndicator(),
+                SizedBox(width: 16),
+                Text('Exporting to CSV...'),
+              ],
+            ),
+          );
+        },
+      );
+
+      final filePath = await _expenseService.exportToCSV();
+
+      // Hide loading indicator
+      Navigator.of(context).pop();
+
+      if (filePath != null) {
+        // Show success dialog
+        showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            final isInDownloads = filePath.contains('/Download/');
+            return AlertDialog(
+              title: const Text('Export Successful'),
+              content: Text(isInDownloads
+                  ? 'CSV file saved to Downloads folder:\n${filePath.split('/Download/').last}'
+                  : 'CSV file saved to:\n$filePath'),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(),
+                  child: const Text('OK'),
+                ),
+              ],
+            );
+          },
+        );
+      } else {
+        // Show error dialog
+        showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              title: const Text('Export Failed'),
+              content: const Text('Failed to export expenses to CSV. This might be due to:\n\n'
+                  '• Storage permissions not granted\n'
+                  '• Insufficient storage space\n'
+                  '• File system restrictions\n\n'
+                  'Please check your device settings and try again.'),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(),
+                  child: const Text('OK'),
+                ),
+              ],
+            );
+          },
+        );
+      }
+    } catch (e) {
+      // Hide loading indicator if still showing
+      if (Navigator.canPop(context)) {
+        Navigator.of(context).pop();
+      }
+
+      // Show error dialog
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: const Text('Export Error'),
+            content: Text('An error occurred while exporting: $e'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: const Text('OK'),
+              ),
+            ],
+          );
+        },
+      );
+    }
+  }
+
   Widget _buildCurrencyFilter() {
     if (_availableCurrencies.isEmpty) {
       return const SizedBox.shrink();
@@ -175,6 +266,11 @@ class _HomeScreenState extends State<HomeScreen> {
           style: TextStyle(fontWeight: FontWeight.bold),
         ),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.file_download),
+            onPressed: _exportToCSV,
+            tooltip: 'Export to CSV',
+          ),
           IconButton(
             icon: const Icon(Icons.list),
             onPressed: () async {
