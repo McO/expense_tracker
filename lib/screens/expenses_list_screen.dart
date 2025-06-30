@@ -276,94 +276,175 @@ class _ExpensesListScreenState extends State<ExpensesListScreen> {
   }
 
   Widget _buildExpenseCard(Expense expense) {
-    return Card(
-      margin: const EdgeInsets.only(bottom: 12),
-      child: ListTile(
-        contentPadding: const EdgeInsets.all(16),
-        leading: CircleAvatar(
-          backgroundColor: Theme.of(context).colorScheme.primaryContainer,
-          child: Text(
-            expense.category.icon,
-            style: const TextStyle(fontSize: 20),
-          ),
+    return Dismissible(
+      key: Key(expense.id),
+      direction: DismissDirection.endToStart,
+      background: Container(
+        alignment: Alignment.centerRight,
+        padding: const EdgeInsets.only(right: 20),
+        margin: const EdgeInsets.only(bottom: 12),
+        decoration: BoxDecoration(
+          color: Colors.red,
+          borderRadius: BorderRadius.circular(12),
         ),
-        title: Text(
-          expense.title,
-          style: const TextStyle(fontWeight: FontWeight.bold),
-        ),
-        subtitle: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+        child: const Column(
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text(
-              '${expense.category.displayName} • ${DateFormat('MMM d, yyyy').format(expense.date)}',
-              style: Theme.of(context).textTheme.bodySmall,
+            Icon(
+              Icons.delete,
+              color: Colors.white,
+              size: 32,
             ),
-            if (expense.description.isNotEmpty) ...[
-              const SizedBox(height: 4),
-              Text(
-                expense.description,
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: Colors.grey[600],
-                ),
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
+            SizedBox(height: 4),
+            Text(
+              'Delete',
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
+        ),
+      ),
+      confirmDismiss: (direction) async {
+        return await showDialog<bool>(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: const Text('Delete Expense'),
+            content: Text('Are you sure you want to delete "${expense.title}"?'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context, false),
+                child: const Text('Cancel'),
+              ),
+              TextButton(
+                onPressed: () => Navigator.pop(context, true),
+                style: TextButton.styleFrom(foregroundColor: Colors.red),
+                child: const Text('Delete'),
               ),
             ],
-          ],
-        ),
-        trailing: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.end,
-          children: [
-                         Text(
-               expense.formattedAmount,
-               style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                 fontWeight: FontWeight.bold,
-                 color: Theme.of(context).colorScheme.primary,
-               ),
-             ),
-            PopupMenuButton<String>(
-              onSelected: (value) {
-                if (value == 'edit') {
-                  _editExpense(expense);
-                } else if (value == 'delete') {
-                  _deleteExpense(expense);
-                }
-              },
-              itemBuilder: (context) => [
-                const PopupMenuItem(
-                  value: 'edit',
-                  child: Row(
-                    children: [
-                      Icon(Icons.edit, color: Colors.blue),
-                      SizedBox(width: 8),
-                      Text('Edit'),
-                    ],
-                  ),
+          ),
+        );
+      },
+      onDismissed: (direction) async {
+        try {
+          await _expenseService.deleteExpense(expense.id);
+          await _loadExpenses();
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text('"${expense.title}" deleted'),
+                backgroundColor: Colors.green,
+                action: SnackBarAction(
+                  label: 'Undo',
+                  textColor: Colors.white,
+                  onPressed: () {
+                    // Add undo functionality if needed in the future
+                  },
                 ),
-                const PopupMenuItem(
-                  value: 'delete',
-                  child: Row(
-                    children: [
-                      Icon(Icons.delete, color: Colors.red),
-                      SizedBox(width: 8),
-                      Text('Delete'),
-                    ],
+              ),
+            );
+          }
+        } catch (e) {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text('Error deleting expense: ${e.toString()}'),
+                backgroundColor: Colors.red,
+              ),
+            );
+          }
+        }
+      },
+      child: Card(
+        margin: const EdgeInsets.only(bottom: 12),
+        child: ListTile(
+          contentPadding: const EdgeInsets.all(16),
+          leading: CircleAvatar(
+            backgroundColor: Theme.of(context).colorScheme.primaryContainer,
+            child: Text(
+              expense.category.icon,
+              style: const TextStyle(fontSize: 20),
+            ),
+          ),
+          title: Text(
+            expense.title,
+            style: const TextStyle(fontWeight: FontWeight.bold),
+          ),
+          subtitle: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                '${expense.category.displayName} • ${DateFormat('MMM d, yyyy').format(expense.date)}',
+                style: Theme.of(context).textTheme.bodySmall,
+              ),
+              if (expense.description.isNotEmpty) ...[
+                const SizedBox(height: 4),
+                Text(
+                  expense.description,
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: Colors.grey[600],
                   ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
                 ),
               ],
-              child: const Icon(Icons.more_vert),
-            ),
-          ],
+            ],
+          ),
+          trailing: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Text(
+                expense.formattedAmount,
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: Theme.of(context).colorScheme.primary,
+                ),
+              ),
+              PopupMenuButton<String>(
+                onSelected: (value) {
+                  if (value == 'edit') {
+                    _editExpense(expense);
+                  } else if (value == 'delete') {
+                    _deleteExpense(expense);
+                  }
+                },
+                itemBuilder: (context) => [
+                  const PopupMenuItem(
+                    value: 'edit',
+                    child: Row(
+                      children: [
+                        Icon(Icons.edit, color: Colors.blue),
+                        SizedBox(width: 8),
+                        Text('Edit'),
+                      ],
+                    ),
+                  ),
+                  const PopupMenuItem(
+                    value: 'delete',
+                    child: Row(
+                      children: [
+                        Icon(Icons.delete, color: Colors.red),
+                        SizedBox(width: 8),
+                        Text('Delete'),
+                      ],
+                    ),
+                  ),
+                ],
+                child: const Icon(Icons.more_vert),
+              ),
+            ],
+          ),
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => ExpenseDetailScreen(expense: expense),
+              ),
+            );
+          },
         ),
-        onTap: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => ExpenseDetailScreen(expense: expense),
-            ),
-          );
-        },
       ),
     );
   }

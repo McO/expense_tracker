@@ -98,6 +98,30 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
+  Future<void> _deleteExpense(Expense expense) async {
+    try {
+      await _expenseService.deleteExpense(expense.id);
+      await _loadData();
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('"${expense.title}" deleted'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error deleting expense: ${e.toString()}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
   Future<void> _exportToCSV() async {
     try {
       // Show loading indicator
@@ -621,41 +645,96 @@ class _HomeScreenState extends State<HomeScreen> {
               )
             : Column(
                 children: _recentExpenses.map((expense) {
-                  return Card(
-                    child: ListTile(
-                      leading: CircleAvatar(
-                        backgroundColor: Theme.of(context).colorScheme.primaryContainer,
-                        child: Text(
-                          expense.category.icon,
-                          style: const TextStyle(fontSize: 20),
-                        ),
+                  return Dismissible(
+                    key: Key(expense.id),
+                    direction: DismissDirection.endToStart,
+                    background: Container(
+                      alignment: Alignment.centerRight,
+                      padding: const EdgeInsets.only(right: 20),
+                      margin: const EdgeInsets.only(bottom: 8),
+                      decoration: BoxDecoration(
+                        color: Colors.red,
+                        borderRadius: BorderRadius.circular(12),
                       ),
-                      title: Text(
-                        expense.title,
-                        style: const TextStyle(fontWeight: FontWeight.bold),
-                      ),
-                      subtitle: Text(
-                        '${expense.category.displayName} • ${DateFormat('MMM d, yyyy').format(expense.date)}',
-                      ),
-                      trailing: Text(
-                        expense.formattedAmount,
-                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                              fontWeight: FontWeight.bold,
-                              color: Theme.of(context).colorScheme.primary,
-                            ),
-                      ),
-                      onTap: () async {
-                        final result = await Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => ExpenseDetailScreen(expense: expense),
+                      child: const Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.delete,
+                            color: Colors.white,
+                            size: 28,
                           ),
-                        );
+                          SizedBox(height: 4),
+                          Text(
+                            'Delete',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 12,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    confirmDismiss: (direction) async {
+                      return await showDialog<bool>(
+                        context: context,
+                        builder: (context) => AlertDialog(
+                          title: const Text('Delete Expense'),
+                          content: Text('Are you sure you want to delete "${expense.title}"?'),
+                          actions: [
+                            TextButton(
+                              onPressed: () => Navigator.pop(context, false),
+                              child: const Text('Cancel'),
+                            ),
+                            TextButton(
+                              onPressed: () => Navigator.pop(context, true),
+                              style: TextButton.styleFrom(foregroundColor: Colors.red),
+                              child: const Text('Delete'),
+                            ),
+                          ],
+                        ),
+                      );
+                    },
+                    onDismissed: (direction) async {
+                      await _deleteExpense(expense);
+                    },
+                    child: Card(
+                      child: ListTile(
+                        leading: CircleAvatar(
+                          backgroundColor: Theme.of(context).colorScheme.primaryContainer,
+                          child: Text(
+                            expense.category.icon,
+                            style: const TextStyle(fontSize: 20),
+                          ),
+                        ),
+                        title: Text(
+                          expense.title,
+                          style: const TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                        subtitle: Text(
+                          '${expense.category.displayName} • ${DateFormat('MMM d, yyyy').format(expense.date)}',
+                        ),
+                        trailing: Text(
+                          expense.formattedAmount,
+                          style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                                fontWeight: FontWeight.bold,
+                                color: Theme.of(context).colorScheme.primary,
+                              ),
+                        ),
+                        onTap: () async {
+                          final result = await Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => ExpenseDetailScreen(expense: expense),
+                            ),
+                          );
 
-                        if (result == true) {
-                          _loadData();
-                        }
-                      },
+                          if (result == true) {
+                            _loadData();
+                          }
+                        },
+                      ),
                     ),
                   );
                 }).toList(),
