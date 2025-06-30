@@ -102,7 +102,7 @@ class ExpenseService {
       for (final expense in expenses) {
         final date = DateFormat('yyyy-MM-dd').format(expense.date);
         final title = _escapeCsvField(expense.title);
-        final category = _escapeCsvField(expense.category.name);
+        final category = _escapeCsvField(expense.category.effectiveExportName);
         final amount = expense.amount.toStringAsFixed(2);
         final currency = expense.currency.code;
         final description = _escapeCsvField(expense.description);

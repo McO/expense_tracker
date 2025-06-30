@@ -14,6 +14,7 @@ class AddEditCategoryScreen extends StatefulWidget {
 class _AddEditCategoryScreenState extends State<AddEditCategoryScreen> {
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
+  final _exportNameController = TextEditingController();
   final CategoryService _categoryService = CategoryService();
 
   String _selectedIcon = '';
@@ -27,6 +28,7 @@ class _AddEditCategoryScreenState extends State<AddEditCategoryScreen> {
     super.initState();
     if (_isEditing) {
       _nameController.text = widget.category!.name;
+      _exportNameController.text = widget.category!.exportName ?? '';
       _selectedIcon = widget.category!.icon;
       _selectedColor = widget.category!.color;
     } else {
@@ -39,6 +41,7 @@ class _AddEditCategoryScreenState extends State<AddEditCategoryScreen> {
   @override
   void dispose() {
     _nameController.dispose();
+    _exportNameController.dispose();
     super.dispose();
   }
 
@@ -85,17 +88,21 @@ class _AddEditCategoryScreenState extends State<AddEditCategoryScreen> {
 
       Category category;
       if (_isEditing) {
+        final exportName = _exportNameController.text.trim();
         category = widget.category!.copyWith(
           name: name,
+          exportName: exportName.isEmpty ? null : exportName,
           icon: _selectedIcon,
           color: _selectedColor,
         );
         await _categoryService.updateCategory(category);
       } else {
         final id = _categoryService.generateCategoryId(name);
+        final exportName = _exportNameController.text.trim();
         category = Category(
           id: id,
           name: name,
+          exportName: exportName.isEmpty ? null : exportName,
           icon: _selectedIcon,
           color: _selectedColor,
           isDefault: false,
@@ -181,6 +188,10 @@ class _AddEditCategoryScreenState extends State<AddEditCategoryScreen> {
               _buildNameInput(),
               const SizedBox(height: 24),
 
+              // Export Name Input
+              _buildExportNameInput(),
+              const SizedBox(height: 24),
+
               // Icon Selection
               _buildIconSelection(),
               const SizedBox(height: 24),
@@ -263,6 +274,16 @@ class _AddEditCategoryScreenState extends State<AddEditCategoryScreen> {
                           fontWeight: FontWeight.bold,
                         ),
                       ),
+                      if (_exportNameController.text.isNotEmpty) ...[
+                        const SizedBox(height: 4),
+                        Text(
+                          'Export as: ${_exportNameController.text}',
+                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            color: Colors.grey[600],
+                            fontStyle: FontStyle.italic,
+                          ),
+                        ),
+                      ],
                       const SizedBox(height: 4),
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
@@ -319,6 +340,43 @@ class _AddEditCategoryScreenState extends State<AddEditCategoryScreen> {
             }
             return null;
           },
+        ),
+      ],
+    );
+  }
+
+  Widget _buildExportNameInput() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Text(
+              'Export Name',
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(width: 8),
+            Text(
+              '(Optional)',
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: Colors.grey[600],
+                fontStyle: FontStyle.italic,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        TextFormField(
+          controller: _exportNameController,
+          decoration: const InputDecoration(
+            hintText: 'Enter custom name for CSV exports',
+            border: OutlineInputBorder(),
+            prefixIcon: Icon(Icons.file_download),
+            helperText: 'If empty, the category name will be used for exports',
+          ),
+          onChanged: (value) => setState(() {}), // Update preview
         ),
       ],
     );

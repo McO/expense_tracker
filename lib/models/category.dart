@@ -4,6 +4,7 @@ class Category {
   final String icon;
   final String color; // Hex color code
   final bool isDefault; // Whether it's a default category that can't be deleted
+  final String? exportName; // Optional name used for CSV exports
 
   const Category({
     required this.id,
@@ -11,6 +12,7 @@ class Category {
     required this.icon,
     required this.color,
     this.isDefault = false,
+    this.exportName,
   });
 
   Map<String, dynamic> toJson() {
@@ -20,6 +22,7 @@ class Category {
       'icon': icon,
       'color': color,
       'isDefault': isDefault,
+      'exportName': exportName,
     };
   }
 
@@ -30,6 +33,7 @@ class Category {
       icon: json['icon'],
       color: json['color'],
       isDefault: json['isDefault'] ?? false,
+      exportName: json['exportName'],
     );
   }
 
@@ -39,6 +43,7 @@ class Category {
     String? icon,
     String? color,
     bool? isDefault,
+    String? exportName,
   }) {
     return Category(
       id: id ?? this.id,
@@ -46,6 +51,7 @@ class Category {
       icon: icon ?? this.icon,
       color: color ?? this.color,
       isDefault: isDefault ?? this.isDefault,
+      exportName: exportName ?? this.exportName,
     );
   }
 
@@ -56,6 +62,9 @@ class Category {
 
   @override
   int get hashCode => id.hashCode;
+
+  // Get the name to use for exports
+  String get effectiveExportName => exportName?.trim().isNotEmpty == true ? exportName! : name;
 
   // Default categories that will be created on first launch
   static List<Category> get defaultCategories => [
