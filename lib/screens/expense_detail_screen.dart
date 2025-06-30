@@ -74,7 +74,7 @@ class ExpenseDetailScreen extends StatelessWidget {
                              ),
                            ),
                           Text(
-                            expense.category.displayName,
+                            expense.category.name,
                             style: Theme.of(context).textTheme.titleMedium?.copyWith(
                               color: Theme.of(context).colorScheme.onPrimaryContainer,
                             ),

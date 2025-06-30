@@ -3,12 +3,14 @@ import 'package:intl/intl.dart';
 import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 import '../models/expense.dart';
 import '../models/currency.dart';
+import '../models/category.dart';
 import '../services/expense_service.dart';
 import '../services/theme_service.dart';
 import 'add_expense_screen.dart';
 import 'expenses_list_screen.dart';
 import 'expense_detail_screen.dart';
 import 'settings_screen.dart';
+import 'category_management_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   final Function(AppThemeMode)? onThemeModeChanged;
@@ -29,7 +31,7 @@ class _HomeScreenState extends State<HomeScreen> {
   List<Expense> _recentExpenses = [];
   List<Expense> _allExpenses = [];
   double _totalExpenses = 0.0;
-  Map<ExpenseCategory, double> _categoryTotals = {};
+  Map<Category, double> _categoryTotals = {};
   Map<Currency, double> _currencyTotals = {};
   Set<Currency> _availableCurrencies = {};
   Currency? _selectedCurrencyFilter;
@@ -70,7 +72,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
     // Calculate totals for filtered data
     double total = 0.0;
-    final Map<ExpenseCategory, double> categoryTotals = {};
+    final Map<Category, double> categoryTotals = {};
     final Map<Currency, double> currencyTotals = {};
 
     for (final expense in filteredExpenses) {
@@ -85,6 +87,14 @@ class _HomeScreenState extends State<HomeScreen> {
       _categoryTotals = categoryTotals;
       _currencyTotals = currencyTotals;
     });
+  }
+
+  Color _getCategoryColor(Category category) {
+    try {
+      return Color(int.parse(category.color, radix: 16));
+    } catch (e) {
+      return Colors.grey;
+    }
   }
 
   Future<void> _navigateToAddExpense() async {
@@ -480,15 +490,15 @@ class _HomeScreenState extends State<HomeScreen> {
       return const SizedBox.shrink();
     }
 
-    String _formatCategoryAmount(ExpenseCategory category, double amount) {
+        String _formatCategoryAmount(Category category, double amount) {
       if (_selectedCurrencyFilter != null) {
         // When filtered by currency, show the amount in that currency
         return '${_selectedCurrencyFilter!.symbol}${amount.toStringAsFixed(2)}';
       } else {
         // When showing all currencies, check if category has mixed currencies
-        final categoryExpenses = _allExpenses.where((e) => e.category == category);
+        final categoryExpenses = _allExpenses.where((e) => e.category.id == category.id);
         final categoryCurrencies = categoryExpenses.map((e) => e.currency).toSet();
-
+        
         if (categoryCurrencies.length == 1) {
           // Single currency for this category
           final currency = categoryCurrencies.first;
@@ -537,13 +547,27 @@ class _HomeScreenState extends State<HomeScreen> {
               children: _categoryTotals.entries.map((entry) {
                 final percentage = _totalExpenses > 0 ? (entry.value / _totalExpenses) * 100 : 0.0;
 
-                return Padding(
+                                return Padding(
                   padding: const EdgeInsets.symmetric(vertical: 8),
                   child: Row(
                     children: [
-                      Text(
-                        entry.key.icon,
-                        style: const TextStyle(fontSize: 24),
+                      Container(
+                        width: 48,
+                        height: 48,
+                        decoration: BoxDecoration(
+                          color: _getCategoryColor(entry.key).withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                            color: _getCategoryColor(entry.key).withOpacity(0.3),
+                            width: 1,
+                          ),
+                        ),
+                        child: Center(
+                          child: Text(
+                            entry.key.icon,
+                            style: const TextStyle(fontSize: 20),
+                          ),
+                        ),
                       ),
                       const SizedBox(width: 12),
                       Expanded(
@@ -554,14 +578,14 @@ class _HomeScreenState extends State<HomeScreen> {
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 Text(
-                                  entry.key.displayName,
+                                  entry.key.name,
                                   style: Theme.of(context).textTheme.bodyLarge,
                                 ),
                                 Text(
                                   _formatCategoryAmount(entry.key, entry.value),
                                   style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                                        fontWeight: FontWeight.bold,
-                                      ),
+                                    fontWeight: FontWeight.bold,
+                                  ),
                                 ),
                               ],
                             ),
@@ -569,6 +593,9 @@ class _HomeScreenState extends State<HomeScreen> {
                             LinearProgressIndicator(
                               value: percentage / 100,
                               backgroundColor: Colors.grey[300],
+                              valueColor: AlwaysStoppedAnimation<Color>(
+                                _getCategoryColor(entry.key),
+                              ),
                             ),
                           ],
                         ),
@@ -699,22 +726,33 @@ class _HomeScreenState extends State<HomeScreen> {
                     onDismissed: (direction) async {
                       await _deleteExpense(expense);
                     },
-                    child: Card(
-                      child: ListTile(
-                        leading: CircleAvatar(
-                          backgroundColor: Theme.of(context).colorScheme.primaryContainer,
-                          child: Text(
-                            expense.category.icon,
-                            style: const TextStyle(fontSize: 20),
+                                          child: Card(
+                        child: ListTile(
+                          leading: Container(
+                            width: 40,
+                            height: 40,
+                            decoration: BoxDecoration(
+                              color: _getCategoryColor(expense.category).withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(10),
+                              border: Border.all(
+                                color: _getCategoryColor(expense.category).withOpacity(0.3),
+                                width: 1,
+                              ),
+                            ),
+                            child: Center(
+                              child: Text(
+                                expense.category.icon,
+                                style: const TextStyle(fontSize: 18),
+                              ),
+                            ),
                           ),
-                        ),
-                        title: Text(
-                          expense.title,
-                          style: const TextStyle(fontWeight: FontWeight.bold),
-                        ),
-                        subtitle: Text(
-                          '${expense.category.displayName} • ${DateFormat('MMM d, yyyy').format(expense.date)}',
-                        ),
+                          title: Text(
+                            expense.title,
+                            style: const TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                          subtitle: Text(
+                            '${expense.category.name} • ${DateFormat('MMM d, yyyy').format(expense.date)}',
+                          ),
                         trailing: Text(
                           expense.formattedAmount,
                           style: Theme.of(context).textTheme.titleMedium?.copyWith(
@@ -835,15 +873,27 @@ class _HomeScreenState extends State<HomeScreen> {
               _loadData();
             },
           ),
-          ListTile(
-            leading: const Icon(Icons.file_download),
-            title: const Text('Export to CSV'),
-            onTap: () async {
-              Navigator.pop(context); // Close drawer
-              await _exportToCSV();
-            },
-          ),
-          const Divider(),
+                     ListTile(
+             leading: const Icon(Icons.file_download),
+             title: const Text('Export to CSV'),
+             onTap: () async {
+               Navigator.pop(context); // Close drawer
+               await _exportToCSV();
+             },
+           ),
+           ListTile(
+             leading: const Icon(Icons.category),
+             title: const Text('Manage Categories'),
+             onTap: () async {
+               Navigator.pop(context); // Close drawer
+               await Navigator.push(
+                 context,
+                 MaterialPageRoute(builder: (context) => const CategoryManagementScreen()),
+               );
+               _loadData(); // Refresh data in case categories were modified
+             },
+           ),
+           const Divider(),
           ListTile(
             leading: const Icon(Icons.settings),
             title: const Text('Settings'),

@@ -2,15 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../models/expense.dart';
 import '../models/currency.dart';
+import '../models/category.dart';
 import '../services/expense_service.dart';
+import '../services/category_service.dart';
 
 class EditExpenseScreen extends StatefulWidget {
   final Expense expense;
 
-  const EditExpenseScreen({
-    super.key,
-    required this.expense,
-  });
+  const EditExpenseScreen({super.key, required this.expense});
 
   @override
   State<EditExpenseScreen> createState() => _EditExpenseScreenState();
@@ -22,8 +21,10 @@ class _EditExpenseScreenState extends State<EditExpenseScreen> {
   final _amountController = TextEditingController();
   final _descriptionController = TextEditingController();
   final ExpenseService _expenseService = ExpenseService();
+  final CategoryService _categoryService = CategoryService();
 
-  ExpenseCategory _selectedCategory = ExpenseCategory.other;
+  Category? _selectedCategory;
+  List<Category> _categories = [];
   Currency _selectedCurrency = Currency.usd;
   DateTime _selectedDate = DateTime.now();
   bool _isLoading = false;
@@ -32,6 +33,15 @@ class _EditExpenseScreenState extends State<EditExpenseScreen> {
   void initState() {
     super.initState();
     _initializeFields();
+    _loadCategories();
+  }
+
+  @override
+  void dispose() {
+    _titleController.dispose();
+    _amountController.dispose();
+    _descriptionController.dispose();
+    super.dispose();
   }
 
   void _initializeFields() {
@@ -43,12 +53,33 @@ class _EditExpenseScreenState extends State<EditExpenseScreen> {
     _selectedDate = widget.expense.date;
   }
 
-  @override
-  void dispose() {
-    _titleController.dispose();
-    _amountController.dispose();
-    _descriptionController.dispose();
-    super.dispose();
+  Future<void> _loadCategories() async {
+    try {
+      final categories = await _categoryService.getCategories();
+      setState(() {
+        _categories = categories;
+        
+        // Ensure the current expense's category exists in the list
+        if (_selectedCategory != null && 
+            !_categories.any((cat) => cat.id == _selectedCategory!.id)) {
+          // Category doesn't exist anymore, find a replacement
+          _selectedCategory = _categories.firstWhere(
+            (cat) => cat.id == 'other',
+            orElse: () => _categories.isNotEmpty ? _categories.first : Category.defaultCategories.first,
+          );
+        }
+      });
+    } catch (e) {
+      // Handle error
+    }
+  }
+
+  Color _getCategoryColor(Category category) {
+    try {
+      return Color(int.parse(category.color, radix: 16));
+    } catch (e) {
+      return Colors.grey;
+    }
   }
 
   Future<void> _selectDate() async {
@@ -66,47 +97,59 @@ class _EditExpenseScreenState extends State<EditExpenseScreen> {
   }
 
   Future<void> _updateExpense() async {
-    if (_formKey.currentState!.validate()) {
-      setState(() {
-        _isLoading = true;
-      });
+    if (!_formKey.currentState!.validate()) {
+      return;
+    }
 
-      try {
-        final updatedExpense = widget.expense.copyWith(
-          title: _titleController.text.trim(),
-          amount: double.parse(_amountController.text),
-          currency: _selectedCurrency,
-          category: _selectedCategory,
-          date: _selectedDate,
-          description: _descriptionController.text.trim(),
+    if (_selectedCategory == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please select a category'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      final updatedExpense = widget.expense.copyWith(
+        title: _titleController.text.trim(),
+        amount: double.parse(_amountController.text),
+        currency: _selectedCurrency,
+        category: _selectedCategory!,
+        date: _selectedDate,
+        description: _descriptionController.text.trim(),
+      );
+
+      await _expenseService.updateExpense(updatedExpense);
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Expense updated successfully!'),
+            backgroundColor: Colors.green,
+          ),
         );
-
-        await _expenseService.updateExpense(updatedExpense);
-
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Expense updated successfully!'),
-              backgroundColor: Colors.green,
-            ),
-          );
-          Navigator.pop(context, true);
-        }
-      } catch (e) {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Error: ${e.toString()}'),
-              backgroundColor: Colors.red,
-            ),
-          );
-        }
-      } finally {
-        if (mounted) {
-          setState(() {
-            _isLoading = false;
-          });
-        }
+        Navigator.pop(context, true);
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error: ${e.toString()}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
       }
     }
   }
@@ -148,35 +191,24 @@ class _EditExpenseScreenState extends State<EditExpenseScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Original expense info card
+              // Info Card
               Card(
-                color: Theme.of(context).colorScheme.surfaceVariant,
                 child: Padding(
                   padding: const EdgeInsets.all(16),
-                  child: Row(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Icon(
-                        Icons.info_outline,
-                        color: Theme.of(context).colorScheme.primary,
+                      Text(
+                        'Editing: ${widget.expense.title}',
+                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Editing: ${widget.expense.title}',
-                              style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                                                         Text(
-                               'Original: ${widget.expense.formattedAmount} • ${DateFormat('MMM d, yyyy').format(widget.expense.date)}',
-                               style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                 color: Colors.grey[600],
-                               ),
-                             ),
-                          ],
+                      const SizedBox(height: 8),
+                      Text(
+                        'Original: ${widget.expense.formattedAmount} • ${DateFormat('MMM d, yyyy').format(widget.expense.date)}',
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          color: Colors.grey[600],
                         ),
                       ),
                     ],
@@ -185,7 +217,7 @@ class _EditExpenseScreenState extends State<EditExpenseScreen> {
               ),
               const SizedBox(height: 16),
 
-              // Expense Details
+              // Title Field
               Card(
                 child: Padding(
                   padding: const EdgeInsets.all(16),
@@ -246,7 +278,7 @@ class _EditExpenseScreenState extends State<EditExpenseScreen> {
                           Expanded(
                             flex: 1,
                             child: Container(
-                              height: 56, // Match TextFormField height
+                              height: 56,
                               padding: const EdgeInsets.symmetric(horizontal: 12),
                               decoration: BoxDecoration(
                                 border: Border.all(color: Colors.grey),
@@ -319,27 +351,41 @@ class _EditExpenseScreenState extends State<EditExpenseScreen> {
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: DropdownButtonHideUnderline(
-                          child: DropdownButton<ExpenseCategory>(
+                          child: DropdownButton<Category>(
                             value: _selectedCategory,
                             isExpanded: true,
-                            onChanged: (ExpenseCategory? newValue) {
+                            onChanged: (Category? newValue) {
                               if (newValue != null) {
                                 setState(() {
                                   _selectedCategory = newValue;
                                 });
                               }
                             },
-                            items: ExpenseCategory.values.map<DropdownMenuItem<ExpenseCategory>>((ExpenseCategory category) {
-                              return DropdownMenuItem<ExpenseCategory>(
+                            items: _categories.map<DropdownMenuItem<Category>>((Category category) {
+                              return DropdownMenuItem<Category>(
                                 value: category,
                                 child: Row(
                                   children: [
-                                    Text(
-                                      category.icon,
-                                      style: const TextStyle(fontSize: 20),
+                                    Container(
+                                      width: 32,
+                                      height: 32,
+                                      decoration: BoxDecoration(
+                                        color: _getCategoryColor(category).withOpacity(0.1),
+                                        borderRadius: BorderRadius.circular(8),
+                                        border: Border.all(
+                                          color: _getCategoryColor(category).withOpacity(0.3),
+                                          width: 1,
+                                        ),
+                                      ),
+                                      child: Center(
+                                        child: Text(
+                                          category.icon,
+                                          style: const TextStyle(fontSize: 16),
+                                        ),
+                                      ),
                                     ),
                                     const SizedBox(width: 12),
-                                    Expanded(child: Text(category.displayName)),
+                                    Expanded(child: Text(category.name)),
                                   ],
                                 ),
                               );

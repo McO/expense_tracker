@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 import '../models/expense.dart';
+import '../models/category.dart';
 import '../services/expense_service.dart';
+import '../services/category_service.dart';
 import 'expense_detail_screen.dart';
 import 'edit_expense_screen.dart';
 
@@ -15,9 +17,11 @@ class ExpensesListScreen extends StatefulWidget {
 
 class _ExpensesListScreenState extends State<ExpensesListScreen> {
   final ExpenseService _expenseService = ExpenseService();
+  final CategoryService _categoryService = CategoryService();
   List<Expense> _allExpenses = [];
   List<Expense> _filteredExpenses = [];
-  ExpenseCategory? _selectedCategory;
+  List<Category> _availableCategories = [];
+  Category? _selectedCategory;
   String _searchQuery = '';
   bool _isLoading = true;
 
@@ -34,9 +38,15 @@ class _ExpensesListScreenState extends State<ExpensesListScreen> {
 
     try {
       final expenses = await _expenseService.getExpenses();
+      final categories = await _categoryService.getCategories();
+      
+      // Get unique categories used in expenses
+      final usedCategories = expenses.map((e) => e.category).toSet().toList();
+      
       setState(() {
         _allExpenses = expenses..sort((a, b) => b.date.compareTo(a.date));
         _filteredExpenses = _allExpenses;
+        _availableCategories = categories;
         _isLoading = false;
       });
     } catch (e) {
@@ -64,7 +74,7 @@ class _ExpensesListScreenState extends State<ExpensesListScreen> {
                 .toLowerCase()
                 .contains(_searchQuery.toLowerCase());
         final matchesCategory = _selectedCategory == null || 
-            expense.category == _selectedCategory;
+            expense.category.id == _selectedCategory!.id;
         
         return matchesSearch && matchesCategory;
       }).toList();
@@ -78,11 +88,19 @@ class _ExpensesListScreenState extends State<ExpensesListScreen> {
     _filterExpenses();
   }
 
-  void _onCategoryFilterChanged(ExpenseCategory? category) {
+  void _onCategoryFilterChanged(Category? category) {
     setState(() {
       _selectedCategory = category;
     });
     _filterExpenses();
+  }
+
+  Color _getCategoryColor(Category category) {
+    try {
+      return Color(int.parse(category.color, radix: 16));
+    } catch (e) {
+      return Colors.grey;
+    }
   }
 
   Future<void> _editExpense(Expense expense) async {
@@ -185,18 +203,20 @@ class _ExpensesListScreenState extends State<ExpensesListScreen> {
                           label: const Text('All'),
                         ),
                       ),
-                      ...ExpenseCategory.values.map((category) {
+                      ..._availableCategories.map((category) {
                         return Padding(
                           padding: const EdgeInsets.only(right: 8),
                           child: FilterChip(
-                            selected: _selectedCategory == category,
+                            selected: _selectedCategory?.id == category.id,
                             onSelected: (_) => _onCategoryFilterChanged(category),
+                            backgroundColor: _getCategoryColor(category).withOpacity(0.1),
+                            selectedColor: _getCategoryColor(category).withOpacity(0.2),
                             label: Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
                                 Text(category.icon),
                                 const SizedBox(width: 4),
-                                Text(category.displayName),
+                                Text(category.name),
                               ],
                             ),
                           ),
@@ -360,11 +380,22 @@ class _ExpensesListScreenState extends State<ExpensesListScreen> {
         margin: const EdgeInsets.only(bottom: 12),
         child: ListTile(
           contentPadding: const EdgeInsets.all(16),
-          leading: CircleAvatar(
-            backgroundColor: Theme.of(context).colorScheme.primaryContainer,
-            child: Text(
-              expense.category.icon,
-              style: const TextStyle(fontSize: 20),
+          leading: Container(
+            width: 48,
+            height: 48,
+            decoration: BoxDecoration(
+              color: _getCategoryColor(expense.category).withOpacity(0.1),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: _getCategoryColor(expense.category).withOpacity(0.3),
+                width: 1,
+              ),
+            ),
+            child: Center(
+              child: Text(
+                expense.category.icon,
+                style: const TextStyle(fontSize: 20),
+              ),
             ),
           ),
           title: Text(
@@ -375,7 +406,7 @@ class _ExpensesListScreenState extends State<ExpensesListScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                '${expense.category.displayName} • ${DateFormat('MMM d, yyyy').format(expense.date)}',
+                '${expense.category.name} • ${DateFormat('MMM d, yyyy').format(expense.date)}',
                 style: Theme.of(context).textTheme.bodySmall,
               ),
               if (expense.description.isNotEmpty) ...[

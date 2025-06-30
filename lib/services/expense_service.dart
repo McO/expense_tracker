@@ -5,15 +5,19 @@ import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:intl/intl.dart';
 import '../models/expense.dart';
+import '../models/category.dart';
+import 'category_service.dart';
 
 class ExpenseService {
   static const String _expensesKey = 'expenses';
+  final CategoryService _categoryService = CategoryService();
 
   Future<List<Expense>> getExpenses() async {
     final prefs = await SharedPreferences.getInstance();
     final expensesJson = prefs.getStringList(_expensesKey) ?? [];
+    final categories = await _categoryService.getCategories();
 
-    return expensesJson.map((json) => Expense.fromJson(jsonDecode(json))).toList();
+    return expensesJson.map((json) => Expense.fromJson(jsonDecode(json), categories)).toList();
   }
 
   Future<void> saveExpense(Expense expense) async {
@@ -48,12 +52,13 @@ class ExpenseService {
     return expenses.fold<double>(0.0, (sum, expense) => sum + expense.amount);
   }
 
-  Future<Map<ExpenseCategory, double>> getExpensesByCategory() async {
+  Future<Map<Category, double>> getExpensesByCategory() async {
     final expenses = await getExpenses();
-    final Map<ExpenseCategory, double> categoryTotals = {};
+    final Map<Category, double> categoryTotals = {};
 
     for (final expense in expenses) {
-      categoryTotals[expense.category] = (categoryTotals[expense.category] ?? 0) + expense.amount;
+      categoryTotals[expense.category] = 
+          (categoryTotals[expense.category] ?? 0.0) + expense.amount;
     }
 
     return categoryTotals;
@@ -66,122 +71,80 @@ class ExpenseService {
     }).toList();
   }
 
-  /// Exports expenses to CSV format according to the specified German format
   Future<String?> exportToCSV() async {
     try {
-      // Request multiple permissions for different Android versions
-      Map<Permission, PermissionStatus> statuses = await [
-        Permission.storage,
-        Permission.manageExternalStorage,
-      ].request();
-
-      // Check if any permission is granted
-      bool hasPermission = statuses.values.any((status) => status.isGranted);
-
-      if (!hasPermission) {
-        print('No storage permissions granted: $statuses');
-        return null;
-      }
-
       final expenses = await getExpenses();
+      
       if (expenses.isEmpty) {
         return null;
       }
 
-      // Sort expenses by date (newest first)
-      expenses.sort((a, b) => b.date.compareTo(a.date));
-
-      // Create CSV content
-      final StringBuffer csvContent = StringBuffer();
-
-      // Add header
-      csvContent.writeln('Datum;Wertstellung;Kategorie;Name;Verwendungszweck;Konto;Bank;Betrag;Währung');
-
-      // Add data rows
-      final dateFormat = DateFormat('dd.MM.yyyy');
-      final numberFormat = NumberFormat('#,##0.00', 'de_DE');
-
-      for (final expense in expenses) {
-        final date = dateFormat.format(expense.date);
-        final category = _mapCategoryToGerman(expense.category);
-        final name = expense.title;
-        final description = expense.description;
-        final amount = numberFormat.format(expense.amount);
-        final currency = expense.currency.code;
-
-        // Format: Datum;Wertstellung;Kategorie;Name;Verwendungszweck;Konto;Bank;Betrag;Währung
-        csvContent.writeln('$date;$date;$category;$name;$description;;;-$amount;$currency');
-      }
-
-      // Try multiple locations for saving the file
-      List<String> possiblePaths = [
-        '/storage/emulated/0/Download',
-        '/storage/emulated/0/Downloads',
-        '/sdcard/Download',
-        '/sdcard/Downloads',
-      ];
-
-      for (String path in possiblePaths) {
-        try {
-          final downloadsDir = Directory(path);
-          if (await downloadsDir.exists()) {
-            final timestamp = DateFormat('yyyyMMdd_HHmmss').format(DateTime.now());
-            final fileName = 'expenses_$timestamp.csv';
-            final file = File('${downloadsDir.path}/$fileName');
-
-            // Write CSV content to file
-            await file.writeAsString(csvContent.toString());
-            print('CSV saved successfully to: ${file.path}');
-            return file.path;
+      // Request permission for external storage
+      var status = await Permission.manageExternalStorage.status;
+      if (!status.isGranted) {
+        status = await Permission.manageExternalStorage.request();
+        if (!status.isGranted) {
+          // Try storage permission instead
+          status = await Permission.storage.status;
+          if (!status.isGranted) {
+            status = await Permission.storage.request();
+            if (!status.isGranted) {
+              return null;
+            }
           }
-        } catch (e) {
-          print('Failed to save to $path: $e');
-          continue;
         }
       }
 
-      // Fallback to app documents directory
-      try {
-        final appDir = await getApplicationDocumentsDirectory();
-        final timestamp = DateFormat('yyyyMMdd_HHmmss').format(DateTime.now());
-        final fileName = 'expenses_$timestamp.csv';
-        final file = File('${appDir.path}/$fileName');
+      // Create CSV content
+      final StringBuffer csvContent = StringBuffer();
+      csvContent.writeln('Date,Title,Category,Amount,Currency,Description');
 
-        // Write CSV content to file
-        await file.writeAsString(csvContent.toString());
-        print('CSV saved to app directory: ${file.path}');
-        return file.path;
+      for (final expense in expenses) {
+        final date = DateFormat('yyyy-MM-dd').format(expense.date);
+        final title = _escapeCsvField(expense.title);
+        final category = _escapeCsvField(expense.category.name);
+        final amount = expense.amount.toStringAsFixed(2);
+        final currency = expense.currency.code;
+        final description = _escapeCsvField(expense.description);
+        
+        csvContent.writeln('$date,$title,$category,$amount,$currency,$description');
+      }
+
+      // Get the downloads directory
+      Directory? directory;
+      try {
+        directory = Directory('/storage/emulated/0/Download');
+        if (!await directory.exists()) {
+          directory = await getExternalStorageDirectory();
+        }
       } catch (e) {
-        print('Failed to save to app directory: $e');
+        directory = await getApplicationDocumentsDirectory();
+      }
+
+      if (directory == null) {
         return null;
       }
+
+      // Create file with timestamp
+      final timestamp = DateFormat('yyyyMMdd_HHmmss').format(DateTime.now());
+      final fileName = 'expenses_$timestamp.csv';
+      final file = File('${directory.path}/$fileName');
+
+      // Write CSV content to file
+      await file.writeAsString(csvContent.toString());
+
+      return file.path;
     } catch (e) {
-      print('Error exporting CSV: $e');
       return null;
     }
   }
 
-  /// Maps expense categories to German names
-  String _mapCategoryToGerman(ExpenseCategory category) {
-    switch (category) {
-      case ExpenseCategory.food:
-        return 'Lebensmittel';
-      case ExpenseCategory.transportation:
-        return 'Transport';
-      case ExpenseCategory.shopping:
-        return 'Einkaufen';
-      case ExpenseCategory.entertainment:
-        return 'Unterhaltung';
-      case ExpenseCategory.bills:
-        return 'Rechnungen';
-      case ExpenseCategory.health:
-        return 'Gesundheit';
-      case ExpenseCategory.education:
-        return 'Bildung';
-      case ExpenseCategory.travel:
-        return 'Reisen';
-      case ExpenseCategory.other:
-        return 'Sonstiges';
+  String _escapeCsvField(String field) {
+    if (field.contains(',') || field.contains('"') || field.contains('\n')) {
+      return '"${field.replaceAll('"', '""')}"';
     }
+    return field;
   }
+
+
 }

@@ -1,11 +1,12 @@
 import 'currency.dart';
+import 'category.dart';
 
 class Expense {
   final String id;
   final String title;
   final double amount;
   final Currency currency;
-  final ExpenseCategory category;
+  final Category category;
   final DateTime date;
   final String description;
 
@@ -25,22 +26,33 @@ class Expense {
       'title': title,
       'amount': amount,
       'currency': currency.code,
-      'category': category.name,
+      'categoryId': category.id,
       'date': date.toIso8601String(),
       'description': description,
     };
   }
 
-  factory Expense.fromJson(Map<String, dynamic> json) {
+  factory Expense.fromJson(Map<String, dynamic> json, List<Category> categories) {
+    // Find the category by ID, fall back to 'other' if not found
+    Category category;
+    try {
+      category = categories.firstWhere((cat) => cat.id == json['categoryId']);
+    } catch (e) {
+      // If category not found, try to find 'other' category
+      try {
+        category = categories.firstWhere((cat) => cat.id == 'other');
+      } catch (e) {
+        // If 'other' not found either, use the first available category
+        category = categories.isNotEmpty ? categories.first : Category.defaultCategories.first;
+      }
+    }
+
     return Expense(
       id: json['id'],
       title: json['title'],
       amount: json['amount'].toDouble(),
       currency: Currency.fromCode(json['currency'] ?? 'USD'),
-      category: ExpenseCategory.values.firstWhere(
-        (cat) => cat.name == json['category'],
-        orElse: () => ExpenseCategory.other,
-      ),
+      category: category,
       date: DateTime.parse(json['date']),
       description: json['description'] ?? '',
     );
@@ -51,7 +63,7 @@ class Expense {
     String? title,
     double? amount,
     Currency? currency,
-    ExpenseCategory? category,
+    Category? category,
     DateTime? date,
     String? description,
   }) {
@@ -67,21 +79,4 @@ class Expense {
   }
 
   String get formattedAmount => '${currency.symbol}${amount.toStringAsFixed(2)}';
-}
-
-enum ExpenseCategory {
-  food('Food', '🍽️'),
-  transportation('Transportation', '🚗'),
-  shopping('Shopping', '🛒'),
-  entertainment('Entertainment', '🎬'),
-  bills('Bills', '💡'),
-  health('Health', '💊'),
-  education('Education', '📚'),
-  travel('Travel', '✈️'),
-  other('Other', '📋');
-
-  const ExpenseCategory(this.displayName, this.icon);
-
-  final String displayName;
-  final String icon;
 } 
