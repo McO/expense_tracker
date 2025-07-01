@@ -5,6 +5,7 @@ import '../models/expense.dart';
 import '../models/currency.dart';
 import '../models/category.dart';
 import '../services/expense_service.dart';
+import '../services/settings_service.dart';
 import '../services/theme_service.dart';
 import 'add_expense_screen.dart';
 import 'expenses_list_screen.dart';
@@ -28,6 +29,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   final ExpenseService _expenseService = ExpenseService();
+  final SettingsService _settingsService = SettingsService();
   List<Expense> _recentExpenses = [];
   List<Expense> _allExpenses = [];
   double _totalExpenses = 0.0;
@@ -35,14 +37,30 @@ class _HomeScreenState extends State<HomeScreen> {
   Map<Currency, double> _currencyTotals = {};
   Set<Currency> _availableCurrencies = {};
   Currency? _selectedCurrencyFilter;
+  Currency _defaultCurrency = Currency.usd;
 
   @override
   void initState() {
     super.initState();
+    _loadDefaultCurrency();
     _loadData();
+  }
+  
+  Future<void> _loadDefaultCurrency() async {
+    try {
+      final currency = await _settingsService.getDefaultCurrency();
+      setState(() {
+        _defaultCurrency = currency;
+      });
+    } catch (e) {
+      // Keep the fallback USD if there's an error
+    }
   }
 
   Future<void> _loadData() async {
+    // Refresh default currency in case it was changed in settings
+    await _loadDefaultCurrency();
+    
     final expenses = await _expenseService.getExpenses();
 
     // Get available currencies
@@ -372,116 +390,75 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildTotalExpenseCard() {
-    if (_currencyTotals.isEmpty) {
-      return Card(
-        color: Theme.of(context).colorScheme.primaryContainer,
-        child: Padding(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
+    // Calculate total amount across all currencies
+    final totalAmount = _currencyTotals.values.fold<double>(0.0, (sum, amount) => sum + amount);
+    
+    // Determine currency to display
+    Currency displayCurrency = _defaultCurrency; // use user's default currency
+    if (_currencyTotals.isNotEmpty) {
+      // Find the currency with the highest total amount (most used)
+      final sortedCurrencies = _currencyTotals.entries.toList()
+        ..sort((a, b) => b.value.compareTo(a.value));
+      displayCurrency = sortedCurrencies.first.key;
+    }
+    
+    return Card(
+      color: Theme.of(context).colorScheme.primaryContainer,
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.primary,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Icon(
+                    Icons.account_balance_wallet,
+                    size: 20,
+                    color: Theme.of(context).colorScheme.onPrimary,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Text(
+                  'Total Expenses',
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        color: Theme.of(context).colorScheme.onPrimaryContainer,
+                        fontWeight: FontWeight.w600,
+                      ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            Text(
+              '${displayCurrency.symbol}${totalAmount.toStringAsFixed(2)}',
+              style: Theme.of(context).textTheme.headlineLarge?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: Theme.of(context).colorScheme.onPrimaryContainer,
+                  ),
+            ),
+            const SizedBox(height: 8),
+            if (_currencyTotals.length > 1)
               Text(
-                'Total Expenses',
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      color: Theme.of(context).colorScheme.onPrimaryContainer,
+                'Combined from ${_currencyTotals.length} currencies',
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: Theme.of(context).colorScheme.onPrimaryContainer.withOpacity(0.7),
                     ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                '\$0.00',
-                style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: Theme.of(context).colorScheme.onPrimaryContainer,
-                    ),
-              ),
-              const SizedBox(height: 8),
+              )
+            else
               Text(
                 'This month',
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: Theme.of(context).colorScheme.onPrimaryContainer,
+                      color: Theme.of(context).colorScheme.onPrimaryContainer.withOpacity(0.7),
                     ),
               ),
-            ],
-          ),
+          ],
         ),
-      );
-    }
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'Total Expenses',
-          style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
-        ),
-        const SizedBox(height: 16),
-        SizedBox(
-          height: 120,
-          child: SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: Row(
-              children: _currencyTotals.entries
-                  .map((entry) => Padding(
-                        padding: const EdgeInsets.only(right: 12),
-                        child: SizedBox(
-                          width: 200,
-                          child: Card(
-                            color: Theme.of(context).colorScheme.primaryContainer,
-                            child: Padding(
-                              padding: const EdgeInsets.all(16),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Row(
-                                    children: [
-                                      Container(
-                                        padding: const EdgeInsets.all(8),
-                                        decoration: BoxDecoration(
-                                          color: Theme.of(context).colorScheme.primary,
-                                          borderRadius: BorderRadius.circular(8),
-                                        ),
-                                        child: Text(
-                                          entry.key.symbol,
-                                          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                                color: Theme.of(context).colorScheme.onPrimary,
-                                                fontWeight: FontWeight.bold,
-                                              ),
-                                        ),
-                                      ),
-                                      const SizedBox(width: 8),
-                                      Expanded(
-                                        child: Text(
-                                          entry.key.code,
-                                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                                color: Theme.of(context).colorScheme.onPrimaryContainer,
-                                                fontWeight: FontWeight.w500,
-                                              ),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                  const SizedBox(height: 8),
-                                  Text(
-                                    '${entry.key.symbol}${entry.value.toStringAsFixed(2)}',
-                                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                                          fontWeight: FontWeight.bold,
-                                          color: Theme.of(context).colorScheme.onPrimaryContainer,
-                                        ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ),
-                      ))
-                  .toList(),
-            ),
-          ),
-        ),
-      ],
+      ),
     );
   }
 
