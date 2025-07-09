@@ -1,5 +1,6 @@
 import 'currency.dart';
 import 'category.dart';
+import 'transaction_type.dart';
 
 class Expense {
   final String id;
@@ -9,6 +10,7 @@ class Expense {
   final Category category;
   final DateTime date;
   final String description;
+  final TransactionType type;
 
   Expense({
     required this.id,
@@ -18,7 +20,21 @@ class Expense {
     required this.category,
     required this.date,
     this.description = '',
+    this.type = TransactionType.expense, // Default to expense for backward compatibility
   });
+
+  // Helper getters
+  bool get isExpense => type == TransactionType.expense;
+  bool get isIncome => type == TransactionType.income;
+  
+  // Signed amount for calculations (positive for income, negative for expenses)
+  double get signedAmount => isIncome ? amount : -amount;
+  
+  // Formatted amount with sign
+  String get formattedAmountWithSign {
+    final sign = isIncome ? '+' : '-';
+    return '$sign${currency.symbol}${amount.toStringAsFixed(2)}';
+  }
 
   Map<String, dynamic> toJson() {
     return {
@@ -29,6 +45,7 @@ class Expense {
       'categoryId': category.id,
       'date': date.toIso8601String(),
       'description': description,
+      'type': type.code,
     };
   }
 
@@ -55,6 +72,7 @@ class Expense {
       category: category,
       date: DateTime.parse(json['date']),
       description: json['description'] ?? '',
+      type: TransactionTypeExtension.fromCode(json['type'] ?? 'expense'), // Default to expense for backward compatibility
     );
   }
 
@@ -66,6 +84,7 @@ class Expense {
     Category? category,
     DateTime? date,
     String? description,
+    TransactionType? type,
   }) {
     return Expense(
       id: id ?? this.id,
@@ -75,6 +94,7 @@ class Expense {
       category: category ?? this.category,
       date: date ?? this.date,
       description: description ?? this.description,
+      type: type ?? this.type,
     );
   }
 

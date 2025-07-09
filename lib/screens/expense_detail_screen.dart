@@ -25,19 +25,27 @@ class ExpenseDetailScreen extends StatelessWidget {
     }
   }
 
+  Color get _transactionTypeColor {
+    return expense.isIncome ? Colors.green : Colors.red;
+  }
+
+  IconData get _transactionTypeIcon {
+    return expense.isIncome ? Icons.trending_up : Icons.trending_down;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
-          'Expense Details',
-          style: TextStyle(fontWeight: FontWeight.bold),
+        title: Text(
+          '${expense.type.name} Details',
+          style: const TextStyle(fontWeight: FontWeight.bold),
         ),
         actions: [
           IconButton(
             icon: const Icon(Icons.edit),
             onPressed: () => _navigateToEdit(context),
-            tooltip: 'Edit Expense',
+            tooltip: 'Edit ${expense.type.name}',
           ),
         ],
       ),
@@ -48,14 +56,14 @@ class ExpenseDetailScreen extends StatelessWidget {
           children: [
             // Amount Card
             Card(
-              color: Theme.of(context).colorScheme.primaryContainer,
+              color: _transactionTypeColor.withOpacity(0.1),
               child: Padding(
                 padding: const EdgeInsets.all(24),
                 child: Row(
                   children: [
                     CircleAvatar(
                       radius: 30,
-                      backgroundColor: Theme.of(context).colorScheme.primary,
+                      backgroundColor: _transactionTypeColor,
                       child: Text(
                         expense.category.icon,
                         style: const TextStyle(fontSize: 28),
@@ -66,17 +74,35 @@ class ExpenseDetailScreen extends StatelessWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                                                     Text(
-                             expense.formattedAmount,
-                             style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                               fontWeight: FontWeight.bold,
-                               color: Theme.of(context).colorScheme.onPrimaryContainer,
-                             ),
-                           ),
+                          Row(
+                            children: [
+                              Icon(
+                                _transactionTypeIcon,
+                                color: _transactionTypeColor,
+                                size: 20,
+                              ),
+                              const SizedBox(width: 8),
+                              Text(
+                                expense.type.name,
+                                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                                  color: _transactionTypeColor,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            expense.formattedAmountWithSign,
+                            style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                              fontWeight: FontWeight.bold,
+                              color: _transactionTypeColor,
+                            ),
+                          ),
                           Text(
                             expense.category.name,
                             style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                              color: Theme.of(context).colorScheme.onPrimaryContainer,
+                              color: Colors.grey[600],
                             ),
                           ),
                         ],
@@ -134,9 +160,17 @@ class ExpenseDetailScreen extends StatelessWidget {
                     const SizedBox(height: 16),
                     _buildInfoRow(
                       context,
-                      'Expense ID',
+                      'Transaction ID',
                       expense.id,
                       Icons.fingerprint,
+                    ),
+                    const Divider(),
+                    _buildInfoRow(
+                      context,
+                      'Transaction Type',
+                      expense.type.name,
+                      _transactionTypeIcon,
+                      color: _transactionTypeColor,
                     ),
                     const Divider(),
                     _buildInfoRow(
@@ -199,7 +233,9 @@ class ExpenseDetailScreen extends StatelessWidget {
                   const SizedBox(height: 4),
                   Text(
                     content,
-                    style: Theme.of(context).textTheme.bodyLarge,
+                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                      fontWeight: FontWeight.w500,
+                    ),
                   ),
                 ],
               ),
@@ -214,33 +250,31 @@ class ExpenseDetailScreen extends StatelessWidget {
     BuildContext context,
     String label,
     String value,
-    IconData icon,
-  ) {
+    IconData icon, {
+    Color? color,
+  }) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8),
+      padding: const EdgeInsets.symmetric(vertical: 4),
       child: Row(
         children: [
           Icon(
             icon,
-            size: 20,
-            color: Colors.grey[600],
+            size: 16,
+            color: color ?? Colors.grey[600],
           ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Text(
-              label,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: Colors.grey[600],
-              ),
+          const SizedBox(width: 8),
+          Text(
+            label,
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+              color: Colors.grey[600],
             ),
           ),
-          Flexible(
-            child: Text(
-              value,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
-              textAlign: TextAlign.end,
+          const Spacer(),
+          Text(
+            value,
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+              fontWeight: FontWeight.w500,
+              color: color,
             ),
           ),
         ],

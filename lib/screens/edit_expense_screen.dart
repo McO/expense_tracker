@@ -3,6 +3,7 @@ import 'package:intl/intl.dart';
 import '../models/expense.dart';
 import '../models/currency.dart';
 import '../models/category.dart';
+import '../models/transaction_type.dart';
 import '../services/expense_service.dart';
 import '../services/category_service.dart';
 
@@ -28,6 +29,7 @@ class _EditExpenseScreenState extends State<EditExpenseScreen> {
   Currency _selectedCurrency = Currency.usd;
   DateTime _selectedDate = DateTime.now();
   TimeOfDay _selectedTime = TimeOfDay.now();
+  TransactionType _selectedType = TransactionType.expense;
   bool _isLoading = false;
 
   @override
@@ -53,27 +55,34 @@ class _EditExpenseScreenState extends State<EditExpenseScreen> {
     _selectedCurrency = widget.expense.currency;
     _selectedDate = widget.expense.date;
     _selectedTime = TimeOfDay.fromDateTime(widget.expense.date);
+    _selectedType = widget.expense.type;
   }
 
   Future<void> _loadCategories() async {
     try {
-      final categories = await _categoryService.getCategories();
+      final categories = await _categoryService.getCategoriesByType(_selectedType);
       setState(() {
         _categories = categories;
         
-        // Ensure the current expense's category exists in the list
+        // Ensure the current expense's category exists in the list and matches the type
         if (_selectedCategory != null && 
-            !_categories.any((cat) => cat.id == _selectedCategory!.id)) {
-          // Category doesn't exist anymore, find a replacement
-          _selectedCategory = _categories.firstWhere(
-            (cat) => cat.id == 'other',
-            orElse: () => _categories.isNotEmpty ? _categories.first : Category.defaultCategories.first,
-          );
+            (!_categories.any((cat) => cat.id == _selectedCategory!.id) || 
+             _selectedCategory!.type != _selectedType)) {
+          // Category doesn't exist or doesn't match type, find a replacement
+          _selectedCategory = _categories.isNotEmpty ? _categories.first : null;
         }
       });
     } catch (e) {
       // Handle error
     }
+  }
+
+  void _onTransactionTypeChanged(TransactionType type) {
+    setState(() {
+      _selectedType = type;
+      _selectedCategory = null; // Reset category when type changes
+    });
+    _loadCategories(); // Reload categories for the new type
   }
 
   Color _getCategoryColor(Category category) {
@@ -82,6 +91,14 @@ class _EditExpenseScreenState extends State<EditExpenseScreen> {
     } catch (e) {
       return Colors.grey;
     }
+  }
+
+  Color get _transactionTypeColor {
+    return _selectedType == TransactionType.income ? Colors.green : Colors.red;
+  }
+
+  IconData get _transactionTypeIcon {
+    return _selectedType == TransactionType.income ? Icons.trending_up : Icons.trending_down;
   }
 
   Future<void> _selectDate() async {
@@ -147,14 +164,15 @@ class _EditExpenseScreenState extends State<EditExpenseScreen> {
         category: _selectedCategory!,
         date: _combinedDateTime,
         description: _descriptionController.text.trim(),
+        type: _selectedType,
       );
 
       await _expenseService.updateExpense(updatedExpense);
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Expense updated successfully!'),
+          SnackBar(
+            content: Text('${_selectedType.name} updated successfully!'),
             backgroundColor: Colors.green,
           ),
         );
@@ -182,9 +200,9 @@ class _EditExpenseScreenState extends State<EditExpenseScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
-          'Edit Expense',
-          style: TextStyle(fontWeight: FontWeight.bold),
+        title: Text(
+          'Edit ${_selectedType.name}',
+          style: const TextStyle(fontWeight: FontWeight.bold),
         ),
         actions: [
           if (_isLoading)
@@ -202,7 +220,7 @@ class _EditExpenseScreenState extends State<EditExpenseScreen> {
             TextButton(
               onPressed: _updateExpense,
               child: const Text(
-                'Update',
+                'Save',
                 style: TextStyle(fontWeight: FontWeight.bold),
               ),
             ),
@@ -215,6 +233,113 @@ class _EditExpenseScreenState extends State<EditExpenseScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              // Transaction Type Selection
+              Card(
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Transaction Type',
+                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: GestureDetector(
+                              onTap: () => _onTransactionTypeChanged(TransactionType.expense),
+                              child: Container(
+                                padding: const EdgeInsets.all(16),
+                                decoration: BoxDecoration(
+                                  color: _selectedType == TransactionType.expense 
+                                      ? Colors.red.withOpacity(0.1) 
+                                      : Colors.grey.withOpacity(0.1),
+                                  borderRadius: BorderRadius.circular(12),
+                                  border: Border.all(
+                                    color: _selectedType == TransactionType.expense 
+                                        ? Colors.red 
+                                        : Colors.grey,
+                                    width: 2,
+                                  ),
+                                ),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(
+                                      Icons.trending_down,
+                                      color: _selectedType == TransactionType.expense 
+                                          ? Colors.red 
+                                          : Colors.grey,
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Text(
+                                      'Expense',
+                                      style: TextStyle(
+                                        color: _selectedType == TransactionType.expense 
+                                            ? Colors.red 
+                                            : Colors.grey,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 16),
+                          Expanded(
+                            child: GestureDetector(
+                              onTap: () => _onTransactionTypeChanged(TransactionType.income),
+                              child: Container(
+                                padding: const EdgeInsets.all(16),
+                                decoration: BoxDecoration(
+                                  color: _selectedType == TransactionType.income 
+                                      ? Colors.green.withOpacity(0.1) 
+                                      : Colors.grey.withOpacity(0.1),
+                                  borderRadius: BorderRadius.circular(12),
+                                  border: Border.all(
+                                    color: _selectedType == TransactionType.income 
+                                        ? Colors.green 
+                                        : Colors.grey,
+                                    width: 2,
+                                  ),
+                                ),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(
+                                      Icons.trending_up,
+                                      color: _selectedType == TransactionType.income 
+                                          ? Colors.green 
+                                          : Colors.grey,
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Text(
+                                      'Income',
+                                      style: TextStyle(
+                                        color: _selectedType == TransactionType.income 
+                                            ? Colors.green 
+                                            : Colors.grey,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+
               // Info Card
               Card(
                 child: Padding(
@@ -277,14 +402,22 @@ class _EditExpenseScreenState extends State<EditExpenseScreen> {
                         children: [
                           Expanded(
                             flex: 2,
-                            child: TextFormField(
-                              controller: _amountController,
-                              decoration: const InputDecoration(
-                                labelText: 'Amount',
-                                hintText: 'Enter amount',
-                                prefixIcon: Icon(Icons.attach_money),
-                                border: OutlineInputBorder(),
-                              ),
+                            child:                       TextFormField(
+                        controller: _amountController,
+                        decoration: InputDecoration(
+                          labelText: 'Amount',
+                          hintText: 'Enter amount',
+                          prefixIcon: Icon(
+                            _transactionTypeIcon,
+                            color: _transactionTypeColor,
+                          ),
+                          border: OutlineInputBorder(
+                            borderSide: BorderSide(color: _transactionTypeColor),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderSide: BorderSide(color: _transactionTypeColor, width: 2),
+                          ),
+                        ),
                               keyboardType: const TextInputType.numberWithOptions(decimal: true),
                               validator: (value) {
                                 if (value == null || value.trim().isEmpty) {

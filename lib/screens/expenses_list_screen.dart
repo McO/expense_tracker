@@ -3,6 +3,7 @@ import 'package:intl/intl.dart';
 import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 import '../models/expense.dart';
 import '../models/category.dart';
+import '../models/transaction_type.dart';
 import '../services/expense_service.dart';
 import '../services/category_service.dart';
 import 'expense_detail_screen.dart';
@@ -24,14 +25,14 @@ class _ExpensesListScreenState extends State<ExpensesListScreen> {
   List<Expense> _filteredExpenses = [];
   List<Category> _availableCategories = [];
   Category? _selectedCategory;
+  TransactionType? _selectedTransactionType;
   String _searchQuery = '';
   bool _isLoading = true;
 
   @override
   void initState() {
     super.initState();
-    // Initialize with the category filter passed from navigation
-    _selectedCategory = widget.initialCategoryFilter;
+    // Don't set _selectedCategory here - wait for categories to load
     _loadExpenses();
   }
 
@@ -51,6 +52,16 @@ class _ExpensesListScreenState extends State<ExpensesListScreen> {
         _allExpenses = expenses; // Already sorted by service
         _filteredExpenses = _allExpenses;
         _availableCategories = categories;
+        
+        // Ensure the initial category filter exists in the loaded categories
+        if (widget.initialCategoryFilter != null) {
+          final matchingCategory = categories.firstWhere(
+            (cat) => cat.id == widget.initialCategoryFilter!.id,
+            orElse: () => widget.initialCategoryFilter!,
+          );
+          _selectedCategory = matchingCategory;
+        }
+        
         _isLoading = false;
       });
       
@@ -65,7 +76,7 @@ class _ExpensesListScreenState extends State<ExpensesListScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Error loading expenses: ${e.toString()}'),
+            content: Text('Error loading transactions: ${e.toString()}'),
             backgroundColor: Colors.red,
           ),
         );
@@ -84,8 +95,10 @@ class _ExpensesListScreenState extends State<ExpensesListScreen> {
                 .contains(_searchQuery.toLowerCase());
         final matchesCategory = _selectedCategory == null || 
             expense.category.id == _selectedCategory!.id;
+        final matchesTransactionType = _selectedTransactionType == null ||
+            expense.type == _selectedTransactionType;
         
-        return matchesSearch && matchesCategory;
+        return matchesSearch && matchesCategory && matchesTransactionType;
       }).toList();
       
       // Ensure filtered expenses maintain sort order by newest date and time first
@@ -107,9 +120,23 @@ class _ExpensesListScreenState extends State<ExpensesListScreen> {
     _filterExpenses();
   }
 
+  void _onTransactionTypeFilterChanged(TransactionType? type) {
+    setState(() {
+      _selectedTransactionType = type;
+    });
+    _filterExpenses();
+  }
+
   Color _getCategoryColor(Category category) {
     try {
-      return Color(int.parse(category.color, radix: 16));
+      final colorString = category.color;
+      if (colorString.isEmpty) return Colors.grey;
+      
+      // Remove any non-hex characters and ensure proper format
+      final cleanColor = colorString.replaceAll(RegExp(r'[^0-9A-Fa-f]'), '');
+      if (cleanColor.length != 8) return Colors.grey;
+      
+      return Color(int.parse(cleanColor, radix: 16));
     } catch (e) {
       return Colors.grey;
     }
@@ -132,7 +159,7 @@ class _ExpensesListScreenState extends State<ExpensesListScreen> {
     final bool? confirm = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Delete Expense'),
+        title: Text('Delete ${expense.type.name}'),
         content: Text('Are you sure you want to delete "${expense.title}"?'),
         actions: [
           TextButton(
@@ -154,8 +181,8 @@ class _ExpensesListScreenState extends State<ExpensesListScreen> {
         await _loadExpenses();
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Expense deleted successfully'),
+            SnackBar(
+              content: Text('${expense.type.name} deleted successfully'),
               backgroundColor: Colors.green,
             ),
           );
@@ -164,7 +191,7 @@ class _ExpensesListScreenState extends State<ExpensesListScreen> {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('Error deleting expense: ${e.toString()}'),
+              content: Text('Error deleting ${expense.type.name.toLowerCase()}: ${e.toString()}'),
               backgroundColor: Colors.red,
             ),
           );
@@ -178,11 +205,11 @@ class _ExpensesListScreenState extends State<ExpensesListScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text(
-          'All Expenses',
+          'All Transactions',
           style: TextStyle(fontWeight: FontWeight.bold),
         ),
         bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(120),
+          preferredSize: const Size.fromHeight(180),
           child: Padding(
             padding: const EdgeInsets.all(16),
             child: Column(
@@ -191,51 +218,97 @@ class _ExpensesListScreenState extends State<ExpensesListScreen> {
                 TextField(
                   onChanged: _onSearchChanged,
                   decoration: InputDecoration(
-                    hintText: 'Search expenses...',
+                    hintText: 'Search transactions...',
                     prefixIcon: const Icon(Icons.search),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
                     filled: true,
-                    fillColor: Colors.grey[100],
+                    fillColor: Theme.of(context).colorScheme.surface,
                   ),
                 ),
                 const SizedBox(height: 12),
-                // Category filter
-                SizedBox(
-                  height: 40,
-                  child: ListView(
-                    scrollDirection: Axis.horizontal,
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.only(right: 8),
-                        child: FilterChip(
-                          selected: _selectedCategory == null,
-                          onSelected: (_) => _onCategoryFilterChanged(null),
-                          label: const Text('All'),
+                
+                // Transaction Type Filter
+                Row(
+                  children: [
+                    Expanded(
+                      child: DropdownButtonFormField<TransactionType?>(
+                        value: _selectedTransactionType,
+                        decoration: InputDecoration(
+                          labelText: 'Transaction Type',
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          filled: true,
+                          fillColor: Theme.of(context).colorScheme.surface,
                         ),
-                      ),
-                      ..._availableCategories.map((category) {
-                        return Padding(
-                          padding: const EdgeInsets.only(right: 8),
-                          child: FilterChip(
-                            selected: _selectedCategory?.id == category.id,
-                            onSelected: (_) => _onCategoryFilterChanged(category),
-                            backgroundColor: _getCategoryColor(category).withOpacity(0.1),
-                            selectedColor: _getCategoryColor(category).withOpacity(0.2),
-                            label: Row(
-                              mainAxisSize: MainAxisSize.min,
+                        items: [
+                          const DropdownMenuItem<TransactionType?>(
+                            value: null,
+                            child: Text('All Types'),
+                          ),
+                          DropdownMenuItem<TransactionType?>(
+                            value: TransactionType.income,
+                            child: Row(
                               children: [
-                                Text(category.icon),
-                                const SizedBox(width: 4),
-                                Text(category.name),
+                                Icon(Icons.trending_up, color: Colors.green, size: 16),
+                                const SizedBox(width: 8),
+                                const Text('Income'),
                               ],
                             ),
                           ),
-                        );
-                      }).toList(),
-                    ],
-                  ),
+                          DropdownMenuItem<TransactionType?>(
+                            value: TransactionType.expense,
+                            child: Row(
+                              children: [
+                                Icon(Icons.trending_down, color: Colors.red, size: 16),
+                                const SizedBox(width: 8),
+                                const Text('Expenses'),
+                              ],
+                            ),
+                          ),
+                        ],
+                        onChanged: _onTransactionTypeFilterChanged,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    
+                    // Category Filter
+                    Expanded(
+                      child: DropdownButtonFormField<Category?>(
+                        value: _selectedCategory != null && _availableCategories.any((cat) => cat.id == _selectedCategory!.id) 
+                            ? _availableCategories.firstWhere((cat) => cat.id == _selectedCategory!.id)
+                            : null,
+                        decoration: InputDecoration(
+                          labelText: 'Category',
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          filled: true,
+                          fillColor: Theme.of(context).colorScheme.surface,
+                        ),
+                        items: [
+                          const DropdownMenuItem<Category?>(
+                            value: null,
+                            child: Text('All Categories'),
+                          ),
+                          ..._availableCategories.where((category) => category != null).map((category) => DropdownMenuItem<Category?>(
+                            value: category,
+                            child: Row(
+                              children: [
+                                Text(category.icon, style: const TextStyle(fontSize: 16)),
+                                const SizedBox(width: 8),
+                                Expanded(child: Text(category.name)),
+                              ],
+                            ),
+                          )),
+                        ],
+                        onChanged: _onCategoryFilterChanged,
+                        isExpanded: true,
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
@@ -253,17 +326,29 @@ class _ExpensesListScreenState extends State<ExpensesListScreen> {
                       padding: const EdgeInsets.all(16),
                       itemCount: _filteredExpenses.length,
                       itemBuilder: (context, index) {
+                        // Safety check to prevent index out of bounds
+                        if (index >= _filteredExpenses.length) {
+                          return const SizedBox.shrink();
+                        }
+                        
                         final expense = _filteredExpenses[index];
-                        return AnimationConfiguration.staggeredList(
-                          position: index,
-                          duration: const Duration(milliseconds: 375),
-                          child: SlideAnimation(
-                            verticalOffset: 50.0,
-                            child: FadeInAnimation(
-                              child: _buildExpenseCard(expense),
+                        
+                        // Wrap in try-catch to prevent animation rendering issues
+                        try {
+                          return AnimationConfiguration.staggeredList(
+                            position: index,
+                            duration: const Duration(milliseconds: 375),
+                            child: SlideAnimation(
+                              verticalOffset: 50.0,
+                              child: FadeInAnimation(
+                                child: _buildExpenseCard(expense),
+                              ),
                             ),
-                          ),
-                        );
+                          );
+                        } catch (e) {
+                          // Fallback to simple card without animation
+                          return _buildExpenseCard(expense);
+                        }
                       },
                     ),
                   ),
@@ -277,7 +362,7 @@ class _ExpensesListScreenState extends State<ExpensesListScreen> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Icon(
-            _searchQuery.isNotEmpty || _selectedCategory != null
+            _searchQuery.isNotEmpty || _selectedCategory != null || _selectedTransactionType != null
                 ? Icons.search_off
                 : Icons.receipt_long,
             size: 64,
@@ -285,18 +370,18 @@ class _ExpensesListScreenState extends State<ExpensesListScreen> {
           ),
           const SizedBox(height: 16),
           Text(
-            _searchQuery.isNotEmpty || _selectedCategory != null
-                ? 'No expenses found'
-                : 'No expenses yet',
+            _searchQuery.isNotEmpty || _selectedCategory != null || _selectedTransactionType != null
+                ? 'No transactions found'
+                : 'No transactions yet',
             style: Theme.of(context).textTheme.titleLarge?.copyWith(
               color: Colors.grey[600],
             ),
           ),
           const SizedBox(height: 8),
           Text(
-            _searchQuery.isNotEmpty || _selectedCategory != null
+            _searchQuery.isNotEmpty || _selectedCategory != null || _selectedTransactionType != null
                 ? 'Try adjusting your search or filters'
-                : 'Start adding expenses to see them here',
+                : 'Start adding transactions to see them here',
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
               color: Colors.grey[500],
             ),
@@ -308,6 +393,11 @@ class _ExpensesListScreenState extends State<ExpensesListScreen> {
   }
 
   Widget _buildExpenseCard(Expense expense) {
+    // Safety check for null expense
+    if (expense == null) {
+      return const SizedBox.shrink();
+    }
+    
     return Dismissible(
       key: Key(expense.id),
       direction: DismissDirection.endToStart,
@@ -316,21 +406,21 @@ class _ExpensesListScreenState extends State<ExpensesListScreen> {
         padding: const EdgeInsets.only(right: 20),
         margin: const EdgeInsets.only(bottom: 12),
         decoration: BoxDecoration(
-          color: Colors.red,
+          color: expense.type == TransactionType.expense ? Colors.red : Colors.green,
           borderRadius: BorderRadius.circular(12),
         ),
-        child: const Column(
+        child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(
-              Icons.delete,
+              expense.type == TransactionType.expense ? Icons.delete : Icons.check_circle,
               color: Colors.white,
               size: 32,
             ),
-            SizedBox(height: 4),
+            const SizedBox(height: 4),
             Text(
-              'Delete',
-              style: TextStyle(
+              expense.type == TransactionType.expense ? 'Delete' : 'Added',
+              style: const TextStyle(
                 color: Colors.white,
                 fontWeight: FontWeight.bold,
               ),
@@ -342,7 +432,7 @@ class _ExpensesListScreenState extends State<ExpensesListScreen> {
         return await showDialog<bool>(
           context: context,
           builder: (context) => AlertDialog(
-            title: const Text('Delete Expense'),
+            title: Text('Delete ${expense.type.name}'),
             content: Text('Are you sure you want to delete "${expense.title}"?'),
             actions: [
               TextButton(
@@ -439,10 +529,10 @@ class _ExpensesListScreenState extends State<ExpensesListScreen> {
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               Text(
-                expense.formattedAmount,
+                expense.formattedAmountWithSign,
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
                   fontWeight: FontWeight.bold,
-                  color: Theme.of(context).colorScheme.primary,
+                  color: expense.isIncome ? Colors.green : Colors.red,
                 ),
               ),
               PopupMenuButton<String>(

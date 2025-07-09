@@ -32,6 +32,7 @@ class _HomeScreenState extends State<HomeScreen> {
   final SettingsService _settingsService = SettingsService();
   List<Expense> _recentExpenses = [];
   List<Expense> _allExpenses = [];
+  double _totalIncome = 0.0;
   double _totalExpenses = 0.0;
   Map<Category, double> _categoryTotals = {};
   Map<Currency, double> _currencyTotals = {};
@@ -92,19 +93,25 @@ class _HomeScreenState extends State<HomeScreen> {
     filteredExpenses.sort((a, b) => b.date.compareTo(a.date));
 
     // Calculate totals for filtered data
-    double total = 0.0;
+    double totalIncome = 0.0;
+    double totalExpenses = 0.0;
     final Map<Category, double> categoryTotals = {};
     final Map<Currency, double> currencyTotals = {};
 
     for (final expense in filteredExpenses) {
-      total += expense.amount;
+      if (expense.isIncome) {
+        totalIncome += expense.amount;
+      } else {
+        totalExpenses += expense.amount;
+      }
       categoryTotals[expense.category] = (categoryTotals[expense.category] ?? 0) + expense.amount;
       currencyTotals[expense.currency] = (currencyTotals[expense.currency] ?? 0) + expense.amount;
     }
 
     setState(() {
       _recentExpenses = filteredExpenses.take(5).toList();
-      _totalExpenses = total;
+      _totalIncome = totalIncome;
+      _totalExpenses = totalExpenses;
       _categoryTotals = categoryTotals;
       _currencyTotals = currencyTotals;
     });
@@ -393,8 +400,8 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildTotalExpenseCard() {
-    // Calculate total amount across all currencies
-    final totalAmount = _currencyTotals.values.fold<double>(0.0, (sum, amount) => sum + amount);
+    // Calculate net balance
+    final netBalance = _totalIncome - _totalExpenses;
     
     // Determine currency to display
     Currency displayCurrency = _defaultCurrency; // use user's default currency
@@ -428,7 +435,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
                 const SizedBox(width: 12),
                 Text(
-                  'Total Expenses',
+                  'Financial Overview',
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
                         color: Theme.of(context).colorScheme.onPrimaryContainer,
                         fontWeight: FontWeight.w600,
@@ -437,13 +444,103 @@ class _HomeScreenState extends State<HomeScreen> {
               ],
             ),
             const SizedBox(height: 16),
-            Text(
-              '${displayCurrency.symbol}${totalAmount.toStringAsFixed(2)}',
-              style: Theme.of(context).textTheme.headlineLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: Theme.of(context).colorScheme.onPrimaryContainer,
-                  ),
+            
+            // Net Balance
+            Row(
+              children: [
+                Icon(
+                  netBalance >= 0 ? Icons.trending_up : Icons.trending_down,
+                  color: netBalance >= 0 ? Colors.green : Colors.red,
+                  size: 24,
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  'Net Balance: ',
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        color: Theme.of(context).colorScheme.onPrimaryContainer,
+                        fontWeight: FontWeight.w600,
+                      ),
+                ),
+                Text(
+                  '${netBalance >= 0 ? '+' : ''}${displayCurrency.symbol}${netBalance.toStringAsFixed(2)}',
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: netBalance >= 0 ? Colors.green : Colors.red,
+                      ),
+                ),
+              ],
             ),
+            const SizedBox(height: 16),
+            
+            // Income and Expenses Row
+            Row(
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.trending_up,
+                            color: Colors.green,
+                            size: 16,
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            'Income',
+                            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                  color: Theme.of(context).colorScheme.onPrimaryContainer.withOpacity(0.8),
+                                ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        '+${displayCurrency.symbol}${_totalIncome.toStringAsFixed(2)}',
+                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                              fontWeight: FontWeight.bold,
+                              color: Colors.green,
+                            ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.trending_down,
+                            color: Colors.red,
+                            size: 16,
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            'Expenses',
+                            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                  color: Theme.of(context).colorScheme.onPrimaryContainer.withOpacity(0.8),
+                                ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        '-${displayCurrency.symbol}${_totalExpenses.toStringAsFixed(2)}',
+                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                              fontWeight: FontWeight.bold,
+                              color: Colors.red,
+                            ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            
             const SizedBox(height: 8),
             if (_currencyTotals.length > 1)
               Text(
@@ -452,9 +549,9 @@ class _HomeScreenState extends State<HomeScreen> {
                       color: Theme.of(context).colorScheme.onPrimaryContainer.withOpacity(0.7),
                     ),
               )
-            else
+            else if (_totalIncome > 0)
               Text(
-                'This month',
+                'Savings Rate: ${((_totalIncome - _totalExpenses) / _totalIncome * 100).toStringAsFixed(1)}%',
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
                       color: Theme.of(context).colorScheme.onPrimaryContainer.withOpacity(0.7),
                     ),
@@ -622,7 +719,7 @@ class _HomeScreenState extends State<HomeScreen> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(
-              'Recent Expenses',
+              'Recent Transactions',
               style: Theme.of(context).textTheme.titleLarge?.copyWith(
                     fontWeight: FontWeight.bold,
                   ),
@@ -757,10 +854,10 @@ class _HomeScreenState extends State<HomeScreen> {
                             '${expense.category.name} • ${DateFormat('MMM d, yyyy • h:mm a').format(expense.date)}',
                           ),
                         trailing: Text(
-                          expense.formattedAmount,
+                          expense.formattedAmountWithSign,
                           style: Theme.of(context).textTheme.titleMedium?.copyWith(
                                 fontWeight: FontWeight.bold,
-                                color: Theme.of(context).colorScheme.primary,
+                                color: expense.isIncome ? Colors.green : Colors.red,
                               ),
                         ),
                         onTap: () async {
