@@ -44,7 +44,7 @@ class _ExpensesListScreenState extends State<ExpensesListScreen> {
       final usedCategories = expenses.map((e) => e.category).toSet().toList();
       
       setState(() {
-        _allExpenses = expenses..sort((a, b) => b.date.compareTo(a.date));
+        _allExpenses = expenses; // Already sorted by service
         _filteredExpenses = _allExpenses;
         _availableCategories = categories;
         _isLoading = false;
@@ -78,6 +78,9 @@ class _ExpensesListScreenState extends State<ExpensesListScreen> {
         
         return matchesSearch && matchesCategory;
       }).toList();
+      
+      // Ensure filtered expenses maintain sort order by newest date and time first
+      _filteredExpenses.sort((a, b) => b.date.compareTo(a.date));
     });
   }
 
@@ -406,7 +409,7 @@ class _ExpensesListScreenState extends State<ExpensesListScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                '${expense.category.name} • ${DateFormat('MMM d, yyyy').format(expense.date)}',
+                '${expense.category.name} • ${DateFormat('MMM d, yyyy • h:mm a').format(expense.date)}',
                 style: Theme.of(context).textTheme.bodySmall,
               ),
               if (expense.description.isNotEmpty) ...[

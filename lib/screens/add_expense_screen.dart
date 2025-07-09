@@ -27,6 +27,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
   List<Category> _categories = [];
   Currency _selectedCurrency = Currency.usd;
   DateTime _selectedDate = DateTime.now();
+  TimeOfDay _selectedTime = TimeOfDay.now();
   bool _isLoading = false;
 
   @override
@@ -95,6 +96,28 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
     }
   }
 
+  Future<void> _selectTime() async {
+    final TimeOfDay? picked = await showTimePicker(
+      context: context,
+      initialTime: _selectedTime,
+    );
+    if (picked != null && picked != _selectedTime) {
+      setState(() {
+        _selectedTime = picked;
+      });
+    }
+  }
+
+  DateTime get _combinedDateTime {
+    return DateTime(
+      _selectedDate.year,
+      _selectedDate.month,
+      _selectedDate.day,
+      _selectedTime.hour,
+      _selectedTime.minute,
+    );
+  }
+
   Future<void> _saveExpense() async {
     if (!_formKey.currentState!.validate()) {
       return;
@@ -121,7 +144,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
         amount: double.parse(_amountController.text),
         currency: _selectedCurrency,
         category: _selectedCategory!,
-        date: _selectedDate,
+        date: _combinedDateTime,
         description: _descriptionController.text.trim(),
       );
 
@@ -373,7 +396,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
               ),
               const SizedBox(height: 16),
 
-              // Date Selection
+              // Date and Time Selection
               Card(
                 child: Padding(
                   padding: const EdgeInsets.all(16),
@@ -381,7 +404,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Date',
+                        'Date and Time',
                         style: Theme.of(context).textTheme.titleMedium?.copyWith(
                           fontWeight: FontWeight.bold,
                         ),
@@ -401,6 +424,29 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                               const SizedBox(width: 12),
                               Text(
                                 DateFormat('EEEE, MMM d, yyyy').format(_selectedDate),
+                                style: Theme.of(context).textTheme.bodyLarge,
+                              ),
+                              const Spacer(),
+                              const Icon(Icons.arrow_drop_down),
+                            ],
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      InkWell(
+                        onTap: _selectTime,
+                        child: Container(
+                          padding: const EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            border: Border.all(color: Colors.grey),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Row(
+                            children: [
+                              const Icon(Icons.access_time),
+                              const SizedBox(width: 12),
+                              Text(
+                                _selectedTime.format(context),
                                 style: Theme.of(context).textTheme.bodyLarge,
                               ),
                               const Spacer(),

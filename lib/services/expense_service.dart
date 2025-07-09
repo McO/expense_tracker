@@ -17,7 +17,12 @@ class ExpenseService {
     final expensesJson = prefs.getStringList(_expensesKey) ?? [];
     final categories = await _categoryService.getCategories();
 
-    return expensesJson.map((json) => Expense.fromJson(jsonDecode(json), categories)).toList();
+    final expenses = expensesJson.map((json) => Expense.fromJson(jsonDecode(json), categories)).toList();
+    
+    // Sort expenses by newest date and time first
+    expenses.sort((a, b) => b.date.compareTo(a.date));
+    
+    return expenses;
   }
 
   Future<void> saveExpense(Expense expense) async {

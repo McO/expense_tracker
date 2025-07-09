@@ -97,12 +97,12 @@ class ExpenseDetailScreen extends StatelessWidget {
             ),
             const SizedBox(height: 16),
 
-            // Date Section
+            // Date and Time Section
             _buildDetailCard(
               context,
               icon: Icons.calendar_today,
-              title: 'Date',
-              content: DateFormat('EEEE, MMMM d, yyyy').format(expense.date),
+              title: 'Date & Time',
+              content: DateFormat('EEEE, MMMM d, yyyy • h:mm a').format(expense.date),
             ),
             const SizedBox(height: 16),
 

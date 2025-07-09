@@ -88,6 +88,9 @@ class _HomeScreenState extends State<HomeScreen> {
       filteredExpenses = _allExpenses.where((expense) => expense.currency == _selectedCurrencyFilter).toList();
     }
 
+    // Ensure expenses are sorted by newest date and time first (in case filtering changed the order)
+    filteredExpenses.sort((a, b) => b.date.compareTo(a.date));
+
     // Calculate totals for filtered data
     double total = 0.0;
     final Map<Category, double> categoryTotals = {};
@@ -728,7 +731,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             style: const TextStyle(fontWeight: FontWeight.bold),
                           ),
                           subtitle: Text(
-                            '${expense.category.name} • ${DateFormat('MMM d, yyyy').format(expense.date)}',
+                            '${expense.category.name} • ${DateFormat('MMM d, yyyy • h:mm a').format(expense.date)}',
                           ),
                         trailing: Text(
                           expense.formattedAmount,
