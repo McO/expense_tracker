@@ -529,58 +529,81 @@ class _HomeScreenState extends State<HomeScreen> {
 
                                 return Padding(
                   padding: const EdgeInsets.symmetric(vertical: 8),
-                  child: Row(
-                    children: [
-                      Container(
-                        width: 48,
-                        height: 48,
-                        decoration: BoxDecoration(
-                          color: _getCategoryColor(entry.key).withOpacity(0.1),
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(
-                            color: _getCategoryColor(entry.key).withOpacity(0.3),
-                            width: 1,
+                  child: InkWell(
+                    onTap: () async {
+                      await Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => ExpensesListScreen(
+                            initialCategoryFilter: entry.key,
                           ),
                         ),
-                        child: Center(
-                          child: Text(
-                            entry.key.icon,
-                            style: const TextStyle(fontSize: 20),
+                      );
+                      _loadData(); // Refresh data when returning
+                    },
+                    borderRadius: BorderRadius.circular(8),
+                    child: Padding(
+                      padding: const EdgeInsets.all(8),
+                      child: Row(
+                        children: [
+                          Container(
+                            width: 48,
+                            height: 48,
+                            decoration: BoxDecoration(
+                              color: _getCategoryColor(entry.key).withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(
+                                color: _getCategoryColor(entry.key).withOpacity(0.3),
+                                width: 1,
+                              ),
+                            ),
+                            child: Center(
+                              child: Text(
+                                entry.key.icon,
+                                style: const TextStyle(fontSize: 20),
+                              ),
+                            ),
                           ),
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text(
-                                  entry.key.name,
-                                  style: Theme.of(context).textTheme.bodyLarge,
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text(
+                                      entry.key.name,
+                                      style: Theme.of(context).textTheme.bodyLarge,
+                                    ),
+                                    Text(
+                                      _formatCategoryAmount(entry.key, entry.value),
+                                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ],
                                 ),
-                                Text(
-                                  _formatCategoryAmount(entry.key, entry.value),
-                                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                                    fontWeight: FontWeight.bold,
+                                const SizedBox(height: 4),
+                                LinearProgressIndicator(
+                                  value: percentage / 100,
+                                  backgroundColor: Colors.grey[300],
+                                  valueColor: AlwaysStoppedAnimation<Color>(
+                                    _getCategoryColor(entry.key),
                                   ),
                                 ),
                               ],
                             ),
-                            const SizedBox(height: 4),
-                            LinearProgressIndicator(
-                              value: percentage / 100,
-                              backgroundColor: Colors.grey[300],
-                              valueColor: AlwaysStoppedAnimation<Color>(
-                                _getCategoryColor(entry.key),
-                              ),
-                            ),
-                          ],
-                        ),
+                          ),
+                          const SizedBox(width: 8),
+                          Icon(
+                            Icons.arrow_forward_ios,
+                            size: 16,
+                            color: Colors.grey[400],
+                          ),
+                        ],
                       ),
-                    ],
+                    ),
                   ),
                 );
               }).toList(),

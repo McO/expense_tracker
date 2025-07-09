@@ -9,7 +9,9 @@ import 'expense_detail_screen.dart';
 import 'edit_expense_screen.dart';
 
 class ExpensesListScreen extends StatefulWidget {
-  const ExpensesListScreen({super.key});
+  final Category? initialCategoryFilter;
+  
+  const ExpensesListScreen({super.key, this.initialCategoryFilter});
 
   @override
   State<ExpensesListScreen> createState() => _ExpensesListScreenState();
@@ -28,6 +30,8 @@ class _ExpensesListScreenState extends State<ExpensesListScreen> {
   @override
   void initState() {
     super.initState();
+    // Initialize with the category filter passed from navigation
+    _selectedCategory = widget.initialCategoryFilter;
     _loadExpenses();
   }
 
@@ -49,6 +53,11 @@ class _ExpensesListScreenState extends State<ExpensesListScreen> {
         _availableCategories = categories;
         _isLoading = false;
       });
+      
+      // Apply initial category filter if provided
+      if (widget.initialCategoryFilter != null) {
+        _filterExpenses();
+      }
     } catch (e) {
       setState(() {
         _isLoading = false;
