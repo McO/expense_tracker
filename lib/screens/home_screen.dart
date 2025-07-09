@@ -35,6 +35,8 @@ class _HomeScreenState extends State<HomeScreen> {
   double _totalIncome = 0.0;
   double _totalExpenses = 0.0;
   Map<Category, double> _categoryTotals = {};
+  Map<Category, double> _categoryIncomeTotal = {};
+  Map<Category, double> _categoryExpenseTotal = {};
   Map<Currency, double> _currencyTotals = {};
   Set<Currency> _availableCurrencies = {};
   Currency? _selectedCurrencyFilter;
@@ -96,13 +98,17 @@ class _HomeScreenState extends State<HomeScreen> {
     double totalIncome = 0.0;
     double totalExpenses = 0.0;
     final Map<Category, double> categoryTotals = {};
+    final Map<Category, double> categoryIncomeTotal = {};
+    final Map<Category, double> categoryExpenseTotal = {};
     final Map<Currency, double> currencyTotals = {};
 
     for (final expense in filteredExpenses) {
       if (expense.isIncome) {
         totalIncome += expense.amount;
+        categoryIncomeTotal[expense.category] = (categoryIncomeTotal[expense.category] ?? 0) + expense.amount;
       } else {
         totalExpenses += expense.amount;
+        categoryExpenseTotal[expense.category] = (categoryExpenseTotal[expense.category] ?? 0) + expense.amount;
       }
       categoryTotals[expense.category] = (categoryTotals[expense.category] ?? 0) + expense.amount;
       currencyTotals[expense.currency] = (currencyTotals[expense.currency] ?? 0) + expense.amount;
@@ -113,6 +119,8 @@ class _HomeScreenState extends State<HomeScreen> {
       _totalIncome = totalIncome;
       _totalExpenses = totalExpenses;
       _categoryTotals = categoryTotals;
+      _categoryIncomeTotal = categoryIncomeTotal;
+      _categoryExpenseTotal = categoryExpenseTotal;
       _currencyTotals = currencyTotals;
     });
   }
@@ -562,32 +570,41 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  String _formatCategoryAmount(Category category, double amount, bool isIncome) {
+    String formattedAmount;
+    
+    if (_selectedCurrencyFilter != null) {
+      // When filtered by currency, show the amount in that currency
+      formattedAmount = '${_selectedCurrencyFilter!.symbol}${amount.toStringAsFixed(2)}';
+    } else {
+      // When showing all currencies, check if category has mixed currencies
+      final categoryExpenses = _allExpenses.where((e) => e.category.id == category.id);
+      final categoryCurrencies = categoryExpenses.map((e) => e.currency).toSet();
+      
+      if (categoryCurrencies.length == 1) {
+        // Single currency for this category
+        final currency = categoryCurrencies.first;
+        formattedAmount = '${currency.symbol}${amount.toStringAsFixed(2)}';
+      } else {
+        // Mixed currencies
+        formattedAmount = 'Mixed currencies';
+      }
+    }
+    
+    // Add sign prefix for income/expense indication
+    if (formattedAmount != 'Mixed currencies') {
+      formattedAmount = '${isIncome ? '+' : '-'}$formattedAmount';
+    }
+    
+    return formattedAmount;
+  }
+
   Widget _buildCategoryBreakdown() {
     if (_categoryTotals.isEmpty) {
       return const SizedBox.shrink();
     }
 
-        String _formatCategoryAmount(Category category, double amount) {
-      if (_selectedCurrencyFilter != null) {
-        // When filtered by currency, show the amount in that currency
-        return '${_selectedCurrencyFilter!.symbol}${amount.toStringAsFixed(2)}';
-      } else {
-        // When showing all currencies, check if category has mixed currencies
-        final categoryExpenses = _allExpenses.where((e) => e.category.id == category.id);
-        final categoryCurrencies = categoryExpenses.map((e) => e.currency).toSet();
-        
-        if (categoryCurrencies.length == 1) {
-          // Single currency for this category
-          final currency = categoryCurrencies.first;
-          return '${currency.symbol}${amount.toStringAsFixed(2)}';
-        } else {
-          // Mixed currencies
-          return 'Mixed currencies';
-        }
-      }
-    }
-
-    return Column(
+        return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(
@@ -621,93 +638,147 @@ class _HomeScreenState extends State<HomeScreen> {
           child: Padding(
             padding: const EdgeInsets.all(16),
             child: Column(
-              children: _categoryTotals.entries.map((entry) {
-                final percentage = _totalExpenses > 0 ? (entry.value / _totalExpenses) * 100 : 0.0;
-
-                                return Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 8),
-                  child: InkWell(
-                    onTap: () async {
-                      await Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => ExpensesListScreen(
-                            initialCategoryFilter: entry.key,
-                          ),
-                        ),
-                      );
-                      _loadData(); // Refresh data when returning
-                    },
-                    borderRadius: BorderRadius.circular(8),
-                    child: Padding(
-                      padding: const EdgeInsets.all(8),
-                      child: Row(
-                        children: [
-                          Container(
-                            width: 48,
-                            height: 48,
-                            decoration: BoxDecoration(
-                              color: _getCategoryColor(entry.key).withOpacity(0.1),
-                              borderRadius: BorderRadius.circular(12),
-                              border: Border.all(
-                                color: _getCategoryColor(entry.key).withOpacity(0.3),
-                                width: 1,
-                              ),
-                            ),
-                            child: Center(
-                              child: Text(
-                                entry.key.icon,
-                                style: const TextStyle(fontSize: 20),
-                              ),
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Text(
-                                      entry.key.name,
-                                      style: Theme.of(context).textTheme.bodyLarge,
-                                    ),
-                                    Text(
-                                      _formatCategoryAmount(entry.key, entry.value),
-                                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                const SizedBox(height: 4),
-                                LinearProgressIndicator(
-                                  value: percentage / 100,
-                                  backgroundColor: Colors.grey[300],
-                                  valueColor: AlwaysStoppedAnimation<Color>(
-                                    _getCategoryColor(entry.key),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                          Icon(
-                            Icons.arrow_forward_ios,
-                            size: 16,
-                            color: Colors.grey[400],
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                );
-              }).toList(),
+              children: _buildCategoryBreakdownItems(),
             ),
           ),
         ),
       ],
+    );
+  }
+
+  List<Widget> _buildCategoryBreakdownItems() {
+    final List<Widget> items = [];
+    
+    // Get all categories that have transactions
+    final allCategories = <Category>{};
+    allCategories.addAll(_categoryIncomeTotal.keys);
+    allCategories.addAll(_categoryExpenseTotal.keys);
+    
+    for (final category in allCategories) {
+      final incomeAmount = _categoryIncomeTotal[category] ?? 0.0;
+      final expenseAmount = _categoryExpenseTotal[category] ?? 0.0;
+      
+      // Add income entry if there's income for this category
+      if (incomeAmount > 0) {
+        items.add(_buildCategoryItem(category, incomeAmount, true));
+      }
+      
+      // Add expense entry if there's expenses for this category
+      if (expenseAmount > 0) {
+        items.add(_buildCategoryItem(category, expenseAmount, false));
+      }
+    }
+    
+    return items;
+  }
+
+  Widget _buildCategoryItem(Category category, double amount, bool isIncome) {
+    final percentage = isIncome 
+        ? (_totalIncome > 0 ? (amount / _totalIncome) * 100 : 0.0)
+        : (_totalExpenses > 0 ? (amount / _totalExpenses) * 100 : 0.0);
+    
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      child: InkWell(
+        onTap: () async {
+          await Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => ExpensesListScreen(
+                initialCategoryFilter: category,
+              ),
+            ),
+          );
+          _loadData(); // Refresh data when returning
+        },
+        borderRadius: BorderRadius.circular(8),
+        child: Padding(
+          padding: const EdgeInsets.all(8),
+          child: Row(
+            children: [
+              Container(
+                width: 48,
+                height: 48,
+                decoration: BoxDecoration(
+                  color: _getCategoryColor(category).withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: _getCategoryColor(category).withOpacity(0.3),
+                    width: 1,
+                  ),
+                ),
+                child: Center(
+                  child: Text(
+                    category.icon,
+                    style: const TextStyle(fontSize: 20),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Row(
+                          children: [
+                            Text(
+                              category.name,
+                              style: Theme.of(context).textTheme.bodyLarge,
+                            ),
+                            const SizedBox(width: 8),
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                              decoration: BoxDecoration(
+                                color: isIncome ? Colors.green.withOpacity(0.1) : Colors.red.withOpacity(0.1),
+                                borderRadius: BorderRadius.circular(8),
+                                border: Border.all(
+                                  color: isIncome ? Colors.green.withOpacity(0.3) : Colors.red.withOpacity(0.3),
+                                  width: 1,
+                                ),
+                              ),
+                              child: Text(
+                                isIncome ? 'Income' : 'Expense',
+                                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                  color: isIncome ? Colors.green : Colors.red,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        Text(
+                          _formatCategoryAmount(category, amount, isIncome),
+                          style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                            fontWeight: FontWeight.bold,
+                            color: isIncome ? Colors.green : Colors.red,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 4),
+                    LinearProgressIndicator(
+                      value: percentage / 100,
+                      backgroundColor: Colors.grey[300],
+                      valueColor: AlwaysStoppedAnimation<Color>(
+                        isIncome ? Colors.green : Colors.red,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 8),
+              Icon(
+                Icons.arrow_forward_ios,
+                size: 16,
+                color: Colors.grey[400],
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 
@@ -1039,3 +1110,4 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 }
+

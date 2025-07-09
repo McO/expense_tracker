@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../models/category.dart';
+import '../models/transaction_type.dart';
 import '../services/category_service.dart';
 import 'add_edit_category_screen.dart';
 
@@ -235,21 +236,67 @@ class _CategoryManagementScreenState extends State<CategoryManagementScreen> {
               ),
               const SizedBox(height: 4),
             ],
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-              decoration: BoxDecoration(
-                color: color.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: color.withOpacity(0.3)),
-              ),
-              child: Text(
-                category.isDefault ? 'Default' : 'Custom',
-                style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w500,
-                  color: color,
+            Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                  decoration: BoxDecoration(
+                    color: category.type == TransactionType.income 
+                        ? Colors.green.withOpacity(0.1) 
+                        : Colors.red.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: category.type == TransactionType.income 
+                          ? Colors.green.withOpacity(0.3) 
+                          : Colors.red.withOpacity(0.3),
+                    ),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        category.type == TransactionType.income 
+                            ? Icons.trending_up 
+                            : Icons.trending_down,
+                        size: 12,
+                        color: category.type == TransactionType.income 
+                            ? Colors.green 
+                            : Colors.red,
+                      ),
+                      const SizedBox(width: 4),
+                      Text(
+                        category.type == TransactionType.income 
+                            ? 'Income' 
+                            : 'Expense',
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w500,
+                          color: category.type == TransactionType.income 
+                              ? Colors.green 
+                              : Colors.red,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
+                const SizedBox(width: 8),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                  decoration: BoxDecoration(
+                    color: color.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: color.withOpacity(0.3)),
+                  ),
+                  child: Text(
+                    category.isDefault ? 'Default' : 'Custom',
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w500,
+                      color: color,
+                    ),
+                  ),
+                ),
+              ],
             ),
           ],
         ),
