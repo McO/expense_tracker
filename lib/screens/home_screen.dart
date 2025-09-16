@@ -8,6 +8,7 @@ import '../models/category.dart';
 import '../services/expense_service.dart';
 import '../services/settings_service.dart';
 import '../services/theme_service.dart';
+import '../widgets/total_expense_card.dart';
 import 'add_expense_screen.dart';
 import 'expenses_list_screen.dart';
 import 'expense_detail_screen.dart';
@@ -450,165 +451,11 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildTotalExpenseCard() {
-    // Calculate net balance
-    final netBalance = _totalIncome - _totalExpenses;
-    
-    // Determine currency to display
-    Currency displayCurrency = _defaultCurrency; // use user's default currency
-    if (_currencyTotals.isNotEmpty) {
-      // Find the currency with the highest total amount (most used)
-      final sortedCurrencies = _currencyTotals.entries.toList()
-        ..sort((a, b) => b.value.compareTo(a.value));
-      displayCurrency = sortedCurrencies.first.key;
-    }
-    
-    return Card(
-      color: Theme.of(context).colorScheme.primaryContainer,
-      child: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.primary,
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Icon(
-                    Icons.account_balance_wallet,
-                    size: 20,
-                    color: Theme.of(context).colorScheme.onPrimary,
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Text(
-                  'Financial Overview',
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        color: Theme.of(context).colorScheme.onPrimaryContainer,
-                        fontWeight: FontWeight.w600,
-                      ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            
-            // Net Balance
-            Row(
-              children: [
-                Icon(
-                  netBalance >= 0 ? Icons.trending_up : Icons.trending_down,
-                  color: netBalance >= 0 ? Colors.green : Colors.red,
-                  size: 24,
-                ),
-                const SizedBox(width: 8),
-                Text(
-                  'Net Balance: ',
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        color: Theme.of(context).colorScheme.onPrimaryContainer,
-                        fontWeight: FontWeight.w600,
-                      ),
-                ),
-                Text(
-                  '${netBalance >= 0 ? '+' : ''}${displayCurrency.symbol}${netBalance.toStringAsFixed(2)}',
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: netBalance >= 0 ? Colors.green : Colors.red,
-                      ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            
-            // Income and Expenses Row
-            Row(
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Icon(
-                            Icons.trending_up,
-                            color: Colors.green,
-                            size: 16,
-                          ),
-                          const SizedBox(width: 4),
-                          Text(
-                            'Income',
-                            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                  color: Theme.of(context).colorScheme.onPrimaryContainer.withOpacity(0.8),
-                                ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        '+${displayCurrency.symbol}${_totalIncome.toStringAsFixed(2)}',
-                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                              fontWeight: FontWeight.bold,
-                              color: Colors.green,
-                            ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Icon(
-                            Icons.trending_down,
-                            color: Colors.red,
-                            size: 16,
-                          ),
-                          const SizedBox(width: 4),
-                          Text(
-                            'Expenses',
-                            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                  color: Theme.of(context).colorScheme.onPrimaryContainer.withOpacity(0.8),
-                                ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        '-${displayCurrency.symbol}${_totalExpenses.toStringAsFixed(2)}',
-                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                              fontWeight: FontWeight.bold,
-                              color: Colors.red,
-                            ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-            
-            const SizedBox(height: 8),
-            if (_currencyTotals.length > 1)
-              Text(
-                'Combined from ${_currencyTotals.length} currencies',
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: Theme.of(context).colorScheme.onPrimaryContainer.withOpacity(0.7),
-                    ),
-              )
-            else if (_totalIncome > 0)
-              Text(
-                'Savings Rate: ${((_totalIncome - _totalExpenses) / _totalIncome * 100).toStringAsFixed(1)}%',
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: Theme.of(context).colorScheme.onPrimaryContainer.withOpacity(0.7),
-                    ),
-              ),
-          ],
-        ),
-      ),
+    return TotalExpenseCard(
+      totalIncome: _totalIncome,
+      totalExpenses: _totalExpenses,
+      currencyTotals: _currencyTotals,
+      defaultCurrency: _defaultCurrency,
     );
   }
 
@@ -662,10 +509,12 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   double _calculateCategorySlideHeight() {
-    // Base height for header and padding
-    double baseHeight = 60.0; // Header height + padding
+    // Base height for category header
+    double baseHeight = 50.0;  // Reduced from 60.0
+    baseHeight += 16.0;       // Reduced vertical padding (8 top + 8 bottom)
+    baseHeight += 4.0;        // Reduced spacing after header
     
-    // Check all categories to find the maximum needed height
+    // Calculate content height
     double maxContentHeight = 0.0;
     
     for (final category in _categoryTotals.keys) {
@@ -676,14 +525,19 @@ class _HomeScreenState extends State<HomeScreen> {
       
       // Add height for income row if present
       if (incomeAmount > 0) {
-        contentHeight += 40.0; // Height of income row
-        contentHeight += 4.0;  // Spacing
+        contentHeight += 36.0; // Reduced from 40.0
+        contentHeight += 2.0;  // Reduced spacing
       }
       
       // Add height for expense row if present
       if (expenseAmount > 0) {
-        contentHeight += 40.0; // Height of expense row
-        contentHeight += 4.0;  // Spacing
+        contentHeight += 36.0; // Reduced from 40.0
+        contentHeight += 2.0;  // Reduced spacing
+      }
+      
+      // Remove extra spacing after last row
+      if (contentHeight > 0) {
+        contentHeight -= 2.0;
       }
       
       if (contentHeight > maxContentHeight) {
@@ -693,7 +547,7 @@ class _HomeScreenState extends State<HomeScreen> {
     
     // If no income/expense breakdown, use minimal height
     if (maxContentHeight == 0.0) {
-      maxContentHeight = 20.0;
+      maxContentHeight = 16.0; // Reduced from 20.0
     }
     
     return baseHeight + maxContentHeight;
