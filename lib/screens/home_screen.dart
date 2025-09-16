@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
@@ -41,12 +42,45 @@ class _HomeScreenState extends State<HomeScreen> {
   Set<Currency> _availableCurrencies = {};
   Currency? _selectedCurrencyFilter;
   Currency _defaultCurrency = Currency.usd;
+  
+  // Category slideshow state
+  late PageController _categoryPageController;
+  int _currentCategoryPage = 0;
+  Timer? _categoryAutoScrollTimer;
 
   @override
   void initState() {
     super.initState();
+    _categoryPageController = PageController();
     _loadDefaultCurrency();
     _loadData();
+  }
+
+  @override
+  void dispose() {
+    _categoryAutoScrollTimer?.cancel();
+    _categoryPageController.dispose();
+    super.dispose();
+  }
+
+  void _startCategoryAutoScroll() {
+    if (_categoryTotals.length <= 1) return;
+    
+    _categoryAutoScrollTimer?.cancel();
+    _categoryAutoScrollTimer = Timer.periodic(const Duration(seconds: 4), (timer) {
+      if (_categoryPageController.hasClients) {
+        final nextPage = (_currentCategoryPage + 1) % _categoryTotals.length;
+        _categoryPageController.animateToPage(
+          nextPage,
+          duration: const Duration(milliseconds: 500),
+          curve: Curves.easeInOut,
+        );
+      }
+    });
+  }
+
+  void _stopCategoryAutoScroll() {
+    _categoryAutoScrollTimer?.cancel();
   }
   
   Future<void> _loadDefaultCurrency() async {
@@ -122,7 +156,15 @@ class _HomeScreenState extends State<HomeScreen> {
       _categoryIncomeTotal = categoryIncomeTotal;
       _categoryExpenseTotal = categoryExpenseTotal;
       _currencyTotals = currencyTotals;
+      _currentCategoryPage = 0;
     });
+    
+    // Start auto-scroll after a brief delay if there are multiple categories
+    if (categoryTotals.length > 1) {
+      Future.delayed(const Duration(seconds: 2), () {
+        if (mounted) _startCategoryAutoScroll();
+      });
+    }
   }
 
   Color _getCategoryColor(Category category) {
@@ -599,12 +641,73 @@ class _HomeScreenState extends State<HomeScreen> {
     return formattedAmount;
   }
 
+  String _formatCategoryTotal(Category category, double amount) {
+    if (_selectedCurrencyFilter != null) {
+      // When filtered by currency, show the amount in that currency
+      return '${_selectedCurrencyFilter!.symbol}${amount.toStringAsFixed(2)}';
+    } else {
+      // When showing all currencies, check if category has mixed currencies
+      final categoryExpenses = _allExpenses.where((e) => e.category.id == category.id);
+      final categoryCurrencies = categoryExpenses.map((e) => e.currency).toSet();
+      
+      if (categoryCurrencies.length == 1) {
+        // Single currency for this category
+        final currency = categoryCurrencies.first;
+        return '${currency.symbol}${amount.toStringAsFixed(2)}';
+      } else {
+        // Mixed currencies
+        return 'Mixed currencies';
+      }
+    }
+  }
+
+  double _calculateCategorySlideHeight() {
+    // Base height for header and padding
+    double baseHeight = 60.0; // Header height + padding
+    
+    // Check all categories to find the maximum needed height
+    double maxContentHeight = 0.0;
+    
+    for (final category in _categoryTotals.keys) {
+      final incomeAmount = _categoryIncomeTotal[category] ?? 0.0;
+      final expenseAmount = _categoryExpenseTotal[category] ?? 0.0;
+      
+      double contentHeight = 0.0;
+      
+      // Add height for income row if present
+      if (incomeAmount > 0) {
+        contentHeight += 40.0; // Height of income row
+        contentHeight += 4.0;  // Spacing
+      }
+      
+      // Add height for expense row if present
+      if (expenseAmount > 0) {
+        contentHeight += 40.0; // Height of expense row
+        contentHeight += 4.0;  // Spacing
+      }
+      
+      if (contentHeight > maxContentHeight) {
+        maxContentHeight = contentHeight;
+      }
+    }
+    
+    // If no income/expense breakdown, use minimal height
+    if (maxContentHeight == 0.0) {
+      maxContentHeight = 20.0;
+    }
+    
+    return baseHeight + maxContentHeight;
+  }
+
   Widget _buildCategoryBreakdown() {
     if (_categoryTotals.isEmpty) {
       return const SizedBox.shrink();
     }
 
-        return Column(
+    // Get unique categories that have transactions
+    final categoryList = _categoryTotals.keys.toList();
+
+    return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(
@@ -634,153 +737,233 @@ class _HomeScreenState extends State<HomeScreen> {
           ],
         ),
         const SizedBox(height: 16),
-        Card(
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              children: _buildCategoryBreakdownItems(),
+        
+        // PageView for category slides
+        SizedBox(
+          height: _calculateCategorySlideHeight(),
+          child: GestureDetector(
+            onTapDown: (_) => _stopCategoryAutoScroll(),
+            onPanStart: (_) => _stopCategoryAutoScroll(),
+            onTapUp: (_) => Future.delayed(
+              const Duration(seconds: 3),
+              () => _startCategoryAutoScroll(),
+            ),
+            onPanEnd: (_) => Future.delayed(
+              const Duration(seconds: 3),
+              () => _startCategoryAutoScroll(),
+            ),
+            child: PageView.builder(
+              controller: _categoryPageController,
+              onPageChanged: (index) {
+                setState(() {
+                  _currentCategoryPage = index;
+                });
+              },
+              itemCount: categoryList.length,
+              itemBuilder: (context, index) {
+                final category = categoryList[index];
+                return Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 4),
+                  child: _buildCategorySlide(category),
+                );
+              },
             ),
           ),
         ),
+        
+        // Page indicator dots
+        if (categoryList.length > 1)
+          Container(
+            padding: const EdgeInsets.symmetric(vertical: 8),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  '${_currentCategoryPage + 1} of ${categoryList.length}',
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: Colors.grey[600],
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                const SizedBox(width: 16),
+                ...List.generate(categoryList.length, (index) {
+                  return AnimatedContainer(
+                    duration: const Duration(milliseconds: 300),
+                    width: _currentCategoryPage == index ? 12 : 8,
+                    height: _currentCategoryPage == index ? 12 : 8,
+                    margin: const EdgeInsets.symmetric(horizontal: 4),
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: _currentCategoryPage == index
+                          ? Theme.of(context).primaryColor
+                          : Colors.grey[300],
+                    ),
+                  );
+                }),
+              ],
+            ),
+          ),
       ],
     );
   }
 
-  List<Widget> _buildCategoryBreakdownItems() {
-    final List<Widget> items = [];
+  Widget _buildCategorySlide(Category category) {
+    final color = _getCategoryColor(category);
+    final incomeAmount = _categoryIncomeTotal[category] ?? 0.0;
+    final expenseAmount = _categoryExpenseTotal[category] ?? 0.0;
+    final totalAmount = _categoryTotals[category] ?? 0.0;
     
-    // Get all categories that have transactions
-    final allCategories = <Category>{};
-    allCategories.addAll(_categoryIncomeTotal.keys);
-    allCategories.addAll(_categoryExpenseTotal.keys);
-    
-    for (final category in allCategories) {
-      final incomeAmount = _categoryIncomeTotal[category] ?? 0.0;
-      final expenseAmount = _categoryExpenseTotal[category] ?? 0.0;
-      
-      // Add income entry if there's income for this category
-      if (incomeAmount > 0) {
-        items.add(_buildCategoryItem(category, incomeAmount, true));
-      }
-      
-      // Add expense entry if there's expenses for this category
-      if (expenseAmount > 0) {
-        items.add(_buildCategoryItem(category, expenseAmount, false));
-      }
-    }
-    
-    return items;
-  }
-
-  Widget _buildCategoryItem(Category category, double amount, bool isIncome) {
-    final percentage = isIncome 
-        ? (_totalIncome > 0 ? (amount / _totalIncome) * 100 : 0.0)
-        : (_totalExpenses > 0 ? (amount / _totalExpenses) * 100 : 0.0);
-    
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8),
-      child: InkWell(
-        onTap: () async {
-          await Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => ExpensesListScreen(
-                initialCategoryFilter: category,
-              ),
-            ),
-          );
-          _loadData(); // Refresh data when returning
-        },
-        borderRadius: BorderRadius.circular(8),
+    return Card(
+      elevation: 6,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20),
+        side: BorderSide(color: color.withOpacity(0.3), width: 2),
+      ),
+      child: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              color.withOpacity(0.08),
+              color.withOpacity(0.03),
+            ],
+          ),
+          borderRadius: BorderRadius.circular(20),
+        ),
         child: Padding(
-          padding: const EdgeInsets.all(8),
-          child: Row(
+          padding: const EdgeInsets.fromLTRB(12, 12, 12, 8),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
             children: [
-              Container(
-                width: 48,
-                height: 48,
-                decoration: BoxDecoration(
-                  color: _getCategoryColor(category).withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(
-                    color: _getCategoryColor(category).withOpacity(0.3),
-                    width: 1,
+              // Category header
+              Row(
+                children: [
+                  Container(
+                    width: 32,
+                    height: 32,
+                    decoration: BoxDecoration(
+                      color: color.withOpacity(0.15),
+                      shape: BoxShape.circle,
+                      border: Border.all(color: color.withOpacity(0.4), width: 1),
+                    ),
+                    child: Center(
+                      child: Text(
+                        category.icon,
+                        style: const TextStyle(fontSize: 16),
+                      ),
+                    ),
                   ),
-                ),
-                child: Center(
-                  child: Text(
-                    category.icon,
-                    style: const TextStyle(fontSize: 20),
-                  ),
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Row(
-                          children: [
-                            Text(
-                              category.name,
-                              style: Theme.of(context).textTheme.bodyLarge,
+                        Expanded(
+                          child: Text(
+                            category.name,
+                            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                              fontWeight: FontWeight.bold,
+                              color: color,
                             ),
-                            const SizedBox(width: 8),
-                            Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                              decoration: BoxDecoration(
-                                color: isIncome ? Colors.green.withOpacity(0.1) : Colors.red.withOpacity(0.1),
-                                borderRadius: BorderRadius.circular(8),
-                                border: Border.all(
-                                  color: isIncome ? Colors.green.withOpacity(0.3) : Colors.red.withOpacity(0.3),
-                                  width: 1,
-                                ),
-                              ),
-                              child: Text(
-                                isIncome ? 'Income' : 'Expense',
-                                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                  color: isIncome ? Colors.green : Colors.red,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                            ),
-                          ],
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
                         ),
                         Text(
-                          _formatCategoryAmount(category, amount, isIncome),
-                          style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                          _formatCategoryTotal(category, totalAmount),
+                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                            color: color,
                             fontWeight: FontWeight.bold,
-                            color: isIncome ? Colors.green : Colors.red,
                           ),
                         ),
                       ],
                     ),
-                    const SizedBox(height: 4),
-                    LinearProgressIndicator(
-                      value: percentage / 100,
-                      backgroundColor: Colors.grey[300],
-                      valueColor: AlwaysStoppedAnimation<Color>(
-                        isIncome ? Colors.green : Colors.red,
-                      ),
-                    ),
-                  ],
-                ),
+                  ),
+                ],
               ),
-              const SizedBox(width: 8),
-              Icon(
-                Icons.arrow_forward_ios,
-                size: 16,
-                color: Colors.grey[400],
-              ),
+              
+              const SizedBox(height: 8),
+              
+              // Income and Expense breakdown
+              if (incomeAmount > 0 || expenseAmount > 0) ...[
+                if (incomeAmount > 0) ...[
+                  _buildAmountRow(
+                    'Income',
+                    incomeAmount,
+                    category,
+                    true,
+                    _totalIncome > 0 ? (incomeAmount / _totalIncome) * 100 : 0.0,
+                  ),
+                  const SizedBox(height: 4),
+                ],
+                if (expenseAmount > 0) ...[
+                  _buildAmountRow(
+                    'Expenses',
+                    expenseAmount,
+                    category,
+                    false,
+                    _totalExpenses > 0 ? (expenseAmount / _totalExpenses) * 100 : 0.0,
+                  ),
+                  const SizedBox(height: 4),
+                ],
+              ],
             ],
           ),
         ),
       ),
     );
   }
+  
+  Widget _buildAmountRow(String label, double amount, Category category, bool isIncome, double percentage) {
+    return Container(
+      padding: const EdgeInsets.all(8),
+      decoration: BoxDecoration(
+        color: isIncome ? Colors.green.withOpacity(0.05) : Colors.red.withOpacity(0.05),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(
+          color: isIncome ? Colors.green.withOpacity(0.2) : Colors.red.withOpacity(0.2),
+        ),
+      ),
+      child: Row(
+        children: [
+          Icon(
+            isIncome ? Icons.trending_up : Icons.trending_down,
+            color: isIncome ? Colors.green : Colors.red,
+            size: 14,
+          ),
+          const SizedBox(width: 4),
+          Text(
+            label,
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: LinearProgressIndicator(
+              value: percentage / 100,
+              backgroundColor: Colors.grey[300],
+              valueColor: AlwaysStoppedAnimation<Color>(
+                isIncome ? Colors.green : Colors.red,
+              ),
+            ),
+          ),
+          const SizedBox(width: 8),
+          Text(
+            '${percentage.toStringAsFixed(1)}%',
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+              fontWeight: FontWeight.w600,
+              color: isIncome ? Colors.green : Colors.red,
+              fontSize: 11,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+
 
   Widget _buildRecentExpenses() {
     return Column(
