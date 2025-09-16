@@ -1,7 +1,9 @@
 import 'dart:async';
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
+import 'package:path_provider/path_provider.dart';
 import '../models/expense.dart';
 import '../models/currency.dart';
 import '../models/category.dart';
@@ -174,6 +176,109 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<void> _exportToCSV() async {
+    // Show date range picker
+    final DateTimeRange? dateRange = await showDateRangePicker(
+      context: context,
+      firstDate: DateTime(2020),
+      lastDate: DateTime.now(),
+      initialDateRange: DateTimeRange(
+        start: DateTime.now().subtract(const Duration(days: 30)),
+        end: DateTime.now(),
+      ),
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            dialogBackgroundColor: Theme.of(context).scaffoldBackgroundColor,
+          ),
+          child: child!,
+        );
+      },
+    );
+
+    if (!mounted) return;
+
+    if (dateRange == null) {
+      // User cancelled the picker
+      return;
+    }
+
+    // Show storage location picker
+    final String? storageLocation = await showDialog<String>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Choose Storage Location'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ListTile(
+                leading: const Icon(Icons.download),
+                title: const Text('Downloads'),
+                subtitle: const Text('Save in Downloads folder'),
+                onTap: () async {
+                  final downloadsDir = Directory('/storage/emulated/0/Download');
+                  final altDownloadsDir = Directory('/storage/emulated/0/Downloads');
+                  
+                  if (await downloadsDir.exists()) {
+                    Navigator.pop(context, downloadsDir.path);
+                  } else if (await altDownloadsDir.exists()) {
+                    Navigator.pop(context, altDownloadsDir.path);
+                  } else {
+                    // Show error dialog
+                    if (!mounted) return;
+                    await showDialog(
+                      context: context,
+                      builder: (context) => AlertDialog(
+                        title: const Text('Downloads Not Available'),
+                        content: const Text('Could not access Downloads folder. Please choose another location.'),
+                        actions: [
+                          TextButton(
+                            onPressed: () => Navigator.pop(context),
+                            child: const Text('OK'),
+                          ),
+                        ],
+                      ),
+                    );
+                  }
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.folder_special),
+                title: const Text('External Storage'),
+                subtitle: const Text('Save in app\'s external storage'),
+                onTap: () async {
+                  final dir = await getExternalStorageDirectory();
+                  Navigator.pop(context, dir?.path);
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.folder),
+                title: const Text('App Storage'),
+                subtitle: const Text('Save in app\'s private storage'),
+                onTap: () async {
+                  final dir = await getApplicationDocumentsDirectory();
+                  Navigator.pop(context, dir.path);
+                },
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Cancel'),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (!mounted) return;
+
+    if (storageLocation == null) {
+      // User cancelled storage selection
+      return;
+    }
+
     try {
       // Show loading indicator
       showDialog(
@@ -192,7 +297,10 @@ class _HomeScreenState extends State<HomeScreen> {
         },
       );
 
-      final filePath = await _expenseService.exportToCSV();
+      final filePath = await _expenseService.exportToCSV(
+        startDate: dateRange.start,
+        endDate: dateRange.end,
+      );
 
       // Hide loading indicator
       Navigator.of(context).pop();

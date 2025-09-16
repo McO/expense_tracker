@@ -76,12 +76,29 @@ class ExpenseService {
     }).toList();
   }
 
-  Future<String?> exportToCSV() async {
+  Future<String?> exportToCSV({DateTime? startDate, DateTime? endDate}) async {
     try {
-      final expenses = await getExpenses();
+      List<Expense> expenses = await getExpenses();
       
       if (expenses.isEmpty) {
         return null;
+      }
+
+      // Filter expenses by date range if provided
+      if (startDate != null || endDate != null) {
+        expenses = expenses.where((expense) {
+          if (startDate != null && expense.date.isBefore(startDate)) {
+            return false;
+          }
+          if (endDate != null && expense.date.isAfter(endDate.add(const Duration(days: 1)))) {
+            return false;
+          }
+          return true;
+        }).toList();
+
+        if (expenses.isEmpty) {
+          return null;
+        }
       }
 
       // Request permission for external storage
@@ -115,19 +132,19 @@ class ExpenseService {
         csvContent.writeln('$date,$title,$category,$amount,$currency,$description');
       }
 
-      // Get the downloads directory
+      // Get directory based on storage type
       Directory? directory;
-      try {
-        directory = Directory('/storage/emulated/0/Download');
-        if (!await directory.exists()) {
-          directory = await getExternalStorageDirectory();
-        }
-      } catch (e) {
-        directory = await getApplicationDocumentsDirectory();
-      }
-
-      if (directory == null) {
+      String? directoryPath = await getExportDirectory();
+      
+      if (directoryPath == null) {
         return null;
+      }
+      
+      directory = Directory(directoryPath);
+      
+      // Create directory if it doesn't exist
+      if (!await directory.exists()) {
+        await directory.create(recursive: true);
       }
 
       // Create file with timestamp
@@ -151,5 +168,29 @@ class ExpenseService {
     return field;
   }
 
+  Future<String?> getExportDirectory() async {
+    try {
+      // Try to get Downloads directory first
+      final downloadsDir = Directory('/storage/emulated/0/Download');
+      final altDownloadsDir = Directory('/storage/emulated/0/Downloads');
+      
+      if (await downloadsDir.exists()) {
+        return downloadsDir.path;
+      } else if (await altDownloadsDir.exists()) {
+        return altDownloadsDir.path;
+      }
 
+      // Try to get external storage directory
+      final externalDir = await getExternalStorageDirectory();
+      if (externalDir != null) {
+        return externalDir.path;
+      }
+
+      // Fall back to app documents directory
+      final docsDir = await getApplicationDocumentsDirectory();
+      return docsDir.path;
+    } catch (e) {
+      return null;
+    }
+  }
 }
