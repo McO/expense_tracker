@@ -36,7 +36,7 @@ class TotalExpenseCard extends StatelessWidget {
           color: netBalance >= 0 ? Colors.blue.shade50 : Colors.orange.shade50,
           elevation: 2,
           child: Padding(
-            padding: const EdgeInsets.all(20),
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
             child: Column(
               children: [
                 Row(
@@ -97,7 +97,7 @@ class TotalExpenseCard extends StatelessWidget {
                 color: Colors.green.shade50,
                 elevation: 2,
                 child: Padding(
-                  padding: const EdgeInsets.all(16),
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -138,7 +138,7 @@ class TotalExpenseCard extends StatelessWidget {
                 color: Colors.red.shade50,
                 elevation: 2,
                 child: Padding(
-                  padding: const EdgeInsets.all(16),
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
