@@ -55,7 +55,6 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
-    _loadDefaultCurrency();
     _loadAccounts();
     _loadData();
   }
@@ -72,21 +71,8 @@ class _HomeScreenState extends State<HomeScreen> {
       // Handle error
     }
   }
-  
-  Future<void> _loadDefaultCurrency() async {
-    try {
-      final currency = await _settingsService.getDefaultCurrency();
-      setState(() {
-        _defaultCurrency = currency;
-      });
-    } catch (e) {
-      // Keep the fallback USD if there's an error
-    }
-  }
 
   Future<void> _loadData() async {
-    // Refresh default currency in case it was changed in settings
-    await _loadDefaultCurrency();
     
     final expenses = await _expenseService.getExpenses();
 
