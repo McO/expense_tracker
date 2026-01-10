@@ -41,6 +41,7 @@ class _HomeScreenState extends State<HomeScreen> {
   final AccountService _accountService = AccountService();
   List<Expense> _recentExpenses = [];
   List<Expense> _allExpenses = [];
+  List<Expense> _filteredExpenses = [];
   double _totalIncome = 0.0;
   double _totalExpenses = 0.0;
   Map<Category, double> _categoryTotals = {};
@@ -128,6 +129,7 @@ class _HomeScreenState extends State<HomeScreen> {
     }
 
     setState(() {
+      _filteredExpenses = filteredExpenses;
       _recentExpenses = filteredExpenses.take(5).toList();
       _totalIncome = totalIncome;
       _totalExpenses = totalExpenses;
@@ -584,7 +586,7 @@ class _HomeScreenState extends State<HomeScreen> {
       categoryExpenseTotal: _categoryExpenseTotal,
       totalIncome: _totalIncome,
       totalExpenses: _totalExpenses,
-      allExpenses: _allExpenses,
+      allExpenses: _filteredExpenses,
     );
   }
 
