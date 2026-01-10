@@ -3,10 +3,12 @@ import 'package:intl/intl.dart';
 import '../models/expense.dart';
 import '../models/currency.dart';
 import '../models/category.dart';
+import '../models/account.dart';
 import '../models/transaction_type.dart';
 import '../services/expense_service.dart';
 import '../services/category_service.dart';
 import '../services/currency_service.dart';
+import '../services/account_service.dart';
 
 class EditExpenseScreen extends StatefulWidget {
   final Expense expense;
@@ -25,11 +27,13 @@ class _EditExpenseScreenState extends State<EditExpenseScreen> {
   final ExpenseService _expenseService = ExpenseService();
   final CategoryService _categoryService = CategoryService();
   final CurrencyService _currencyService = CurrencyService();
+  final AccountService _accountService = AccountService();
 
   Category? _selectedCategory;
   List<Category> _categories = [];
   List<Currency> _availableCurrencies = [];
   Currency _selectedCurrency = Currency.usd;
+  Account? _selectedAccount;
   DateTime _selectedDate = DateTime.now();
   TimeOfDay _selectedTime = TimeOfDay.now();
   TransactionType _selectedType = TransactionType.expense;
@@ -40,7 +44,7 @@ class _EditExpenseScreenState extends State<EditExpenseScreen> {
     super.initState();
     _initializeFields();
     _loadCategories();
-    _loadAvailableCurrencies();
+    _loadAccount();
   }
 
   @override
@@ -81,17 +85,15 @@ class _EditExpenseScreenState extends State<EditExpenseScreen> {
     }
   }
 
-  Future<void> _loadAvailableCurrencies() async {
+  Future<void> _loadAccount() async {
     try {
-      final currencies = await _currencyService.getAllAvailableCurrencies();
+      // Load the account for the expense
+      final account = await _accountService.getAccountById(widget.expense.accountId);
       setState(() {
-        _availableCurrencies = currencies;
+        _selectedAccount = account;
       });
     } catch (e) {
-      // Use predefined currencies if there's an error
-      setState(() {
-        _availableCurrencies = Currency.predefinedValues;
-      });
+      // Handle error
     }
   }
 
@@ -458,47 +460,15 @@ class _EditExpenseScreenState extends State<EditExpenseScreen> {
                               decoration: BoxDecoration(
                                 border: Border.all(color: Colors.grey),
                                 borderRadius: BorderRadius.circular(4),
+                                color: Colors.grey[100],
                               ),
-                              child: DropdownButtonHideUnderline(
-                                child: DropdownButton<Currency>(
-                                  value: _selectedCurrency,
-                                  isExpanded: true,
-                                  onChanged: (Currency? newValue) {
-                                    if (newValue != null) {
-                                      setState(() {
-                                        _selectedCurrency = newValue;
-                                      });
-                                    }
-                                  },
-                                  items: _availableCurrencies.map<DropdownMenuItem<Currency>>((Currency currency) {
-                                    return DropdownMenuItem<Currency>(
-                                      value: currency,
-                                      child: Row(
-                                        children: [
-                                          Text(
-                                            currency.symbol,
-                                            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                              fontWeight: FontWeight.bold,
-                                            ),
-                                          ),
-                                          const SizedBox(width: 8),
-                                          Expanded(
-                                            child: Text(
-                                              currency.code,
-                                              style: Theme.of(context).textTheme.bodySmall,
-                                              overflow: TextOverflow.ellipsis,
-                                            ),
-                                          ),
-                                          if (currency.isCustom)
-                                            Icon(
-                                              Icons.star,
-                                              size: 12,
-                                              color: Colors.amber,
-                                            ),
-                                        ],
-                                      ),
-                                    );
-                                  }).toList(),
+                              child: Center(
+                                child: Text(
+                                  _selectedCurrency.symbol,
+                                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.grey[600],
+                                  ),
                                 ),
                               ),
                             ),

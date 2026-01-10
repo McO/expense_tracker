@@ -3,11 +3,13 @@ import 'package:intl/intl.dart';
 import '../models/expense.dart';
 import '../models/currency.dart';
 import '../models/category.dart';
+import '../models/account.dart';
 import '../models/transaction_type.dart';
 import '../services/expense_service.dart';
 import '../services/settings_service.dart';
 import '../services/category_service.dart';
 import '../services/currency_service.dart';
+import '../services/account_service.dart';
 
 class AddExpenseScreen extends StatefulWidget {
   const AddExpenseScreen({super.key});
@@ -25,11 +27,13 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
   final SettingsService _settingsService = SettingsService();
   final CategoryService _categoryService = CategoryService();
   final CurrencyService _currencyService = CurrencyService();
+  final AccountService _accountService = AccountService();
 
   Category? _selectedCategory;
   List<Category> _categories = [];
   List<Currency> _availableCurrencies = [];
   Currency _selectedCurrency = Currency.usd;
+  Account? _selectedAccount;
   DateTime _selectedDate = DateTime.now();
   TimeOfDay _selectedTime = TimeOfDay.now();
   TransactionType _selectedType = TransactionType.expense;
@@ -38,9 +42,8 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
   @override
   void initState() {
     super.initState();
-    _loadDefaultCurrency();
+    _loadSelectedAccount();
     _loadCategories();
-    _loadAvailableCurrencies();
   }
 
   @override
@@ -51,28 +54,16 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
     super.dispose();
   }
 
-  Future<void> _loadDefaultCurrency() async {
+  Future<void> _loadSelectedAccount() async {
     try {
-      final currency = await _settingsService.getDefaultCurrency();
+      final account = await _accountService.getSelectedAccount();
       setState(() {
-        _selectedCurrency = currency;
+        _selectedAccount = account;
+        // Set currency from account
+        _selectedCurrency = account?.currency ?? Currency.usd;
       });
     } catch (e) {
       // Use default USD if there's an error
-    }
-  }
-
-  Future<void> _loadAvailableCurrencies() async {
-    try {
-      final currencies = await _currencyService.getAllAvailableCurrencies();
-      setState(() {
-        _availableCurrencies = currencies;
-      });
-    } catch (e) {
-      // Use predefined currencies if there's an error
-      setState(() {
-        _availableCurrencies = Currency.predefinedValues;
-      });
     }
   }
 
@@ -171,6 +162,17 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
     });
 
     try {
+      if (_selectedAccount == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('No account selected'),
+            backgroundColor: Colors.red,
+          ),
+        );
+        setState(() => _isLoading = false);
+        return;
+      }
+
       final expense = Expense(
         id: DateTime.now().millisecondsSinceEpoch.toString(),
         title: _titleController.text.trim(),
@@ -180,6 +182,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
         date: _combinedDateTime,
         description: _descriptionController.text.trim(),
         type: _selectedType,
+        accountId: _selectedAccount!.id,
       );
 
       await _expenseService.saveExpense(expense);
@@ -429,47 +432,15 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                               decoration: BoxDecoration(
                                 border: Border.all(color: Colors.grey),
                                 borderRadius: BorderRadius.circular(4),
+                                color: Colors.grey[100],
                               ),
-                              child: DropdownButtonHideUnderline(
-                                child: DropdownButton<Currency>(
-                                  value: _selectedCurrency,
-                                  isExpanded: true,
-                                  onChanged: (Currency? newValue) {
-                                    if (newValue != null) {
-                                      setState(() {
-                                        _selectedCurrency = newValue;
-                                      });
-                                    }
-                                  },
-                                  items: _availableCurrencies.map<DropdownMenuItem<Currency>>((Currency currency) {
-                                    return DropdownMenuItem<Currency>(
-                                      value: currency,
-                                      child: Row(
-                                        children: [
-                                          Text(
-                                            currency.symbol,
-                                            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                              fontWeight: FontWeight.bold,
-                                            ),
-                                          ),
-                                          const SizedBox(width: 8),
-                                          Expanded(
-                                            child: Text(
-                                              currency.code,
-                                              style: Theme.of(context).textTheme.bodySmall,
-                                              overflow: TextOverflow.ellipsis,
-                                            ),
-                                          ),
-                                          if (currency.isCustom)
-                                            Icon(
-                                              Icons.star,
-                                              size: 12,
-                                              color: Colors.amber,
-                                            ),
-                                        ],
-                                      ),
-                                    );
-                                  }).toList(),
+                              child: Center(
+                                child: Text(
+                                  _selectedCurrency.symbol,
+                                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.grey[600],
+                                  ),
                                 ),
                               ),
                             ),

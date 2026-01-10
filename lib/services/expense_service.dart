@@ -9,19 +9,25 @@ import '../models/category.dart';
 import '../models/currency.dart';
 import 'category_service.dart';
 import 'currency_service.dart';
+import 'account_service.dart';
 
 class ExpenseService {
   static const String _expensesKey = 'expenses';
   final CategoryService _categoryService = CategoryService();
   final CurrencyService _currencyService = CurrencyService();
+  final AccountService _accountService = AccountService();
 
   Future<List<Expense>> getExpenses() async {
     final prefs = await SharedPreferences.getInstance();
     final expensesJson = prefs.getStringList(_expensesKey) ?? [];
     final categories = await _categoryService.getCategories();
     final customCurrencies = await _currencyService.getCustomCurrencies();
+    
+    // Get default account for backward compatibility
+    final defaultAccount = await _accountService.getSelectedAccount();
+    final defaultAccountId = defaultAccount?.id;
 
-    final expenses = expensesJson.map((json) => Expense.fromJson(jsonDecode(json), categories, customCurrencies: customCurrencies)).toList();
+    final expenses = expensesJson.map((json) => Expense.fromJson(jsonDecode(json), categories, customCurrencies: customCurrencies, defaultAccountId: defaultAccountId)).toList();
     
     // Sort expenses by newest date and time first
     expenses.sort((a, b) => b.date.compareTo(a.date));
@@ -80,12 +86,34 @@ class ExpenseService {
     }).toList();
   }
 
-  Future<String?> exportToCSV({DateTime? startDate, DateTime? endDate}) async {
+  Future<List<Expense>> getExpensesForAccount(String accountId) async {
+    final expenses = await getExpenses();
+    return expenses.where((expense) => expense.accountId == accountId).toList();
+  }
+
+  Future<List<Expense>> getExpensesForAccountOrAll(String? accountId) async {
+    final expenses = await getExpenses();
+    if (accountId == null) {
+      return expenses;
+    }
+    return expenses.where((expense) => expense.accountId == accountId).toList();
+  }
+
+  Future<String?> exportToCSV({DateTime? startDate, DateTime? endDate, String? accountId, String? storagePath}) async {
     try {
       List<Expense> expenses = await getExpenses();
       
       if (expenses.isEmpty) {
         return null;
+      }
+
+      // Filter expenses by account if provided
+      if (accountId != null) {
+        expenses = expenses.where((expense) => expense.accountId == accountId).toList();
+        
+        if (expenses.isEmpty) {
+          return null;
+        }
       }
 
       // Filter expenses by date range if provided
@@ -138,7 +166,7 @@ class ExpenseService {
 
       // Get directory based on storage type
       Directory? directory;
-      String? directoryPath = await getExportDirectory();
+      String? directoryPath = storagePath ?? await getExportDirectory();
 
       if (directoryPath == null) {
         return null;

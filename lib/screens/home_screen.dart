@@ -7,13 +7,14 @@ import 'package:path_provider/path_provider.dart';
 import '../models/expense.dart';
 import '../models/currency.dart';
 import '../models/category.dart';
+import '../models/account.dart';
 import '../services/expense_service.dart';
 import '../services/settings_service.dart';
 import '../services/theme_service.dart';
+import '../services/account_service.dart';
 import '../widgets/total_expense_card.dart';
 import '../widgets/category_breakdown.dart';
 import '../widgets/recent_expenses.dart';
-import '../widgets/currency_filter.dart';
 import 'add_expense_screen.dart';
 import 'expenses_list_screen.dart';
 import 'expense_detail_screen.dart';
@@ -37,6 +38,7 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   final ExpenseService _expenseService = ExpenseService();
   final SettingsService _settingsService = SettingsService();
+  final AccountService _accountService = AccountService();
   List<Expense> _recentExpenses = [];
   List<Expense> _allExpenses = [];
   double _totalIncome = 0.0;
@@ -45,15 +47,29 @@ class _HomeScreenState extends State<HomeScreen> {
   Map<Category, double> _categoryIncomeTotal = {};
   Map<Category, double> _categoryExpenseTotal = {};
   Map<Currency, double> _currencyTotals = {};
-  Set<Currency> _availableCurrencies = {};
-  Currency? _selectedCurrencyFilter;
   Currency _defaultCurrency = Currency.usd;
+  Account? _selectedAccount;
+  List<Account> _accounts = [];
 
   @override
   void initState() {
     super.initState();
     _loadDefaultCurrency();
+    _loadAccounts();
     _loadData();
+  }
+
+  Future<void> _loadAccounts() async {
+    try {
+      final accounts = await _accountService.getAccounts();
+      final selectedAccount = await _accountService.getSelectedAccount();
+      setState(() {
+        _accounts = accounts;
+        _selectedAccount = selectedAccount;
+      });
+    } catch (e) {
+      // Handle error
+    }
   }
   
   Future<void> _loadDefaultCurrency() async {
@@ -73,29 +89,19 @@ class _HomeScreenState extends State<HomeScreen> {
     
     final expenses = await _expenseService.getExpenses();
 
-    // Get available currencies
-    final Set<Currency> availableCurrencies = {};
-    for (final expense in expenses) {
-      availableCurrencies.add(expense.currency);
-    }
-
     setState(() {
       _allExpenses = expenses;
-      _availableCurrencies = availableCurrencies;
     });
 
     _applyFilter();
   }
 
   void _applyFilter() {
-    List<Expense> filteredExpenses;
+    List<Expense> filteredExpenses = _allExpenses;
 
-    if (_selectedCurrencyFilter == null) {
-      // Show all expenses
-      filteredExpenses = _allExpenses;
-    } else {
-      // Filter by selected currency
-      filteredExpenses = _allExpenses.where((expense) => expense.currency == _selectedCurrencyFilter).toList();
+    // Filter by selected account
+    if (_selectedAccount != null) {
+      filteredExpenses = filteredExpenses.where((expense) => expense.accountId == _selectedAccount!.id).toList();
     }
 
     // Ensure expenses are sorted by newest date and time first (in case filtering changed the order)
@@ -176,6 +182,49 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<void> _exportToCSV() async {
+    // Show account selection dialog
+    final Account? selectedAccount = await showDialog<Account>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Select Account'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: _accounts.map((account) {
+              return ListTile(
+                leading: CircleAvatar(
+                  backgroundColor: Color(int.parse(account.color, radix: 16)),
+                  child: Text(
+                    account.icon,
+                    style: const TextStyle(fontSize: 20),
+                  ),
+                ),
+                title: Text(
+                  account.name,
+                  style: const TextStyle(fontWeight: FontWeight.bold),
+                ),
+                subtitle: Text('${account.currency.displayName} (${account.currency.symbol})'),
+                onTap: () => Navigator.pop(context, account),
+              );
+            }).toList(),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Cancel'),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (!mounted) return;
+
+    if (selectedAccount == null) {
+      // User cancelled account selection
+      return;
+    }
+
     // Show date range picker
     final DateTimeRange? dateRange = await showDateRangePicker(
       context: context,
@@ -300,6 +349,8 @@ class _HomeScreenState extends State<HomeScreen> {
       final filePath = await _expenseService.exportToCSV(
         startDate: dateRange.start,
         endDate: dateRange.end,
+        accountId: selectedAccount.id,
+        storagePath: storageLocation,
       );
 
       // Hide loading indicator
@@ -372,18 +423,82 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
-  Widget _buildCurrencyFilter() {
-    return CurrencyFilter(
-      availableCurrencies: _availableCurrencies,
-      selectedCurrency: _selectedCurrencyFilter,
-      onCurrencyChanged: (Currency? newValue) {
+  Widget _buildAccountSelector() {
+    if (_accounts.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.secondaryContainer,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Row(
+        children: [
+          Icon(
+            Icons.account_balance_wallet,
+            size: 20,
+            color: Theme.of(context).colorScheme.onSecondaryContainer,
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: DropdownButtonHideUnderline(
+              child: DropdownButton<Account>(
+                value: _selectedAccount,
+                isExpanded: true,
+                icon: Icon(
+                  Icons.arrow_drop_down,
+                  color: Theme.of(context).colorScheme.onSecondaryContainer,
+                ),
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: Theme.of(context).colorScheme.onSecondaryContainer,
+                    ),
+                onChanged: (Account? newValue) async {
                 setState(() {
-                  _selectedCurrencyFilter = newValue;
+                    _selectedAccount = newValue;
                 });
+                  if (newValue != null) {
+                    await _accountService.setSelectedAccount(newValue.id);
+                  }
                 _applyFilter();
               },
+                items: _accounts.map<DropdownMenuItem<Account>>((Account account) {
+                  return DropdownMenuItem<Account>(
+                    value: account,
+                    child: Row(
+                      children: [
+                        Text(
+                          account.icon,
+                          style: const TextStyle(fontSize: 18),
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                  child: Text(
+                            account.name,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          account.currency.code,
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                color: Colors.grey[600],
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                }).toList(),
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -444,7 +559,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                 ),
                 children: [
-                  _buildCurrencyFilter(),
+                  _buildAccountSelector(),
                   const SizedBox(height: 16),
                   _buildTotalExpenseCard(),
                   const SizedBox(height: 24),
@@ -482,7 +597,6 @@ class _HomeScreenState extends State<HomeScreen> {
       totalIncome: _totalIncome,
       totalExpenses: _totalExpenses,
       allExpenses: _allExpenses,
-      selectedCurrencyFilter: _selectedCurrencyFilter,
     );
   }
 

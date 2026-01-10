@@ -11,7 +11,6 @@ class CategoryBreakdown extends StatefulWidget {
   final double totalIncome;
   final double totalExpenses;
   final List<Expense> allExpenses;
-  final Currency? selectedCurrencyFilter;
 
   const CategoryBreakdown({
     super.key,
@@ -21,7 +20,6 @@ class CategoryBreakdown extends StatefulWidget {
     required this.totalIncome,
     required this.totalExpenses,
     required this.allExpenses,
-    required this.selectedCurrencyFilter,
   });
 
   @override
@@ -78,18 +76,17 @@ class _CategoryBreakdownState extends State<CategoryBreakdown> {
   String _formatCategoryAmount(Category category, double amount, bool isIncome) {
     String formattedAmount;
     
-    if (widget.selectedCurrencyFilter != null) {
-      formattedAmount = '${widget.selectedCurrencyFilter!.symbol}${amount.toStringAsFixed(2)}';
+    final categoryExpenses = widget.allExpenses.where((e) => e.category.id == category.id);
+    final categoryCurrencies = categoryExpenses.map((e) => e.currency).toSet();
+    
+    if (categoryCurrencies.length == 1) {
+      final currency = categoryCurrencies.first;
+      formattedAmount = '${currency.symbol}${amount.toStringAsFixed(2)}';
+    } else if (categoryCurrencies.isEmpty) {
+      // No expenses in this category, use a default
+      formattedAmount = '\$${amount.toStringAsFixed(2)}';
     } else {
-      final categoryExpenses = widget.allExpenses.where((e) => e.category.id == category.id);
-      final categoryCurrencies = categoryExpenses.map((e) => e.currency).toSet();
-      
-      if (categoryCurrencies.length == 1) {
-        final currency = categoryCurrencies.first;
-        formattedAmount = '${currency.symbol}${amount.toStringAsFixed(2)}';
-      } else {
-        formattedAmount = 'Mixed currencies';
-      }
+      formattedAmount = 'Mixed currencies';
     }
     
     if (formattedAmount != 'Mixed currencies') {
@@ -100,18 +97,14 @@ class _CategoryBreakdownState extends State<CategoryBreakdown> {
   }
 
   String _formatCategoryTotal(Category category, double amount) {
-    if (widget.selectedCurrencyFilter != null) {
-      return '${widget.selectedCurrencyFilter!.symbol}${amount.toStringAsFixed(2)}';
+    final categoryExpenses = widget.allExpenses.where((e) => e.category.id == category.id);
+    final categoryCurrencies = categoryExpenses.map((e) => e.currency).toSet();
+    
+    if (categoryCurrencies.length == 1) {
+      final currency = categoryCurrencies.first;
+      return '${currency.symbol}${amount.toStringAsFixed(2)}';
     } else {
-      final categoryExpenses = widget.allExpenses.where((e) => e.category.id == category.id);
-      final categoryCurrencies = categoryExpenses.map((e) => e.currency).toSet();
-      
-      if (categoryCurrencies.length == 1) {
-        final currency = categoryCurrencies.first;
-        return '${currency.symbol}${amount.toStringAsFixed(2)}';
-      } else {
-        return 'Mixed currencies';
-      }
+      return 'Mixed currencies';
     }
   }
 
@@ -328,21 +321,6 @@ class _CategoryBreakdownState extends State<CategoryBreakdown> {
                     fontWeight: FontWeight.bold,
                   ),
             ),
-            if (widget.selectedCurrencyFilter != null)
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.primaryContainer,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Text(
-                  widget.selectedCurrencyFilter!.code,
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: Theme.of(context).colorScheme.onPrimaryContainer,
-                      ),
-                ),
-              ),
           ],
         ),
         const SizedBox(height: 16),

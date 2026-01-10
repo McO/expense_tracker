@@ -3,6 +3,7 @@ import '../models/currency.dart';
 import '../services/settings_service.dart';
 import '../services/theme_service.dart';
 import '../services/currency_service.dart';
+import 'account_management_screen.dart';
 
 class SettingsScreen extends StatefulWidget {
   final Function(AppThemeMode)? onThemeModeChanged;
@@ -266,159 +267,29 @@ class _SettingsScreenState extends State<SettingsScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  // Account Management Section
                   Card(
-                    child: Padding(
-                      padding: const EdgeInsets.all(16),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              Icon(
-                                Icons.attach_money,
-                                color: Theme.of(context).colorScheme.primary,
-                              ),
-                              const SizedBox(width: 12),
-                              Text(
-                                'Default Currency',
-                                style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 8),
-                          Text(
-                            'This currency will be used for new expenses',
-                            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                  color: Colors.grey[600],
-                                ),
-                          ),
-                          const SizedBox(height: 16),
-                          Container(
-                            width: double.infinity,
-                            padding: const EdgeInsets.symmetric(horizontal: 12),
-                            decoration: BoxDecoration(
-                              border: Border.all(color: Colors.grey),
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: DropdownButtonHideUnderline(
-                              child: DropdownButton<Currency>(
-                                value: _selectedCurrency,
-                                isExpanded: true,
-                                onChanged: (Currency? newValue) {
-                                  if (newValue != null) {
-                                    _updateCurrency(newValue);
-                                  }
-                                },
-                                items: Currency.predefinedValues.map<DropdownMenuItem<Currency>>((Currency currency) {
-                                  return DropdownMenuItem<Currency>(
-                                    value: currency,
-                                    child: Row(
-                                      children: [
-                                        Text(
-                                          currency.symbol,
-                                          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                                fontWeight: FontWeight.bold,
-                                              ),
-                                        ),
-                                        const SizedBox(width: 12),
-                                        Expanded(child: Text(currency.displayName)),
-                                      ],
-                                    ),
-                                  );
-                                }).toList(),
-                              ),
-                            ),
-                          ),
-                        ],
+                    child: ListTile(
+                      leading: Icon(
+                        Icons.account_balance_wallet,
+                        color: Theme.of(context).colorScheme.primary,
                       ),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  Card(
-                    child: Padding(
-                      padding: const EdgeInsets.all(16),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              Icon(
-                                _getThemeIcon(),
-                                color: Theme.of(context).colorScheme.primary,
-                              ),
-                              const SizedBox(width: 12),
-                              Text(
-                                'Appearance',
-                                style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 8),
-                          Text(
-                            'Choose your preferred theme',
-                            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                  color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
-                                ),
-                          ),
-                          const SizedBox(height: 16),
-                          _buildThemeOption(
-                            AppThemeMode.light,
-                            'Light',
-                            'Use light theme',
-                            Icons.light_mode,
-                          ),
-                          const SizedBox(height: 8),
-                          _buildThemeOption(
-                            AppThemeMode.dark,
-                            'Dark',
-                            'Use dark theme',
-                            Icons.dark_mode,
-                          ),
-                          const SizedBox(height: 8),
-                          _buildThemeOption(
-                            AppThemeMode.system,
-                            'System',
-                            'Follow device settings',
-                            Icons.settings_system_daydream,
-                          ),
-                        ],
+                      title: const Text(
+                        'Account Management',
+                        style: TextStyle(fontWeight: FontWeight.bold),
                       ),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  Card(
-                    child: Padding(
-                      padding: const EdgeInsets.all(16),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              Icon(
-                                Icons.info_outline,
-                                color: Theme.of(context).colorScheme.primary,
-                              ),
-                              const SizedBox(width: 12),
-                              Text(
-                                'Currency Information',
-                                style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                              ),
-                            ],
+                      subtitle: const Text('Manage your accounts and currencies'),
+                      trailing: const Icon(Icons.chevron_right),
+                      onTap: () async {
+                        await Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const AccountManagementScreen(),
                           ),
-                          const SizedBox(height: 16),
-                          _buildInfoRow('Selected Currency', _selectedCurrency.name),
-                          const Divider(),
-                          _buildInfoRow('Currency Code', _selectedCurrency.code),
-                          const Divider(),
-                          _buildInfoRow('Symbol', _selectedCurrency.symbol),
-                        ],
-                      ),
+                        );
+                        // Reload settings after returning from account management
+                        _loadSettings();
+                      },
                     ),
                   ),
                   const SizedBox(height: 16),
@@ -524,35 +395,55 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       ),
                     ),
                   ),
-                  const SizedBox(height: 24),
+                  const SizedBox(height: 16),
                   Card(
-                    color: Theme.of(context).colorScheme.surfaceVariant,
                     child: Padding(
                       padding: const EdgeInsets.all(16),
-                      child: Row(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Icon(
-                            Icons.lightbulb_outline,
-                            color: Theme.of(context).colorScheme.primary,
+                          Row(
+                            children: [
+                              Icon(
+                                _getThemeIcon(),
+                                color: Theme.of(context).colorScheme.primary,
+                              ),
+                              const SizedBox(width: 12),
+                              Text(
+                                'Appearance',
+                                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                              ),
+                            ],
                           ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  'Tip',
-                                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                                        fontWeight: FontWeight.bold,
-                                      ),
+                          const SizedBox(height: 8),
+                          Text(
+                            'Choose your preferred theme',
+                            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                  color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
                                 ),
-                                const SizedBox(height: 4),
-                                Text(
-                                  'You can change the currency for individual expenses when adding or editing them.',
-                                  style: Theme.of(context).textTheme.bodySmall,
-                                ),
-                              ],
-                            ),
+                          ),
+                          const SizedBox(height: 16),
+                          _buildThemeOption(
+                            AppThemeMode.light,
+                            'Light',
+                            'Use light theme',
+                            Icons.light_mode,
+                          ),
+                          const SizedBox(height: 8),
+                          _buildThemeOption(
+                            AppThemeMode.dark,
+                            'Dark',
+                            'Use dark theme',
+                            Icons.dark_mode,
+                          ),
+                          const SizedBox(height: 8),
+                          _buildThemeOption(
+                            AppThemeMode.system,
+                            'System',
+                            'Follow device settings',
+                            Icons.settings_system_daydream,
                           ),
                         ],
                       ),

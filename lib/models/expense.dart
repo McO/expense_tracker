@@ -1,6 +1,7 @@
 import 'currency.dart';
 import 'category.dart';
 import 'transaction_type.dart';
+import 'account.dart';
 
 class Expense {
   final String id;
@@ -11,6 +12,7 @@ class Expense {
   final DateTime date;
   final String description;
   final TransactionType type;
+  final String accountId;
 
   Expense({
     required this.id,
@@ -21,6 +23,7 @@ class Expense {
     required this.date,
     this.description = '',
     this.type = TransactionType.expense, // Default to expense for backward compatibility
+    required this.accountId,
   });
 
   // Helper getters
@@ -46,10 +49,11 @@ class Expense {
       'date': date.toIso8601String(),
       'description': description,
       'type': type.code,
+      'accountId': accountId,
     };
   }
 
-  factory Expense.fromJson(Map<String, dynamic> json, List<Category> categories, {List<Currency> customCurrencies = const []}) {
+  factory Expense.fromJson(Map<String, dynamic> json, List<Category> categories, {List<Currency> customCurrencies = const [], String? defaultAccountId}) {
     // Find the category by ID, fall back to 'other' if not found
     Category category;
     try {
@@ -73,6 +77,7 @@ class Expense {
       date: DateTime.parse(json['date']),
       description: json['description'] ?? '',
       type: TransactionTypeExtension.fromCode(json['type'] ?? 'expense'), // Default to expense for backward compatibility
+      accountId: json['accountId'] ?? defaultAccountId ?? '', // Use provided accountId or default
     );
   }
 
@@ -85,6 +90,7 @@ class Expense {
     DateTime? date,
     String? description,
     TransactionType? type,
+    String? accountId,
   }) {
     return Expense(
       id: id ?? this.id,
@@ -95,6 +101,7 @@ class Expense {
       date: date ?? this.date,
       description: description ?? this.description,
       type: type ?? this.type,
+      accountId: accountId ?? this.accountId,
     );
   }
 
