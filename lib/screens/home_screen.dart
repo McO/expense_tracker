@@ -48,7 +48,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Set<Currency> _availableCurrencies = {};
   Currency? _selectedCurrencyFilter;
   Currency _defaultCurrency = Currency.usd;
-  
+
   @override
   void initState() {
     super.initState();
@@ -129,7 +129,7 @@ class _HomeScreenState extends State<HomeScreen> {
       _categoryIncomeTotal = categoryIncomeTotal;
       _categoryExpenseTotal = categoryExpenseTotal;
       _currencyTotals = currencyTotals;
-    });
+      });
   }
 
   Color _getCategoryColor(Category category) {
@@ -377,11 +377,11 @@ class _HomeScreenState extends State<HomeScreen> {
       availableCurrencies: _availableCurrencies,
       selectedCurrency: _selectedCurrencyFilter,
       onCurrencyChanged: (Currency? newValue) {
-        setState(() {
-          _selectedCurrencyFilter = newValue;
-        });
-        _applyFilter();
-      },
+                setState(() {
+                  _selectedCurrencyFilter = newValue;
+                });
+                _applyFilter();
+              },
     );
   }
 
@@ -491,12 +491,12 @@ class _HomeScreenState extends State<HomeScreen> {
       expenses: _recentExpenses,
       onDelete: _deleteExpense,
       onViewAll: () async {
-        await Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => const ExpensesListScreen()),
-        );
-        _loadData();
-      },
+                  await Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const ExpensesListScreen()),
+                  );
+                  _loadData();
+                },
       onRefresh: _loadData,
     );
   }

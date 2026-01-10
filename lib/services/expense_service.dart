@@ -135,7 +135,7 @@ class ExpenseService {
       // Get directory based on storage type
       Directory? directory;
       String? directoryPath = await getExportDirectory();
-      
+
       if (directoryPath == null) {
         return null;
       }
