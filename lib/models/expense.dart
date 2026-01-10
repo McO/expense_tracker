@@ -49,7 +49,7 @@ class Expense {
     };
   }
 
-  factory Expense.fromJson(Map<String, dynamic> json, List<Category> categories) {
+  factory Expense.fromJson(Map<String, dynamic> json, List<Category> categories, {List<Currency> customCurrencies = const []}) {
     // Find the category by ID, fall back to 'other' if not found
     Category category;
     try {
@@ -68,7 +68,7 @@ class Expense {
       id: json['id'],
       title: json['title'],
       amount: json['amount'].toDouble(),
-      currency: Currency.fromCode(json['currency'] ?? 'USD'),
+      currency: Currency.fromCode(json['currency'] ?? 'USD', customCurrencies: customCurrencies),
       category: category,
       date: DateTime.parse(json['date']),
       description: json['description'] ?? '',

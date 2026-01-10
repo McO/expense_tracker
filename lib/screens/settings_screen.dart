@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../models/currency.dart';
 import '../services/settings_service.dart';
 import '../services/theme_service.dart';
+import '../services/currency_service.dart';
 
 class SettingsScreen extends StatefulWidget {
   final Function(AppThemeMode)? onThemeModeChanged;
@@ -20,9 +21,11 @@ class SettingsScreen extends StatefulWidget {
 class _SettingsScreenState extends State<SettingsScreen> {
   final SettingsService _settingsService = SettingsService();
   final ThemeService _themeService = ThemeService();
+  final CurrencyService _currencyService = CurrencyService();
   Currency _selectedCurrency = Currency.usd;
   bool _isLoading = true;
   AppThemeMode _currentThemeMode = AppThemeMode.system;
+  List<Currency> _customCurrencies = [];
 
   @override
   void initState() {
@@ -34,9 +37,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
     try {
       final currency = await _settingsService.getDefaultCurrency();
       final themeMode = await _themeService.getThemeMode();
+      final customCurrencies = await _currencyService.getCustomCurrencies();
       setState(() {
         _selectedCurrency = currency;
         _currentThemeMode = themeMode;
+        _customCurrencies = customCurrencies;
         _isLoading = false;
       });
     } catch (e) {
@@ -116,6 +121,135 @@ class _SettingsScreenState extends State<SettingsScreen> {
     }
   }
 
+  Future<void> _showAddCurrencyDialog() async {
+    final codeController = TextEditingController();
+    final symbolController = TextEditingController();
+    final nameController = TextEditingController();
+
+    final result = await showDialog<bool>(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Add Custom Currency'),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextField(
+                  controller: codeController,
+                  decoration: const InputDecoration(
+                    labelText: 'Currency Code',
+                    hintText: 'e.g., USD',
+                    border: OutlineInputBorder(),
+                  ),
+                  textCapitalization: TextCapitalization.characters,
+                  maxLength: 3,
+                ),
+                const SizedBox(height: 16),
+                TextField(
+                  controller: symbolController,
+                  decoration: const InputDecoration(
+                    labelText: 'Symbol',
+                    hintText: 'e.g., \$',
+                    border: OutlineInputBorder(),
+                  ),
+                  maxLength: 3,
+                ),
+                const SizedBox(height: 16),
+                TextField(
+                  controller: nameController,
+                  decoration: const InputDecoration(
+                    labelText: 'Currency Name',
+                    hintText: 'e.g., US Dollar',
+                    border: OutlineInputBorder(),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: const Text('Cancel'),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                if (codeController.text.isEmpty ||
+                    symbolController.text.isEmpty ||
+                    nameController.text.isEmpty) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Please fill in all fields'),
+                      backgroundColor: Colors.red,
+                    ),
+                  );
+                  return;
+                }
+                Navigator.pop(context, true);
+              },
+              child: const Text('Add'),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (result == true && mounted) {
+      try {
+        await _currencyService.addCustomCurrency(
+          codeController.text.trim(),
+          symbolController.text.trim(),
+          nameController.text.trim(),
+        );
+        
+        await _loadSettings();
+        
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Currency ${codeController.text.toUpperCase()} added successfully'),
+              backgroundColor: Colors.green,
+            ),
+          );
+        }
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Error adding currency: ${e.toString()}'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      }
+    }
+  }
+
+  Future<void> _deleteCustomCurrency(String code) async {
+    try {
+      await _currencyService.removeCustomCurrency(code);
+      await _loadSettings();
+      
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Currency $code removed successfully'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error removing currency: ${e.toString()}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -177,7 +311,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                     _updateCurrency(newValue);
                                   }
                                 },
-                                items: Currency.values.map<DropdownMenuItem<Currency>>((Currency currency) {
+                                items: Currency.predefinedValues.map<DropdownMenuItem<Currency>>((Currency currency) {
                                   return DropdownMenuItem<Currency>(
                                     value: currency,
                                     child: Row(
@@ -283,6 +417,109 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           _buildInfoRow('Currency Code', _selectedCurrency.code),
                           const Divider(),
                           _buildInfoRow('Symbol', _selectedCurrency.symbol),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  Card(
+                    child: Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Row(
+                                children: [
+                                  Icon(
+                                    Icons.add_circle_outline,
+                                    color: Theme.of(context).colorScheme.primary,
+                                  ),
+                                  const SizedBox(width: 12),
+                                  Text(
+                                    'Custom Currencies',
+                                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                  ),
+                                ],
+                              ),
+                              IconButton(
+                                icon: const Icon(Icons.add),
+                                onPressed: _showAddCurrencyDialog,
+                                tooltip: 'Add Currency',
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            'Add custom currencies to use in your expenses',
+                            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                  color: Colors.grey[600],
+                                ),
+                          ),
+                          const SizedBox(height: 16),
+                          if (_customCurrencies.isEmpty)
+                            Padding(
+                              padding: const EdgeInsets.all(16),
+                              child: Center(
+                                child: Text(
+                                  'No custom currencies added yet',
+                                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                        color: Colors.grey[500],
+                                      ),
+                                ),
+                              ),
+                            )
+                          else
+                            ...(_customCurrencies.map((currency) {
+                              return ListTile(
+                                leading: CircleAvatar(
+                                  backgroundColor: Theme.of(context).colorScheme.primaryContainer,
+                                  child: Text(
+                                    currency.symbol,
+                                    style: TextStyle(
+                                      color: Theme.of(context).colorScheme.onPrimaryContainer,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                                title: Text(
+                                  currency.name,
+                                  style: const TextStyle(fontWeight: FontWeight.bold),
+                                ),
+                                subtitle: Text('${currency.code} • ${currency.symbol}'),
+                                trailing: IconButton(
+                                  icon: const Icon(Icons.delete, color: Colors.red),
+                                  onPressed: () async {
+                                    final confirm = await showDialog<bool>(
+                                      context: context,
+                                      builder: (context) => AlertDialog(
+                                        title: const Text('Delete Currency'),
+                                        content: Text('Remove ${currency.name}?'),
+                                        actions: [
+                                          TextButton(
+                                            onPressed: () => Navigator.pop(context, false),
+                                            child: const Text('Cancel'),
+                                          ),
+                                          TextButton(
+                                            onPressed: () => Navigator.pop(context, true),
+                                            style: TextButton.styleFrom(foregroundColor: Colors.red),
+                                            child: const Text('Delete'),
+                                          ),
+                                        ],
+                                      ),
+                                    );
+                                    
+                                    if (confirm == true) {
+                                      await _deleteCustomCurrency(currency.code);
+                                    }
+                                  },
+                                ),
+                              );
+                            }).toList()),
                         ],
                       ),
                     ),

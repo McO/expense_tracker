@@ -6,18 +6,22 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:intl/intl.dart';
 import '../models/expense.dart';
 import '../models/category.dart';
+import '../models/currency.dart';
 import 'category_service.dart';
+import 'currency_service.dart';
 
 class ExpenseService {
   static const String _expensesKey = 'expenses';
   final CategoryService _categoryService = CategoryService();
+  final CurrencyService _currencyService = CurrencyService();
 
   Future<List<Expense>> getExpenses() async {
     final prefs = await SharedPreferences.getInstance();
     final expensesJson = prefs.getStringList(_expensesKey) ?? [];
     final categories = await _categoryService.getCategories();
+    final customCurrencies = await _currencyService.getCustomCurrencies();
 
-    final expenses = expensesJson.map((json) => Expense.fromJson(jsonDecode(json), categories)).toList();
+    final expenses = expensesJson.map((json) => Expense.fromJson(jsonDecode(json), categories, customCurrencies: customCurrencies)).toList();
     
     // Sort expenses by newest date and time first
     expenses.sort((a, b) => b.date.compareTo(a.date));

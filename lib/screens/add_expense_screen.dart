@@ -7,6 +7,7 @@ import '../models/transaction_type.dart';
 import '../services/expense_service.dart';
 import '../services/settings_service.dart';
 import '../services/category_service.dart';
+import '../services/currency_service.dart';
 
 class AddExpenseScreen extends StatefulWidget {
   const AddExpenseScreen({super.key});
@@ -23,9 +24,11 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
   final ExpenseService _expenseService = ExpenseService();
   final SettingsService _settingsService = SettingsService();
   final CategoryService _categoryService = CategoryService();
+  final CurrencyService _currencyService = CurrencyService();
 
   Category? _selectedCategory;
   List<Category> _categories = [];
+  List<Currency> _availableCurrencies = [];
   Currency _selectedCurrency = Currency.usd;
   DateTime _selectedDate = DateTime.now();
   TimeOfDay _selectedTime = TimeOfDay.now();
@@ -37,6 +40,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
     super.initState();
     _loadDefaultCurrency();
     _loadCategories();
+    _loadAvailableCurrencies();
   }
 
   @override
@@ -55,6 +59,20 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
       });
     } catch (e) {
       // Use default USD if there's an error
+    }
+  }
+
+  Future<void> _loadAvailableCurrencies() async {
+    try {
+      final currencies = await _currencyService.getAllAvailableCurrencies();
+      setState(() {
+        _availableCurrencies = currencies;
+      });
+    } catch (e) {
+      // Use predefined currencies if there's an error
+      setState(() {
+        _availableCurrencies = Currency.predefinedValues;
+      });
     }
   }
 
@@ -423,14 +441,32 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                                       });
                                     }
                                   },
-                                  items: Currency.values.map<DropdownMenuItem<Currency>>((Currency currency) {
+                                  items: _availableCurrencies.map<DropdownMenuItem<Currency>>((Currency currency) {
                                     return DropdownMenuItem<Currency>(
                                       value: currency,
-                                      child: Text(
-                                        currency.symbol,
-                                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                          fontWeight: FontWeight.bold,
-                                        ),
+                                      child: Row(
+                                        children: [
+                                          Text(
+                                            currency.symbol,
+                                            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                          const SizedBox(width: 8),
+                                          Expanded(
+                                            child: Text(
+                                              currency.code,
+                                              style: Theme.of(context).textTheme.bodySmall,
+                                              overflow: TextOverflow.ellipsis,
+                                            ),
+                                          ),
+                                          if (currency.isCustom)
+                                            Icon(
+                                              Icons.star,
+                                              size: 12,
+                                              color: Colors.amber,
+                                            ),
+                                        ],
                                       ),
                                     );
                                   }).toList(),
