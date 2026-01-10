@@ -69,11 +69,10 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
 
   Future<void> _loadCategories() async {
     try {
-      final categories = await _categoryService.getCategoriesByType(_selectedType);
+      final categories = await _categoryService.getCategories();
       setState(() {
         _categories = categories;
         if (_categories.isNotEmpty && _selectedCategory == null) {
-          // Set default category to first available for the selected type
           _selectedCategory = _categories.first;
         }
       });
@@ -85,9 +84,8 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
   void _onTransactionTypeChanged(TransactionType type) {
     setState(() {
       _selectedType = type;
-      _selectedCategory = null; // Reset category when type changes
+      // Don't reset category - categories are now universal
     });
-    _loadCategories(); // Reload categories for the new type
   }
 
   Color _getCategoryColor(Category category) {

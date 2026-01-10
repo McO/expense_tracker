@@ -434,16 +434,7 @@ class _HomeScreenState extends State<HomeScreen> {
         color: Theme.of(context).colorScheme.secondaryContainer,
         borderRadius: BorderRadius.circular(12),
       ),
-      child: Row(
-        children: [
-          Icon(
-            Icons.account_balance_wallet,
-            size: 20,
-            color: Theme.of(context).colorScheme.onSecondaryContainer,
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: DropdownButtonHideUnderline(
+      child: DropdownButtonHideUnderline(
               child: DropdownButton<Account>(
                 value: _selectedAccount,
                 isExpanded: true,
@@ -491,10 +482,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                   );
                 }).toList(),
-              ),
             ),
-          ),
-        ],
       ),
     );
   }

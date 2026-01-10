@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import '../models/category.dart';
-import '../models/transaction_type.dart';
 import '../services/category_service.dart';
 
 class AddEditCategoryScreen extends StatefulWidget {
@@ -20,7 +19,6 @@ class _AddEditCategoryScreenState extends State<AddEditCategoryScreen> {
 
   String _selectedIcon = '';
   String _selectedColor = '';
-  TransactionType _selectedType = TransactionType.expense;
   bool _isLoading = false;
 
   bool get _isEditing => widget.category != null;
@@ -33,12 +31,10 @@ class _AddEditCategoryScreenState extends State<AddEditCategoryScreen> {
       _exportNameController.text = widget.category!.exportName ?? '';
       _selectedIcon = widget.category!.icon;
       _selectedColor = widget.category!.color;
-      _selectedType = widget.category!.type;
     } else {
       // Set default values for new category
       _selectedIcon = CategoryService.availableIcons.first;
       _selectedColor = CategoryService.availableColors.first;
-      _selectedType = TransactionType.expense;
     }
   }
 
@@ -98,7 +94,6 @@ class _AddEditCategoryScreenState extends State<AddEditCategoryScreen> {
           exportName: exportName.isEmpty ? null : exportName,
           icon: _selectedIcon,
           color: _selectedColor,
-          type: _selectedType,
         );
         await _categoryService.updateCategory(category);
       } else {
@@ -111,7 +106,6 @@ class _AddEditCategoryScreenState extends State<AddEditCategoryScreen> {
           icon: _selectedIcon,
           color: _selectedColor,
           isDefault: false,
-          type: _selectedType,
         );
         await _categoryService.saveCategory(category);
       }
@@ -196,10 +190,6 @@ class _AddEditCategoryScreenState extends State<AddEditCategoryScreen> {
 
               // Export Name Input
               _buildExportNameInput(),
-              const SizedBox(height: 24),
-
-              // Transaction Type Selection
-              _buildTransactionTypeSelection(),
               const SizedBox(height: 24),
 
               // Icon Selection
@@ -300,48 +290,6 @@ class _AddEditCategoryScreenState extends State<AddEditCategoryScreen> {
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                             decoration: BoxDecoration(
-                              color: _selectedType == TransactionType.income 
-                                  ? Colors.green.withOpacity(0.1) 
-                                  : Colors.red.withOpacity(0.1),
-                              borderRadius: BorderRadius.circular(12),
-                              border: Border.all(
-                                color: _selectedType == TransactionType.income 
-                                    ? Colors.green.withOpacity(0.3) 
-                                    : Colors.red.withOpacity(0.3),
-                              ),
-                            ),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Icon(
-                                  _selectedType == TransactionType.income 
-                                      ? Icons.trending_up 
-                                      : Icons.trending_down,
-                                  size: 12,
-                                  color: _selectedType == TransactionType.income 
-                                      ? Colors.green 
-                                      : Colors.red,
-                                ),
-                                const SizedBox(width: 4),
-                                Text(
-                                  _selectedType == TransactionType.income 
-                                      ? 'Income' 
-                                      : 'Expense',
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.w500,
-                                    color: _selectedType == TransactionType.income 
-                                        ? Colors.green 
-                                        : Colors.red,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                            decoration: BoxDecoration(
                               color: color.withOpacity(0.1),
                               borderRadius: BorderRadius.circular(12),
                               border: Border.all(color: color.withOpacity(0.3)),
@@ -433,78 +381,6 @@ class _AddEditCategoryScreenState extends State<AddEditCategoryScreen> {
             helperText: 'If empty, the category name will be used for exports',
           ),
           onChanged: (value) => setState(() {}), // Update preview
-        ),
-      ],
-    );
-  }
-
-  Widget _buildTransactionTypeSelection() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'Transaction Type',
-          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        const SizedBox(height: 8),
-        Container(
-          decoration: BoxDecoration(
-            border: Border.all(color: Colors.grey.shade300),
-            borderRadius: BorderRadius.circular(8),
-          ),
-          child: Column(
-            children: [
-              RadioListTile<TransactionType>(
-                value: TransactionType.expense,
-                groupValue: _selectedType,
-                onChanged: (TransactionType? value) {
-                  if (value != null) {
-                    setState(() {
-                      _selectedType = value;
-                    });
-                  }
-                },
-                title: Row(
-                  children: [
-                    Icon(
-                      Icons.trending_down,
-                      color: Colors.red,
-                      size: 20,
-                    ),
-                    const SizedBox(width: 8),
-                    const Text('Expense'),
-                  ],
-                ),
-                subtitle: const Text('For money going out (purchases, bills, etc.)'),
-              ),
-              Divider(height: 1, color: Colors.grey.shade300),
-              RadioListTile<TransactionType>(
-                value: TransactionType.income,
-                groupValue: _selectedType,
-                onChanged: (TransactionType? value) {
-                  if (value != null) {
-                    setState(() {
-                      _selectedType = value;
-                    });
-                  }
-                },
-                title: Row(
-                  children: [
-                    Icon(
-                      Icons.trending_up,
-                      color: Colors.green,
-                      size: 20,
-                    ),
-                    const SizedBox(width: 8),
-                    const Text('Income'),
-                  ],
-                ),
-                subtitle: const Text('For money coming in (salary, freelance, etc.)'),
-              ),
-            ],
-          ),
         ),
       ],
     );

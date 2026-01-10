@@ -68,15 +68,14 @@ class _EditExpenseScreenState extends State<EditExpenseScreen> {
 
   Future<void> _loadCategories() async {
     try {
-      final categories = await _categoryService.getCategoriesByType(_selectedType);
+      final categories = await _categoryService.getCategories();
       setState(() {
         _categories = categories;
         
-        // Ensure the current expense's category exists in the list and matches the type
+        // Ensure the current expense's category exists in the list
         if (_selectedCategory != null && 
-            (!_categories.any((cat) => cat.id == _selectedCategory!.id) || 
-             _selectedCategory!.type != _selectedType)) {
-          // Category doesn't exist or doesn't match type, find a replacement
+            !_categories.any((cat) => cat.id == _selectedCategory!.id)) {
+          // Category doesn't exist, find a replacement
           _selectedCategory = _categories.isNotEmpty ? _categories.first : null;
         }
       });
@@ -100,9 +99,8 @@ class _EditExpenseScreenState extends State<EditExpenseScreen> {
   void _onTransactionTypeChanged(TransactionType type) {
     setState(() {
       _selectedType = type;
-      _selectedCategory = null; // Reset category when type changes
+      // Don't reset category - categories are now universal
     });
-    _loadCategories(); // Reload categories for the new type
   }
 
   Color _getCategoryColor(Category category) {

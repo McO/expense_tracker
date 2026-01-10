@@ -1,5 +1,3 @@
-import 'transaction_type.dart';
-
 class Category {
   final String id;
   final String name;
@@ -7,7 +5,6 @@ class Category {
   final String color; // Hex color code
   final bool isDefault; // Whether it's a default category that can't be deleted
   final String? exportName; // Optional name used for CSV exports
-  final TransactionType type; // Type of transaction this category is for
 
   const Category({
     required this.id,
@@ -16,7 +13,6 @@ class Category {
     required this.color,
     this.isDefault = false,
     this.exportName,
-    this.type = TransactionType.expense, // Default to expense for backward compatibility
   });
 
   Map<String, dynamic> toJson() {
@@ -27,7 +23,6 @@ class Category {
       'color': color,
       'isDefault': isDefault,
       'exportName': exportName,
-      'type': type.code,
     };
   }
 
@@ -39,7 +34,6 @@ class Category {
       color: json['color'],
       isDefault: json['isDefault'] ?? false,
       exportName: json['exportName'],
-      type: TransactionTypeExtension.fromCode(json['type'] ?? 'expense'),
     );
   }
 
@@ -50,7 +44,6 @@ class Category {
     String? color,
     bool? isDefault,
     String? exportName,
-    TransactionType? type,
   }) {
     return Category(
       id: id ?? this.id,
@@ -59,7 +52,6 @@ class Category {
       color: color ?? this.color,
       isDefault: isDefault ?? this.isDefault,
       exportName: exportName ?? this.exportName,
-      type: type ?? this.type,
     );
   }
 
@@ -74,19 +66,14 @@ class Category {
   // Get the name to use for exports
   String get effectiveExportName => exportName?.trim().isNotEmpty == true ? exportName! : name;
 
-  // Helper getters
-  bool get isExpenseCategory => type == TransactionType.expense;
-  bool get isIncomeCategory => type == TransactionType.income;
-
-  // Default expense categories
-  static List<Category> get defaultExpenseCategories => [
+  // Default categories (universal - can be used for both expenses and income)
+  static List<Category> get defaultCategories => [
     const Category(
       id: 'food',
       name: 'Food',
       icon: '🍽️',
       color: 'FF4CAF50',
       isDefault: true,
-      type: TransactionType.expense,
     ),
     const Category(
       id: 'transportation',
@@ -94,7 +81,6 @@ class Category {
       icon: '🚗',
       color: 'FF2196F3',
       isDefault: true,
-      type: TransactionType.expense,
     ),
     const Category(
       id: 'shopping',
@@ -102,7 +88,6 @@ class Category {
       icon: '🛒',
       color: 'FFE91E63',
       isDefault: true,
-      type: TransactionType.expense,
     ),
     const Category(
       id: 'entertainment',
@@ -110,7 +95,6 @@ class Category {
       icon: '🎬',
       color: 'FF9C27B0',
       isDefault: true,
-      type: TransactionType.expense,
     ),
     const Category(
       id: 'bills',
@@ -118,7 +102,6 @@ class Category {
       icon: '💡',
       color: 'FFFF9800',
       isDefault: true,
-      type: TransactionType.expense,
     ),
     const Category(
       id: 'health',
@@ -126,7 +109,6 @@ class Category {
       icon: '💊',
       color: 'FFF44336',
       isDefault: true,
-      type: TransactionType.expense,
     ),
     const Category(
       id: 'education',
@@ -134,7 +116,6 @@ class Category {
       icon: '📚',
       color: 'FF3F51B5',
       isDefault: true,
-      type: TransactionType.expense,
     ),
     const Category(
       id: 'travel',
@@ -142,27 +123,13 @@ class Category {
       icon: '✈️',
       color: 'FF00BCD4',
       isDefault: true,
-      type: TransactionType.expense,
     ),
-    const Category(
-      id: 'other_expense',
-      name: 'Other',
-      icon: '📋',
-      color: 'FF9E9E9E',
-      isDefault: true,
-      type: TransactionType.expense,
-    ),
-  ];
-
-  // Default income categories
-  static List<Category> get defaultIncomeCategories => [
     const Category(
       id: 'salary',
       name: 'Salary',
       icon: '💼',
       color: 'FF4CAF50',
       isDefault: true,
-      type: TransactionType.income,
     ),
     const Category(
       id: 'freelance',
@@ -170,7 +137,6 @@ class Category {
       icon: '💻',
       color: 'FF2196F3',
       isDefault: true,
-      type: TransactionType.income,
     ),
     const Category(
       id: 'business',
@@ -178,7 +144,6 @@ class Category {
       icon: '🏪',
       color: 'FFFF9800',
       isDefault: true,
-      type: TransactionType.income,
     ),
     const Category(
       id: 'investment',
@@ -186,7 +151,6 @@ class Category {
       icon: '📈',
       color: 'FF9C27B0',
       isDefault: true,
-      type: TransactionType.income,
     ),
     const Category(
       id: 'bonus',
@@ -194,7 +158,6 @@ class Category {
       icon: '🎁',
       color: 'FFE91E63',
       isDefault: true,
-      type: TransactionType.income,
     ),
     const Category(
       id: 'rental',
@@ -202,7 +165,6 @@ class Category {
       icon: '🏠',
       color: 'FF795548',
       isDefault: true,
-      type: TransactionType.income,
     ),
     const Category(
       id: 'refund',
@@ -210,24 +172,13 @@ class Category {
       icon: '↩️',
       color: 'FF607D8B',
       isDefault: true,
-      type: TransactionType.income,
     ),
     const Category(
-      id: 'other_income',
+      id: 'other',
       name: 'Other',
-      icon: '💰',
+      icon: '📋',
       color: 'FF9E9E9E',
       isDefault: true,
-      type: TransactionType.income,
     ),
   ];
-
-  // Combined default categories
-  static List<Category> get defaultCategories => [
-    ...defaultExpenseCategories,
-    ...defaultIncomeCategories,
-  ];
-
-  // Backward compatibility getter
-  static List<Category> get defaultExpenseCategories_old => defaultExpenseCategories;
 } 

@@ -1,12 +1,10 @@
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/category.dart';
-import '../models/transaction_type.dart';
 
 class CategoryService {
   static const String _categoriesKey = 'categories';
-  static const String _defaultsInitializedKey = 'categories_defaults_initialized';
-  static const String _incomeDefaultsInitializedKey = 'income_categories_defaults_initialized';
+  static const String _defaultsInitializedKey = 'categories_defaults_initialized_v2';
 
   Future<List<Category>> getCategories() async {
     final prefs = await SharedPreferences.getInstance();
@@ -17,60 +15,19 @@ class CategoryService {
       await _initializeDefaultCategories();
     }
     
-    // Check if income categories have been initialized (for existing users)
-    final incomeDefaultsInitialized = prefs.getBool(_incomeDefaultsInitializedKey) ?? false;
-    if (!incomeDefaultsInitialized) {
-      await _initializeIncomeCategories();
-    }
-    
     final categoriesJson = prefs.getStringList(_categoriesKey) ?? [];
     return categoriesJson.map((json) => Category.fromJson(jsonDecode(json))).toList();
-  }
-
-  Future<List<Category>> getCategoriesByType(TransactionType type) async {
-    final allCategories = await getCategories();
-    return allCategories.where((category) => category.type == type).toList();
-  }
-
-  Future<List<Category>> getExpenseCategories() async {
-    return getCategoriesByType(TransactionType.expense);
-  }
-
-  Future<List<Category>> getIncomeCategories() async {
-    return getCategoriesByType(TransactionType.income);
   }
 
   Future<void> _initializeDefaultCategories() async {
     final prefs = await SharedPreferences.getInstance();
     
-    // Save default categories (both expense and income)
+    // Save default categories (universal - works for both expense and income)
     final defaultCategories = Category.defaultCategories;
     await _saveCategories(defaultCategories);
     
     // Mark defaults as initialized
     await prefs.setBool(_defaultsInitializedKey, true);
-    await prefs.setBool(_incomeDefaultsInitializedKey, true);
-  }
-
-  Future<void> _initializeIncomeCategories() async {
-    final prefs = await SharedPreferences.getInstance();
-    
-    // Get existing categories directly from SharedPreferences to avoid infinite loop
-    final categoriesJson = prefs.getStringList(_categoriesKey) ?? [];
-    final existingCategories = categoriesJson.map((json) => Category.fromJson(jsonDecode(json))).toList();
-    
-    // Check if income categories already exist
-    final hasIncomeCategories = existingCategories.any((cat) => cat.type == TransactionType.income);
-    
-    if (!hasIncomeCategories) {
-      // Add income categories to existing categories
-      final incomeCategories = Category.defaultIncomeCategories;
-      final allCategories = [...existingCategories, ...incomeCategories];
-      await _saveCategories(allCategories);
-    }
-    
-    // Mark income defaults as initialized
-    await prefs.setBool(_incomeDefaultsInitializedKey, true);
   }
 
   Future<void> _saveCategories(List<Category> categories) async {
@@ -125,12 +82,11 @@ class CategoryService {
     }
   }
 
-  Future<bool> categoryExists(String name, {String? excludeId, TransactionType? type}) async {
+  Future<bool> categoryExists(String name, {String? excludeId}) async {
     final categories = await getCategories();
     return categories.any((c) => 
         c.name.toLowerCase() == name.toLowerCase() && 
-        c.id != excludeId &&
-        (type == null || c.type == type));
+        c.id != excludeId);
   }
 
   String generateCategoryId(String name) {
