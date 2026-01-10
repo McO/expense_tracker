@@ -34,6 +34,7 @@ class _EditExpenseScreenState extends State<EditExpenseScreen> {
   List<Currency> _availableCurrencies = [];
   Currency _selectedCurrency = Currency.usd;
   Account? _selectedAccount;
+  List<Account> _accounts = [];
   DateTime _selectedDate = DateTime.now();
   TimeOfDay _selectedTime = TimeOfDay.now();
   TransactionType _selectedType = TransactionType.expense;
@@ -86,10 +87,17 @@ class _EditExpenseScreenState extends State<EditExpenseScreen> {
 
   Future<void> _loadAccount() async {
     try {
+      // Load all accounts
+      final accounts = await _accountService.getAccounts();
       // Load the account for the expense
       final account = await _accountService.getAccountById(widget.expense.accountId);
       setState(() {
+        _accounts = accounts;
         _selectedAccount = account;
+        // Update currency to match the account
+        if (account != null) {
+          _selectedCurrency = account.currency;
+        }
       });
     } catch (e) {
       // Handle error
@@ -170,6 +178,16 @@ class _EditExpenseScreenState extends State<EditExpenseScreen> {
       return;
     }
 
+    if (_selectedAccount == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please select an account'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
     setState(() {
       _isLoading = true;
     });
@@ -183,6 +201,7 @@ class _EditExpenseScreenState extends State<EditExpenseScreen> {
         date: _combinedDateTime,
         description: _descriptionController.text.trim(),
         type: _selectedType,
+        accountId: _selectedAccount!.id,
       );
 
       await _expenseService.updateExpense(updatedExpense);
@@ -483,6 +502,71 @@ class _EditExpenseScreenState extends State<EditExpenseScreen> {
                           border: OutlineInputBorder(),
                         ),
                         maxLines: 3,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+
+              // Account Selection
+              Card(
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Account',
+                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.symmetric(horizontal: 12),
+                        decoration: BoxDecoration(
+                          border: Border.all(color: Colors.grey),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: DropdownButtonHideUnderline(
+                          child: DropdownButton<Account>(
+                            value: _selectedAccount,
+                            isExpanded: true,
+                            onChanged: (Account? newValue) {
+                              if (newValue != null) {
+                                setState(() {
+                                  _selectedAccount = newValue;
+                                  // Update currency to match the account
+                                  _selectedCurrency = newValue.currency;
+                                });
+                              }
+                            },
+                            items: _accounts.map<DropdownMenuItem<Account>>((Account account) {
+                              return DropdownMenuItem<Account>(
+                                value: account,
+                                child: Row(
+                                  children: [
+                                    Text(
+                                      account.icon,
+                                      style: const TextStyle(fontSize: 18),
+                                    ),
+                                    const SizedBox(width: 12),
+                                    Expanded(child: Text(account.name)),
+                                    const SizedBox(width: 8),
+                                    Text(
+                                      account.currency.code,
+                                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                        color: Colors.grey[600],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              );
+                            }).toList(),
+                          ),
+                        ),
                       ),
                     ],
                   ),

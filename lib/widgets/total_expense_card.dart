@@ -29,153 +29,152 @@ class TotalExpenseCard extends StatelessWidget {
       displayCurrency = sortedCurrencies.first.key;
     }
     
-    return Card(
-      color: Theme.of(context).colorScheme.primaryContainer,
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
+    return Column(
+      children: [
+        // Net Balance Card - Larger
+        Card(
+          color: netBalance >= 0 ? Colors.blue.shade50 : Colors.orange.shade50,
+          elevation: 2,
+          child: Padding(
+            padding: const EdgeInsets.all(20),
+            child: Column(
               children: [
-                Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.primary,
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Icon(
-                    Icons.account_balance_wallet,
-                    size: 20,
-                    color: Theme.of(context).colorScheme.onPrimary,
-                  ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      netBalance >= 0 ? Icons.trending_up : Icons.trending_down,
+                      color: netBalance >= 0 ? Colors.blue.shade700 : Colors.orange.shade700,
+                      size: 24,
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      'Net Balance',
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                            color: netBalance >= 0 ? Colors.blue.shade700 : Colors.orange.shade700,
+                            fontWeight: FontWeight.w600,
+                          ),
+                    ),
+                  ],
                 ),
-                const SizedBox(width: 12),
-                Text(
-                  'Financial Overview',
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        color: Theme.of(context).colorScheme.onPrimaryContainer,
-                        fontWeight: FontWeight.w600,
-                      ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            
-            // Net Balance
-            Row(
-              children: [
-                Icon(
-                  netBalance >= 0 ? Icons.trending_up : Icons.trending_down,
-                  color: netBalance >= 0 ? Colors.green : Colors.red,
-                  size: 24,
-                ),
-                const SizedBox(width: 8),
-                Text(
-                  'Net Balance: ',
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        color: Theme.of(context).colorScheme.onPrimaryContainer,
-                        fontWeight: FontWeight.w600,
-                      ),
-                ),
+                const SizedBox(height: 12),
                 Text(
                   '${netBalance >= 0 ? '+' : ''}${displayCurrency.symbol}${netBalance.toStringAsFixed(2)}',
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                         fontWeight: FontWeight.bold,
-                        color: netBalance >= 0 ? Colors.green : Colors.red,
+                        color: netBalance >= 0 ? Colors.blue.shade700 : Colors.orange.shade700,
                       ),
                 ),
+                if (totalIncome > 0 && currencyTotals.length <= 1) ...[
+                  const SizedBox(height: 8),
+                  Text(
+                    'Savings Rate: ${((totalIncome - totalExpenses) / totalIncome * 100).toStringAsFixed(1)}%',
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: (netBalance >= 0 ? Colors.blue.shade700 : Colors.orange.shade700).withOpacity(0.7),
+                    ),
+                  ),
+                ],
+                if (currencyTotals.length > 1) ...[
+                  const SizedBox(height: 8),
+                  Text(
+                    'Combined from ${currencyTotals.length} currencies',
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: (netBalance >= 0 ? Colors.blue.shade700 : Colors.orange.shade700).withOpacity(0.7),
+                    ),
+                  ),
+                ],
               ],
             ),
-            const SizedBox(height: 16),
-            
-            // Income and Expenses Row
-            Row(
-              children: [
-                Expanded(
+          ),
+        ),
+        const SizedBox(height: 12),
+        // Income and Expenses Row - Smaller, side by side
+        Row(
+          children: [
+            // Income Card
+            Expanded(
+              child: Card(
+                color: Colors.green.shade50,
+                elevation: 2,
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Row(
                         children: [
                           Icon(
-                            Icons.trending_up,
-                            color: Colors.green,
-                            size: 16,
+                            Icons.arrow_upward,
+                            color: Colors.green.shade700,
+                            size: 18,
                           ),
-                          const SizedBox(width: 4),
+                          const SizedBox(width: 6),
                           Text(
                             'Income',
                             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                  color: Theme.of(context).colorScheme.onPrimaryContainer.withOpacity(0.8),
+                                  color: Colors.green.shade700,
+                                  fontWeight: FontWeight.w600,
                                 ),
                           ),
                         ],
                       ),
-                      const SizedBox(height: 4),
+                      const SizedBox(height: 8),
                       Text(
                         '+${displayCurrency.symbol}${totalIncome.toStringAsFixed(2)}',
-                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
                               fontWeight: FontWeight.bold,
-                              color: Colors.green,
+                              color: Colors.green.shade700,
                             ),
                       ),
                     ],
                   ),
                 ),
-                const SizedBox(width: 16),
-                Expanded(
+              ),
+            ),
+            const SizedBox(width: 12),
+            // Expenses Card
+            Expanded(
+              child: Card(
+                color: Colors.red.shade50,
+                elevation: 2,
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Row(
                         children: [
                           Icon(
-                            Icons.trending_down,
-                            color: Colors.red,
-                            size: 16,
+                            Icons.arrow_downward,
+                            color: Colors.red.shade700,
+                            size: 18,
                           ),
-                          const SizedBox(width: 4),
+                          const SizedBox(width: 6),
                           Text(
                             'Expenses',
                             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                  color: Theme.of(context).colorScheme.onPrimaryContainer.withOpacity(0.8),
+                                  color: Colors.red.shade700,
+                                  fontWeight: FontWeight.w600,
                                 ),
                           ),
                         ],
                       ),
-                      const SizedBox(height: 4),
+                      const SizedBox(height: 8),
                       Text(
                         '-${displayCurrency.symbol}${totalExpenses.toStringAsFixed(2)}',
-                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
                               fontWeight: FontWeight.bold,
-                              color: Colors.red,
+                              color: Colors.red.shade700,
                             ),
                       ),
                     ],
                   ),
                 ),
-              ],
               ),
-              
-              const SizedBox(height: 8),
-              if (currencyTotals.length > 1)
-                Text(
-                  'Combined from ${currencyTotals.length} currencies',
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Theme.of(context).colorScheme.onPrimaryContainer.withOpacity(0.7),
-                  ),
-                )
-              else if (totalIncome > 0)
-                Text(
-                  'Savings Rate: ${((totalIncome - totalExpenses) / totalIncome * 100).toStringAsFixed(1)}%',
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Theme.of(context).colorScheme.onPrimaryContainer.withOpacity(0.7),
-                  ),
-                )
+            ),
           ],
         ),
-      ),
+      ],
     );
   }
 }
