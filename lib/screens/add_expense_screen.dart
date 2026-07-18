@@ -6,10 +6,9 @@ import '../models/category.dart';
 import '../models/account.dart';
 import '../models/transaction_type.dart';
 import '../services/expense_service.dart';
-import '../services/settings_service.dart';
 import '../services/category_service.dart';
-import '../services/currency_service.dart';
 import '../services/account_service.dart';
+import '../widgets/transaction_type_selector.dart';
 
 class AddExpenseScreen extends StatefulWidget {
   const AddExpenseScreen({super.key});
@@ -24,14 +23,11 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
   final _amountController = TextEditingController();
   final _descriptionController = TextEditingController();
   final ExpenseService _expenseService = ExpenseService();
-  final SettingsService _settingsService = SettingsService();
   final CategoryService _categoryService = CategoryService();
-  final CurrencyService _currencyService = CurrencyService();
   final AccountService _accountService = AccountService();
 
   Category? _selectedCategory;
   List<Category> _categories = [];
-  List<Currency> _availableCurrencies = [];
   Currency _selectedCurrency = Currency.usd;
   Account? _selectedAccount;
   DateTime _selectedDate = DateTime.now();
@@ -86,14 +82,6 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
       _selectedType = type;
       // Don't reset category - categories are now universal
     });
-  }
-
-  Color _getCategoryColor(Category category) {
-    try {
-      return Color(int.parse(category.color, radix: 16));
-    } catch (e) {
-      return Colors.grey;
-    }
   }
 
   Color get _transactionTypeColor {
@@ -249,110 +237,9 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Transaction Type Selection
-              Card(
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Transaction Type',
-                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: GestureDetector(
-                              onTap: () => _onTransactionTypeChanged(TransactionType.expense),
-                              child: Container(
-                                padding: const EdgeInsets.all(16),
-                                decoration: BoxDecoration(
-                                  color: _selectedType == TransactionType.expense 
-                                      ? Colors.red.withOpacity(0.1) 
-                                      : Colors.grey.withOpacity(0.1),
-                                  borderRadius: BorderRadius.circular(12),
-                                  border: Border.all(
-                                    color: _selectedType == TransactionType.expense 
-                                        ? Colors.red 
-                                        : Colors.grey,
-                                    width: 2,
-                                  ),
-                                ),
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Icon(
-                                      Icons.trending_down,
-                                      color: _selectedType == TransactionType.expense 
-                                          ? Colors.red 
-                                          : Colors.grey,
-                                    ),
-                                    const SizedBox(width: 8),
-                                    Text(
-                                      'Expense',
-                                      style: TextStyle(
-                                        color: _selectedType == TransactionType.expense 
-                                            ? Colors.red 
-                                            : Colors.grey,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ),
-                          const SizedBox(width: 16),
-                          Expanded(
-                            child: GestureDetector(
-                              onTap: () => _onTransactionTypeChanged(TransactionType.income),
-                              child: Container(
-                                padding: const EdgeInsets.all(16),
-                                decoration: BoxDecoration(
-                                  color: _selectedType == TransactionType.income 
-                                      ? Colors.green.withOpacity(0.1) 
-                                      : Colors.grey.withOpacity(0.1),
-                                  borderRadius: BorderRadius.circular(12),
-                                  border: Border.all(
-                                    color: _selectedType == TransactionType.income 
-                                        ? Colors.green 
-                                        : Colors.grey,
-                                    width: 2,
-                                  ),
-                                ),
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Icon(
-                                      Icons.trending_up,
-                                      color: _selectedType == TransactionType.income 
-                                          ? Colors.green 
-                                          : Colors.grey,
-                                    ),
-                                    const SizedBox(width: 8),
-                                    Text(
-                                      'Income',
-                                      style: TextStyle(
-                                        color: _selectedType == TransactionType.income 
-                                            ? Colors.green 
-                                            : Colors.grey,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
+              TransactionTypeSelector(
+                selectedType: _selectedType,
+                onChanged: _onTransactionTypeChanged,
               ),
               const SizedBox(height: 16),
 
@@ -503,10 +390,10 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                                       width: 32,
                                       height: 32,
                                       decoration: BoxDecoration(
-                                        color: _getCategoryColor(category).withOpacity(0.1),
+                                        color: category.toColor().withOpacity(0.1),
                                         borderRadius: BorderRadius.circular(8),
                                         border: Border.all(
-                                          color: _getCategoryColor(category).withOpacity(0.3),
+                                          color: category.toColor().withOpacity(0.3),
                                           width: 1,
                                         ),
                                       ),

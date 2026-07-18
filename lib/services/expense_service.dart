@@ -62,11 +62,6 @@ class ExpenseService {
     await prefs.setStringList(_expensesKey, expensesJson);
   }
 
-  Future<double> getTotalExpenses() async {
-    final expenses = await getExpenses();
-    return expenses.fold<double>(0.0, (sum, expense) => sum + expense.amount);
-  }
-
   Future<Map<Category, double>> getExpensesByCategory() async {
     final expenses = await getExpenses();
     final Map<Category, double> categoryTotals = {};

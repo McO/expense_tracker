@@ -62,24 +62,19 @@ class CategoryService {
 
   Future<void> deleteCategory(String categoryId) async {
     final categories = await getCategories();
-    final category = categories.firstWhere((c) => c.id == categoryId);
-    
-    // Don't allow deletion of default categories
-    if (category.isDefault) {
+    final idx = categories.indexWhere((c) => c.id == categoryId);
+    if (idx < 0) return;
+    if (categories[idx].isDefault) {
       throw Exception('Cannot delete default categories');
     }
-    
-    categories.removeWhere((c) => c.id == categoryId);
+    categories.removeAt(idx);
     await _saveCategories(categories);
   }
 
   Future<Category?> getCategoryById(String id) async {
     final categories = await getCategories();
-    try {
-      return categories.firstWhere((c) => c.id == id);
-    } catch (e) {
-      return null;
-    }
+    final idx = categories.indexWhere((c) => c.id == id);
+    return idx >= 0 ? categories[idx] : null;
   }
 
   Future<bool> categoryExists(String name, {String? excludeId}) async {

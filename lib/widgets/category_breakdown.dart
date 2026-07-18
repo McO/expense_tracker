@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import '../models/category.dart';
-import '../models/currency.dart';
 import '../models/expense.dart';
 
 class CategoryBreakdown extends StatefulWidget {
@@ -30,12 +29,24 @@ class _CategoryBreakdownState extends State<CategoryBreakdown> {
   late PageController _pageController;
   int _currentPage = 0;
   Timer? _autoScrollTimer;
+  double _slideHeight = 0.0;
 
   @override
   void initState() {
     super.initState();
     _pageController = PageController();
+    _slideHeight = _calculateSlideHeight();
     _startAutoScroll();
+  }
+
+  @override
+  void didUpdateWidget(CategoryBreakdown oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.categoryTotals != widget.categoryTotals ||
+        oldWidget.categoryIncomeTotal != widget.categoryIncomeTotal ||
+        oldWidget.categoryExpenseTotal != widget.categoryExpenseTotal) {
+      _slideHeight = _calculateSlideHeight();
+    }
   }
 
   @override
@@ -63,37 +74,6 @@ class _CategoryBreakdownState extends State<CategoryBreakdown> {
 
   void _stopAutoScroll() {
     _autoScrollTimer?.cancel();
-  }
-
-  Color _getCategoryColor(Category category) {
-    try {
-      return Color(int.parse(category.color, radix: 16));
-    } catch (e) {
-      return Colors.grey;
-    }
-  }
-
-  String _formatCategoryAmount(Category category, double amount, bool isIncome) {
-    String formattedAmount;
-    
-    final categoryExpenses = widget.allExpenses.where((e) => e.category.id == category.id);
-    final categoryCurrencies = categoryExpenses.map((e) => e.currency).toSet();
-    
-    if (categoryCurrencies.length == 1) {
-      final currency = categoryCurrencies.first;
-      formattedAmount = '${currency.symbol}${amount.toStringAsFixed(2)}';
-    } else if (categoryCurrencies.isEmpty) {
-      // No expenses in this category, use a default
-      formattedAmount = '\$${amount.toStringAsFixed(2)}';
-    } else {
-      formattedAmount = 'Mixed currencies';
-    }
-    
-    if (formattedAmount != 'Mixed currencies') {
-      formattedAmount = '${isIncome ? '+' : '-'}$formattedAmount';
-    }
-    
-    return formattedAmount;
   }
 
   String _formatCategoryTotal(Category category, double amount) {
@@ -196,7 +176,7 @@ class _CategoryBreakdownState extends State<CategoryBreakdown> {
   }
 
   Widget _buildCategorySlide(Category category) {
-    final color = _getCategoryColor(category);
+    final color = category.toColor();
     final incomeAmount = widget.categoryIncomeTotal[category] ?? 0.0;
     final expenseAmount = widget.categoryExpenseTotal[category] ?? 0.0;
     final totalAmount = widget.categoryTotals[category] ?? 0.0;
@@ -326,7 +306,7 @@ class _CategoryBreakdownState extends State<CategoryBreakdown> {
         const SizedBox(height: 16),
         
         SizedBox(
-          height: _calculateSlideHeight(),
+          height: _slideHeight,
           child: GestureDetector(
             onTapDown: (_) => _stopAutoScroll(),
             onPanStart: (_) => _stopAutoScroll(),

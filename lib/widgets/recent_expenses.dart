@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../models/expense.dart';
-import '../models/category.dart';
 import '../screens/expenses_list_screen.dart';
 import '../screens/expense_detail_screen.dart';
 
@@ -18,14 +17,6 @@ class RecentExpenses extends StatelessWidget {
     required this.onViewAll,
     required this.onRefresh,
   });
-
-  Color _getCategoryColor(Category category) {
-    try {
-      return Color(int.parse(category.color, radix: 16));
-    } catch (e) {
-      return Colors.grey;
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -149,10 +140,10 @@ class RecentExpenses extends StatelessWidget {
                           width: 40,
                           height: 40,
                           decoration: BoxDecoration(
-                            color: _getCategoryColor(expense.category).withOpacity(0.1),
+                            color: expense.category.toColor().withOpacity(0.1),
                             borderRadius: BorderRadius.circular(10),
                             border: Border.all(
-                              color: _getCategoryColor(expense.category).withOpacity(0.3),
+                              color: expense.category.toColor().withOpacity(0.3),
                               width: 1,
                             ),
                           ),

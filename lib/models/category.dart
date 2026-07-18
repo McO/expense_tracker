@@ -1,3 +1,5 @@
+import 'package:flutter/material.dart';
+
 class Category {
   final String id;
   final String name;
@@ -62,6 +64,14 @@ class Category {
 
   @override
   int get hashCode => id.hashCode;
+
+  Color toColor() {
+    try {
+      return Color(int.parse(color, radix: 16));
+    } catch (_) {
+      return Colors.grey;
+    }
+  }
 
   // Get the name to use for exports
   String get effectiveExportName => exportName?.trim().isNotEmpty == true ? exportName! : name;

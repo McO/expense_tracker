@@ -45,9 +45,6 @@ class _ExpensesListScreenState extends State<ExpensesListScreen> {
       final expenses = await _expenseService.getExpenses();
       final categories = await _categoryService.getCategories();
       
-      // Get unique categories used in expenses
-      final usedCategories = expenses.map((e) => e.category).toSet().toList();
-      
       setState(() {
         _allExpenses = expenses; // Already sorted by service
         _filteredExpenses = _allExpenses;
@@ -107,39 +104,18 @@ class _ExpensesListScreenState extends State<ExpensesListScreen> {
   }
 
   void _onSearchChanged(String query) {
-    setState(() {
-      _searchQuery = query;
-    });
+    _searchQuery = query;
     _filterExpenses();
   }
 
   void _onCategoryFilterChanged(Category? category) {
-    setState(() {
-      _selectedCategory = category;
-    });
+    _selectedCategory = category;
     _filterExpenses();
   }
 
   void _onTransactionTypeFilterChanged(TransactionType? type) {
-    setState(() {
-      _selectedTransactionType = type;
-    });
+    _selectedTransactionType = type;
     _filterExpenses();
-  }
-
-  Color _getCategoryColor(Category category) {
-    try {
-      final colorString = category.color;
-      if (colorString.isEmpty) return Colors.grey;
-      
-      // Remove any non-hex characters and ensure proper format
-      final cleanColor = colorString.replaceAll(RegExp(r'[^0-9A-Fa-f]'), '');
-      if (cleanColor.length != 8) return Colors.grey;
-      
-      return Color(int.parse(cleanColor, radix: 16));
-    } catch (e) {
-      return Colors.grey;
-    }
   }
 
   Future<void> _editExpense(Expense expense) async {
@@ -293,7 +269,7 @@ class _ExpensesListScreenState extends State<ExpensesListScreen> {
                             value: null,
                             child: Text('All Categories'),
                           ),
-                          ..._availableCategories.where((category) => category != null).map((category) => DropdownMenuItem<Category?>(
+                          ..._availableCategories.map((category) => DropdownMenuItem<Category?>(
                             value: category,
                             child: Row(
                               children: [
@@ -393,11 +369,6 @@ class _ExpensesListScreenState extends State<ExpensesListScreen> {
   }
 
   Widget _buildExpenseCard(Expense expense) {
-    // Safety check for null expense
-    if (expense == null) {
-      return const SizedBox.shrink();
-    }
-    
     return Dismissible(
       key: Key(expense.id),
       direction: DismissDirection.endToStart,
@@ -486,10 +457,10 @@ class _ExpensesListScreenState extends State<ExpensesListScreen> {
             width: 48,
             height: 48,
             decoration: BoxDecoration(
-              color: _getCategoryColor(expense.category).withOpacity(0.1),
+              color: expense.category.toColor().withOpacity(0.1),
               borderRadius: BorderRadius.circular(12),
               border: Border.all(
-                color: _getCategoryColor(expense.category).withOpacity(0.3),
+                color: expense.category.toColor().withOpacity(0.3),
                 width: 1,
               ),
             ),

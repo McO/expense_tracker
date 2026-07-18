@@ -41,8 +41,8 @@ class _ExpenseTrackerAppState extends State<ExpenseTrackerApp> {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Expense Tracker',
-      theme: _buildLightTheme(),
-      darkTheme: _buildDarkTheme(),
+      theme: _buildTheme(Brightness.light),
+      darkTheme: _buildTheme(Brightness.dark),
       themeMode: _getFlutterThemeMode(),
       home: HomeScreen(
         onThemeModeChanged: _updateThemeMode,
@@ -63,34 +63,11 @@ class _ExpenseTrackerAppState extends State<ExpenseTrackerApp> {
     }
   }
 
-  ThemeData _buildLightTheme() {
+  ThemeData _buildTheme(Brightness brightness) {
     return ThemeData(
       colorScheme: ColorScheme.fromSeed(
         seedColor: const Color(0xFF6366F1),
-        brightness: Brightness.light,
-      ),
-      useMaterial3: true,
-      appBarTheme: const AppBarTheme(
-        centerTitle: true,
-        elevation: 0,
-      ),
-      cardTheme: const CardThemeData(
-        elevation: 4,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.all(Radius.circular(16)),
-        ),
-      ),
-      floatingActionButtonTheme: const FloatingActionButtonThemeData(
-        elevation: 6,
-      ),
-    );
-  }
-
-  ThemeData _buildDarkTheme() {
-    return ThemeData(
-      colorScheme: ColorScheme.fromSeed(
-        seedColor: const Color(0xFF6366F1),
-        brightness: Brightness.dark,
+        brightness: brightness,
       ),
       useMaterial3: true,
       appBarTheme: const AppBarTheme(

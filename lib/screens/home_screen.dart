@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 import 'package:path_provider/path_provider.dart';
 import '../models/expense.dart';
@@ -9,7 +8,6 @@ import '../models/currency.dart';
 import '../models/category.dart';
 import '../models/account.dart';
 import '../services/expense_service.dart';
-import '../services/settings_service.dart';
 import '../services/theme_service.dart';
 import '../services/account_service.dart';
 import '../widgets/total_expense_card.dart';
@@ -17,7 +15,6 @@ import '../widgets/category_breakdown.dart';
 import '../widgets/recent_expenses.dart';
 import 'add_expense_screen.dart';
 import 'expenses_list_screen.dart';
-import 'expense_detail_screen.dart';
 import 'settings_screen.dart';
 import 'category_management_screen.dart';
 
@@ -37,7 +34,6 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   final ExpenseService _expenseService = ExpenseService();
-  final SettingsService _settingsService = SettingsService();
   final AccountService _accountService = AccountService();
   List<Expense> _recentExpenses = [];
   List<Expense> _allExpenses = [];
@@ -48,15 +44,19 @@ class _HomeScreenState extends State<HomeScreen> {
   Map<Category, double> _categoryIncomeTotal = {};
   Map<Category, double> _categoryExpenseTotal = {};
   Map<Currency, double> _currencyTotals = {};
-  Currency _defaultCurrency = Currency.usd;
+  final Currency _defaultCurrency = Currency.usd;
   Account? _selectedAccount;
   List<Account> _accounts = [];
 
   @override
   void initState() {
     super.initState();
-    _loadAccounts();
-    _loadData();
+    _initData();
+  }
+
+  Future<void> _initData() async {
+    await _loadAccounts();
+    await _loadData();
   }
 
   Future<void> _loadAccounts() async {
@@ -73,14 +73,50 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<void> _loadData() async {
-    
     final expenses = await _expenseService.getExpenses();
+
+    List<Expense> filteredExpenses = expenses;
+    if (_selectedAccount != null) {
+      filteredExpenses = filteredExpenses
+          .where((e) => e.accountId == _selectedAccount!.id)
+          .toList();
+    }
+    filteredExpenses.sort((a, b) => b.date.compareTo(a.date));
+
+    double totalIncome = 0.0;
+    double totalExpenses = 0.0;
+    final Map<Category, double> categoryTotals = {};
+    final Map<Category, double> categoryIncomeTotal = {};
+    final Map<Category, double> categoryExpenseTotal = {};
+    final Map<Currency, double> currencyTotals = {};
+
+    for (final expense in filteredExpenses) {
+      if (expense.isIncome) {
+        totalIncome += expense.amount;
+        categoryIncomeTotal[expense.category] =
+            (categoryIncomeTotal[expense.category] ?? 0) + expense.amount;
+      } else {
+        totalExpenses += expense.amount;
+        categoryExpenseTotal[expense.category] =
+            (categoryExpenseTotal[expense.category] ?? 0) + expense.amount;
+      }
+      categoryTotals[expense.category] =
+          (categoryTotals[expense.category] ?? 0) + expense.amount;
+      currencyTotals[expense.currency] =
+          (currencyTotals[expense.currency] ?? 0) + expense.amount;
+    }
 
     setState(() {
       _allExpenses = expenses;
+      _filteredExpenses = filteredExpenses;
+      _recentExpenses = filteredExpenses.take(5).toList();
+      _totalIncome = totalIncome;
+      _totalExpenses = totalExpenses;
+      _categoryTotals = categoryTotals;
+      _categoryIncomeTotal = categoryIncomeTotal;
+      _categoryExpenseTotal = categoryExpenseTotal;
+      _currencyTotals = currencyTotals;
     });
-
-    _applyFilter();
   }
 
   void _applyFilter() {
@@ -124,14 +160,6 @@ class _HomeScreenState extends State<HomeScreen> {
       _categoryExpenseTotal = categoryExpenseTotal;
       _currencyTotals = currencyTotals;
       });
-  }
-
-  Color _getCategoryColor(Category category) {
-    try {
-      return Color(int.parse(category.color, radix: 16));
-    } catch (e) {
-      return Colors.grey;
-    }
   }
 
   Future<void> _navigateToAddExpense() async {
@@ -342,7 +370,7 @@ class _HomeScreenState extends State<HomeScreen> {
       );
 
       // Hide loading indicator
-      Navigator.of(context).pop();
+      if (mounted) Navigator.of(context).pop();
 
       if (filePath != null) {
         // Show success dialog
@@ -585,7 +613,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     context,
                     MaterialPageRoute(builder: (context) => const ExpensesListScreen()),
                   );
-                  _loadData();
+                  await _loadData();
                 },
       onRefresh: _loadData,
     );
@@ -680,7 +708,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 context,
                 MaterialPageRoute(builder: (context) => const ExpensesListScreen()),
               );
-              _loadData();
+              await _loadData();
             },
           ),
                      ListTile(
@@ -700,7 +728,7 @@ class _HomeScreenState extends State<HomeScreen> {
                  context,
                  MaterialPageRoute(builder: (context) => const CategoryManagementScreen()),
                );
-               _loadData(); // Refresh data in case categories were modified
+               await _loadData();
              },
            ),
            const Divider(),

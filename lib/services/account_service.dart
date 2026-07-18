@@ -102,7 +102,9 @@ class AccountService {
 
   Future<void> deleteAccount(String accountId) async {
     final accounts = await getAccounts();
-    final accountToDelete = accounts.firstWhere((a) => a.id == accountId);
+    final deleteIdx = accounts.indexWhere((a) => a.id == accountId);
+    if (deleteIdx < 0) return;
+    final accountToDelete = accounts[deleteIdx];
     
     // Don't allow deleting the last account
     if (accounts.length <= 1) {
@@ -137,10 +139,7 @@ class AccountService {
 
   Future<Account?> getAccountById(String accountId) async {
     final accounts = await getAccounts();
-    try {
-      return accounts.firstWhere((account) => account.id == accountId);
-    } catch (e) {
-      return null;
-    }
+    final idx = accounts.indexWhere((a) => a.id == accountId);
+    return idx >= 0 ? accounts[idx] : null;
   }
 }

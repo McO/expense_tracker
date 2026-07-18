@@ -129,7 +129,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
     final result = await showDialog<bool>(
       context: context,
-      builder: (context) {
+      builder: (dialogContext) {
         return AlertDialog(
           title: const Text('Add Custom Currency'),
           content: SingleChildScrollView(
@@ -194,6 +194,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
         );
       },
     );
+
+    codeController.dispose();
+    symbolController.dispose();
+    nameController.dispose();
 
     if (result == true && mounted) {
       try {
@@ -452,29 +456,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 ],
               ),
             ),
-    );
-  }
-
-  Widget _buildInfoRow(String label, String value) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(
-            label,
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: Colors.grey[600],
-                ),
-          ),
-          Text(
-            value,
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
-          ),
-        ],
-      ),
     );
   }
 
