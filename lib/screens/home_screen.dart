@@ -2,7 +2,7 @@ import 'dart:async';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
-import 'package:path_provider/path_provider.dart';
+import 'package:permission_handler/permission_handler.dart';
 import '../models/expense.dart';
 import '../models/currency.dart';
 import '../models/category.dart';
@@ -200,7 +200,6 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<void> _exportToCSV() async {
-    // Show account selection dialog
     final Account? selectedAccount = await showDialog<Account>(
       context: context,
       builder: (BuildContext context) {
@@ -212,16 +211,12 @@ class _HomeScreenState extends State<HomeScreen> {
               return ListTile(
                 leading: CircleAvatar(
                   backgroundColor: Color(int.parse(account.color, radix: 16)),
-                  child: Text(
-                    account.icon,
-                    style: const TextStyle(fontSize: 20),
-                  ),
+                  child: Text(account.icon, style: const TextStyle(fontSize: 20)),
                 ),
-                title: Text(
-                  account.name,
-                  style: const TextStyle(fontWeight: FontWeight.bold),
-                ),
-                subtitle: Text('${account.currency.displayName} (${account.currency.symbol})'),
+                title: Text(account.name,
+                    style: const TextStyle(fontWeight: FontWeight.bold)),
+                subtitle: Text(
+                    '${account.currency.displayName} (${account.currency.symbol})'),
                 onTap: () => Navigator.pop(context, account),
               );
             }).toList(),
@@ -236,14 +231,8 @@ class _HomeScreenState extends State<HomeScreen> {
       },
     );
 
-    if (!mounted) return;
+    if (!mounted || selectedAccount == null) return;
 
-    if (selectedAccount == null) {
-      // User cancelled account selection
-      return;
-    }
-
-    // Show date range picker
     final DateTimeRange? dateRange = await showDateRangePicker(
       context: context,
       firstDate: DateTime(2020),
@@ -252,192 +241,74 @@ class _HomeScreenState extends State<HomeScreen> {
         start: DateTime.now().subtract(const Duration(days: 30)),
         end: DateTime.now(),
       ),
-      builder: (context, child) {
-        return Theme(
-          data: Theme.of(context).copyWith(
-            dialogBackgroundColor: Theme.of(context).scaffoldBackgroundColor,
-          ),
-          child: child!,
-        );
-      },
+    );
+
+    if (!mounted || dateRange == null) return;
+
+    // Build CSV content
+    final csvContent = await _expenseService.buildCSV(
+      startDate: dateRange.start,
+      endDate: dateRange.end,
+      accountId: selectedAccount.id,
     );
 
     if (!mounted) return;
 
-    if (dateRange == null) {
-      // User cancelled the picker
+    if (csvContent == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('No expenses found for the selected range')),
+      );
       return;
     }
 
-    // Show storage location picker
-    final String? storageLocation = await showDialog<String>(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Choose Storage Location'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              ListTile(
-                leading: const Icon(Icons.download),
-                title: const Text('Downloads'),
-                subtitle: const Text('Save in Downloads folder'),
-                onTap: () async {
-                  final downloadsDir = Directory('/storage/emulated/0/Download');
-                  final altDownloadsDir = Directory('/storage/emulated/0/Downloads');
-                  
-                  if (await downloadsDir.exists()) {
-                    Navigator.pop(context, downloadsDir.path);
-                  } else if (await altDownloadsDir.exists()) {
-                    Navigator.pop(context, altDownloadsDir.path);
-                  } else {
-                    // Show error dialog
-                    if (!mounted) return;
-                    await showDialog(
-                      context: context,
-                      builder: (context) => AlertDialog(
-                        title: const Text('Downloads Not Available'),
-                        content: const Text('Could not access Downloads folder. Please choose another location.'),
-                        actions: [
-                          TextButton(
-                            onPressed: () => Navigator.pop(context),
-                            child: const Text('OK'),
-                          ),
-                        ],
-                      ),
-                    );
-                  }
-                },
-              ),
-              ListTile(
-                leading: const Icon(Icons.folder_special),
-                title: const Text('External Storage'),
-                subtitle: const Text('Save in app\'s external storage'),
-                onTap: () async {
-                  final dir = await getExternalStorageDirectory();
-                  Navigator.pop(context, dir?.path);
-                },
-              ),
-              ListTile(
-                leading: const Icon(Icons.folder),
-                title: const Text('App Storage'),
-                subtitle: const Text('Save in app\'s private storage'),
-                onTap: () async {
-                  final dir = await getApplicationDocumentsDirectory();
-                  Navigator.pop(context, dir.path);
-                },
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('Cancel'),
-            ),
-          ],
-        );
-      },
-    );
-
-    if (!mounted) return;
-
-    if (storageLocation == null) {
-      // User cancelled storage selection
-      return;
+    // Request storage permission
+    var status = await Permission.manageExternalStorage.status;
+    if (!status.isGranted) {
+      status = await Permission.manageExternalStorage.request();
     }
-
-    try {
-      // Show loading indicator
-      showDialog(
-        context: context,
-        barrierDismissible: false,
-        builder: (BuildContext context) {
-          return const AlertDialog(
-            content: Row(
-              children: [
-                CircularProgressIndicator(),
-                SizedBox(width: 16),
-                Text('Exporting to CSV...'),
-              ],
+    if (!status.isGranted) {
+      var fallback = await Permission.storage.status;
+      if (!fallback.isGranted) fallback = await Permission.storage.request();
+      if (!fallback.isGranted) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Storage permission required to export'),
+              backgroundColor: Colors.red,
             ),
           );
-        },
-      );
+        }
+        return;
+      }
+    }
 
-      final filePath = await _expenseService.exportToCSV(
-        startDate: dateRange.start,
-        endDate: dateRange.end,
-        accountId: selectedAccount.id,
-        storagePath: storageLocation,
-      );
+    final from = '${dateRange.start.year}${dateRange.start.month.toString().padLeft(2, '0')}${dateRange.start.day.toString().padLeft(2, '0')}';
+    final to = '${dateRange.end.year}${dateRange.end.month.toString().padLeft(2, '0')}${dateRange.end.day.toString().padLeft(2, '0')}';
+    final fileName = 'expenses_${from}_$to.csv';
 
-      // Hide loading indicator
-      if (mounted) Navigator.of(context).pop();
+    try {
+      final downloadsDir = Directory('/storage/emulated/0/Download');
+      final dir = await downloadsDir.exists() ? downloadsDir : Directory('/storage/emulated/0/Downloads');
+      final file = File('${dir.path}/$fileName');
+      await file.writeAsString(csvContent);
 
-      if (filePath != null) {
-        // Show success dialog
-        showDialog(
-          context: context,
-          builder: (BuildContext context) {
-            final isInDownloads = filePath.contains('/Download/');
-            return AlertDialog(
-              title: const Text('Export Successful'),
-              content: Text(isInDownloads
-                  ? 'CSV file saved to Downloads folder:\n${filePath.split('/Download/').last}'
-                  : 'CSV file saved to:\n$filePath'),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.of(context).pop(),
-                  child: const Text('OK'),
-                ),
-              ],
-            );
-          },
-        );
-      } else {
-        // Show error dialog
-        showDialog(
-          context: context,
-          builder: (BuildContext context) {
-            return AlertDialog(
-              title: const Text('Export Failed'),
-              content: const Text('Failed to export expenses to CSV. This might be due to:\n\n'
-                  '• Storage permissions not granted\n'
-                  '• Insufficient storage space\n'
-                  '• File system restrictions\n\n'
-                  'Please check your device settings and try again.'),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.of(context).pop(),
-                  child: const Text('OK'),
-                ),
-              ],
-            );
-          },
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Saved to Downloads/$fileName'),
+            backgroundColor: Colors.green,
+          ),
         );
       }
     } catch (e) {
-      // Hide loading indicator if still showing
-      if (Navigator.canPop(context)) {
-        Navigator.of(context).pop();
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Export failed: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
       }
-
-      // Show error dialog
-      showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return AlertDialog(
-            title: const Text('Export Error'),
-            content: Text('An error occurred while exporting: $e'),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.of(context).pop(),
-                child: const Text('OK'),
-              ),
-            ],
-          );
-        },
-      );
     }
   }
 
