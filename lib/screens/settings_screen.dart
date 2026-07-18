@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import '../models/currency.dart';
 import '../services/settings_service.dart';
 import '../services/theme_service.dart';
@@ -122,15 +123,90 @@ class _SettingsScreenState extends State<SettingsScreen> {
     }
   }
 
+  static const Map<String, String> _isoNames = {
+    'AED': 'UAE Dirham', 'AFN': 'Afghan Afghani', 'ALL': 'Albanian Lek',
+    'AMD': 'Armenian Dram', 'ANG': 'Netherlands Antillean Guilder',
+    'AOA': 'Angolan Kwanza', 'ARS': 'Argentine Peso', 'AUD': 'Australian Dollar',
+    'AWG': 'Aruban Florin', 'AZN': 'Azerbaijani Manat',
+    'BAM': 'Bosnia-Herzegovina Mark', 'BBD': 'Barbadian Dollar',
+    'BDT': 'Bangladeshi Taka', 'BGN': 'Bulgarian Lev', 'BHD': 'Bahraini Dinar',
+    'BND': 'Brunei Dollar', 'BOB': 'Bolivian Boliviano', 'BRL': 'Brazilian Real',
+    'BSD': 'Bahamian Dollar', 'BTN': 'Bhutanese Ngultrum',
+    'BWP': 'Botswanan Pula', 'BYN': 'Belarusian Ruble', 'BZD': 'Belize Dollar',
+    'CAD': 'Canadian Dollar', 'CDF': 'Congolese Franc', 'CHF': 'Swiss Franc',
+    'CLP': 'Chilean Peso', 'CNY': 'Chinese Yuan', 'COP': 'Colombian Peso',
+    'CRC': 'Costa Rican Colón', 'CUP': 'Cuban Peso', 'CVE': 'Cape Verdean Escudo',
+    'CZK': 'Czech Koruna', 'DJF': 'Djiboutian Franc', 'DKK': 'Danish Krone',
+    'DOP': 'Dominican Peso', 'DZD': 'Algerian Dinar', 'EGP': 'Egyptian Pound',
+    'ERN': 'Eritrean Nakfa', 'ETB': 'Ethiopian Birr', 'EUR': 'Euro',
+    'FJD': 'Fijian Dollar', 'GBP': 'British Pound', 'GEL': 'Georgian Lari',
+    'GHS': 'Ghanaian Cedi', 'GMD': 'Gambian Dalasi', 'GNF': 'Guinean Franc',
+    'GTQ': 'Guatemalan Quetzal', 'GYD': 'Guyanaese Dollar',
+    'HKD': 'Hong Kong Dollar', 'HNL': 'Honduran Lempira',
+    'HTG': 'Haitian Gourde', 'HUF': 'Hungarian Forint', 'IDR': 'Indonesian Rupiah',
+    'ILS': 'Israeli New Shekel', 'INR': 'Indian Rupee', 'IQD': 'Iraqi Dinar',
+    'IRR': 'Iranian Rial', 'ISK': 'Icelandic Króna', 'JMD': 'Jamaican Dollar',
+    'JOD': 'Jordanian Dinar', 'JPY': 'Japanese Yen', 'KES': 'Kenyan Shilling',
+    'KGS': 'Kyrgystani Som', 'KHR': 'Cambodian Riel', 'KMF': 'Comorian Franc',
+    'KRW': 'South Korean Won', 'KWD': 'Kuwaiti Dinar',
+    'KYD': 'Cayman Islands Dollar', 'KZT': 'Kazakhstani Tenge',
+    'LAK': 'Laotian Kip', 'LBP': 'Lebanese Pound', 'LKR': 'Sri Lankan Rupee',
+    'LRD': 'Liberian Dollar', 'LYD': 'Libyan Dinar', 'MAD': 'Moroccan Dirham',
+    'MDL': 'Moldovan Leu', 'MKD': 'Macedonian Denar', 'MMK': 'Myanmar Kyat',
+    'MNT': 'Mongolian Tögrög', 'MOP': 'Macanese Pataca',
+    'MUR': 'Mauritian Rupee', 'MVR': 'Maldivian Rufiyaa',
+    'MWK': 'Malawian Kwacha', 'MXN': 'Mexican Peso', 'MYR': 'Malaysian Ringgit',
+    'MZN': 'Mozambican Metical', 'NAD': 'Namibian Dollar',
+    'NGN': 'Nigerian Naira', 'NIO': 'Nicaraguan Córdoba',
+    'NOK': 'Norwegian Krone', 'NPR': 'Nepalese Rupee', 'NZD': 'New Zealand Dollar',
+    'OMR': 'Omani Rial', 'PAB': 'Panamanian Balboa', 'PEN': 'Peruvian Sol',
+    'PGK': 'Papua New Guinean Kina', 'PHP': 'Philippine Peso',
+    'PKR': 'Pakistani Rupee', 'PLN': 'Polish Złoty', 'PYG': 'Paraguayan Guarani',
+    'QAR': 'Qatari Rial', 'RON': 'Romanian Leu', 'RSD': 'Serbian Dinar',
+    'RUB': 'Russian Ruble', 'RWF': 'Rwandan Franc', 'SAR': 'Saudi Riyal',
+    'SBD': 'Solomon Islands Dollar', 'SCR': 'Seychellois Rupee',
+    'SDG': 'Sudanese Pound', 'SEK': 'Swedish Krona', 'SGD': 'Singapore Dollar',
+    'SHP': 'Saint Helena Pound', 'SOS': 'Somali Shilling',
+    'SRD': 'Surinamese Dollar', 'SYP': 'Syrian Pound', 'SZL': 'Swazi Lilangeni',
+    'THB': 'Thai Baht', 'TJS': 'Tajikistani Somoni', 'TMT': 'Turkmenistani Manat',
+    'TND': 'Tunisian Dinar', 'TOP': "Tongan Pa'anga", 'TRY': 'Turkish Lira',
+    'TTD': 'Trinidad & Tobago Dollar', 'TWD': 'New Taiwan Dollar',
+    'TZS': 'Tanzanian Shilling', 'UAH': 'Ukrainian Hryvnia',
+    'UGX': 'Ugandan Shilling', 'USD': 'US Dollar', 'UYU': 'Uruguayan Peso',
+    'UZS': 'Uzbekistani Som', 'VND': 'Vietnamese Đồng', 'VUV': 'Vanuatu Vatu',
+    'WST': 'Samoan Tala', 'XAF': 'Central African CFA Franc',
+    'XCD': 'East Caribbean Dollar', 'XOF': 'West African CFA Franc',
+    'XPF': 'CFP Franc', 'YER': 'Yemeni Rial', 'ZAR': 'South African Rand',
+    'ZMW': 'Zambian Kwacha',
+  };
+
+  void _lookupCurrency(String code, StateSetter setDialogState,
+      TextEditingController symbolController,
+      TextEditingController nameController) {
+    final name = _isoNames[code];
+
+    String symbol = '';
+    try {
+      final s = NumberFormat.simpleCurrency(name: code).currencySymbol;
+      if (s != code) symbol = s;
+    } catch (_) {}
+
+    setDialogState(() {
+      if (name != null) nameController.text = name;
+      if (symbol.isNotEmpty) symbolController.text = symbol;
+    });
+  }
+
   Future<void> _showAddCurrencyDialog() async {
     final codeController = TextEditingController();
     final symbolController = TextEditingController();
     final nameController = TextEditingController();
+    bool lookupFound = false;
 
     final result = await showDialog<bool>(
       context: context,
-      builder: (dialogContext) {
-        return AlertDialog(
+      builder: (dialogContext) => StatefulBuilder(
+        builder: (context, setDialogState) => AlertDialog(
           title: const Text('Add Custom Currency'),
           content: SingleChildScrollView(
             child: Column(
@@ -138,20 +214,35 @@ class _SettingsScreenState extends State<SettingsScreen> {
               children: [
                 TextField(
                   controller: codeController,
-                  decoration: const InputDecoration(
+                  decoration: InputDecoration(
                     labelText: 'Currency Code',
-                    hintText: 'e.g., USD',
-                    border: OutlineInputBorder(),
+                    hintText: 'e.g., EUR',
+                    border: const OutlineInputBorder(),
+                    helperText: 'Symbol and name auto-filled when recognized',
+                    suffixIcon: lookupFound
+                        ? const Icon(Icons.check_circle, color: Colors.green)
+                        : null,
                   ),
                   textCapitalization: TextCapitalization.characters,
                   maxLength: 3,
+                  onChanged: (value) {
+                    final code = value.toUpperCase();
+                    if (code.length == 3) {
+                      _lookupCurrency(
+                          code, setDialogState, symbolController, nameController);
+                      setDialogState(
+                          () => lookupFound = _isoNames.containsKey(code));
+                    } else {
+                      setDialogState(() => lookupFound = false);
+                    }
+                  },
                 ),
                 const SizedBox(height: 16),
                 TextField(
                   controller: symbolController,
                   decoration: const InputDecoration(
                     labelText: 'Symbol',
-                    hintText: 'e.g., \$',
+                    hintText: 'e.g., €',
                     border: OutlineInputBorder(),
                   ),
                   maxLength: 3,
@@ -161,7 +252,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   controller: nameController,
                   decoration: const InputDecoration(
                     labelText: 'Currency Name',
-                    hintText: 'e.g., US Dollar',
+                    hintText: 'e.g., Euro',
                     border: OutlineInputBorder(),
                   ),
                 ),
@@ -170,11 +261,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ),
           actions: [
             TextButton(
-              onPressed: () => Navigator.pop(context, false),
+              onPressed: () => Navigator.pop(dialogContext, false),
               child: const Text('Cancel'),
             ),
             ElevatedButton(
-              onPressed: () async {
+              onPressed: () {
                 if (codeController.text.isEmpty ||
                     symbolController.text.isEmpty ||
                     nameController.text.isEmpty) {
@@ -186,13 +277,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   );
                   return;
                 }
-                Navigator.pop(context, true);
+                Navigator.pop(dialogContext, true);
               },
               child: const Text('Add'),
             ),
           ],
-        );
-      },
+        ),
+      ),
     );
 
     codeController.dispose();
