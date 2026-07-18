@@ -16,6 +16,8 @@ import '../widgets/recent_expenses.dart';
 import 'add_expense_screen.dart';
 import 'expenses_list_screen.dart';
 import 'settings_screen.dart';
+import 'account_management_screen.dart';
+import 'currency_management_screen.dart';
 import 'category_management_screen.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -703,7 +705,7 @@ class _HomeScreenState extends State<HomeScreen> {
             leading: const Icon(Icons.list),
             title: const Text('All Expenses'),
             onTap: () async {
-              Navigator.pop(context); // Close drawer
+              Navigator.pop(context);
               await Navigator.push(
                 context,
                 MaterialPageRoute(builder: (context) => const ExpensesListScreen()),
@@ -711,27 +713,51 @@ class _HomeScreenState extends State<HomeScreen> {
               await _loadData();
             },
           ),
-                     ListTile(
-             leading: const Icon(Icons.file_download),
-             title: const Text('Export to CSV'),
-             onTap: () async {
-               Navigator.pop(context); // Close drawer
-               await _exportToCSV();
-             },
-           ),
-           ListTile(
-             leading: const Icon(Icons.category),
-             title: const Text('Manage Categories'),
-             onTap: () async {
-               Navigator.pop(context); // Close drawer
-               await Navigator.push(
-                 context,
-                 MaterialPageRoute(builder: (context) => const CategoryManagementScreen()),
-               );
-               await _loadData();
-             },
-           ),
-           const Divider(),
+          const Divider(),
+          ListTile(
+            leading: const Icon(Icons.account_balance_wallet),
+            title: const Text('Accounts'),
+            onTap: () async {
+              Navigator.pop(context);
+              await Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const AccountManagementScreen()),
+              );
+              await _initData();
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.currency_exchange),
+            title: const Text('Currencies'),
+            onTap: () async {
+              Navigator.pop(context);
+              await Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const CurrencyManagementScreen()),
+              );
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.category),
+            title: const Text('Categories'),
+            onTap: () async {
+              Navigator.pop(context);
+              await Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const CategoryManagementScreen()),
+              );
+              await _loadData();
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.file_download),
+            title: const Text('Export'),
+            onTap: () async {
+              Navigator.pop(context);
+              await _exportToCSV();
+            },
+          ),
+          const Divider(),
           ListTile(
             leading: const Icon(Icons.settings),
             title: const Text('Settings'),
