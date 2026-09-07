@@ -1,7 +1,6 @@
 import 'currency.dart';
 import 'category.dart';
 import 'transaction_type.dart';
-import 'account.dart';
 
 class Expense {
   final String id;

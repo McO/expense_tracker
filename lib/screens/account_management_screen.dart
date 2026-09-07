@@ -54,6 +54,8 @@ class _AccountManagementScreenState extends State<AccountManagementScreen> {
 
     final availableCurrencies = await _currencyService.getAllAvailableCurrencies();
 
+    if (!mounted) return;
+
     final result = await showDialog<bool>(
       context: context,
       builder: (context) => StatefulBuilder(
@@ -81,7 +83,7 @@ class _AccountManagementScreenState extends State<AccountManagementScreen> {
                 ),
                 const SizedBox(height: 16),
                 DropdownButtonFormField<Currency>(
-                  value: selectedCurrency,
+                  initialValue: selectedCurrency,
                   decoration: const InputDecoration(
                     labelText: 'Currency',
                     border: OutlineInputBorder(),
@@ -112,7 +114,7 @@ class _AccountManagementScreenState extends State<AccountManagementScreen> {
                 ),
                 const SizedBox(height: 16),
                 DropdownButtonFormField<String>(
-                  value: selectedColor,
+                  initialValue: selectedColor,
                   decoration: const InputDecoration(
                     labelText: 'Color',
                     border: OutlineInputBorder(),

@@ -124,7 +124,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           Text(
                             'Choose your preferred theme',
                             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                  color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
+                                  color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
                                 ),
                           ),
                           const SizedBox(height: 16),
@@ -171,7 +171,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           border: Border.all(
             color: isSelected
                 ? Theme.of(context).colorScheme.primary
-                : Theme.of(context).colorScheme.outline.withOpacity(0.3),
+                : Theme.of(context).colorScheme.outline.withValues(alpha: 0.3),
             width: isSelected ? 2 : 1,
           ),
           borderRadius: BorderRadius.circular(12),
@@ -203,8 +203,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     description,
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
                           color: isSelected
-                              ? Theme.of(context).colorScheme.onPrimaryContainer.withOpacity(0.8)
-                              : Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
+                              ? Theme.of(context).colorScheme.onPrimaryContainer.withValues(alpha: 0.8)
+                              : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
                         ),
                   ),
                 ],

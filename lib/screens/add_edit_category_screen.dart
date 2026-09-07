@@ -74,15 +74,17 @@ class _AddEditCategoryScreenState extends State<AddEditCategoryScreen> {
       );
       
       if (exists) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('A category with this name already exists'),
-            backgroundColor: Colors.red,
-          ),
-        );
-        setState(() {
-          _isLoading = false;
-        });
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('A category with this name already exists'),
+              backgroundColor: Colors.red,
+            ),
+          );
+          setState(() {
+            _isLoading = false;
+          });
+        }
         return;
       }
 
@@ -249,9 +251,9 @@ class _AddEditCategoryScreenState extends State<AddEditCategoryScreen> {
                   width: 56,
                   height: 56,
                   decoration: BoxDecoration(
-                    color: color.withOpacity(0.1),
+                    color: color.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: color.withOpacity(0.3), width: 1),
+                    border: Border.all(color: color.withValues(alpha: 0.3), width: 1),
                   ),
                   child: Center(
                     child: Text(
@@ -290,9 +292,9 @@ class _AddEditCategoryScreenState extends State<AddEditCategoryScreen> {
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                             decoration: BoxDecoration(
-                              color: color.withOpacity(0.1),
+                              color: color.withValues(alpha: 0.1),
                               borderRadius: BorderRadius.circular(12),
-                              border: Border.all(color: color.withOpacity(0.3)),
+                              border: Border.all(color: color.withValues(alpha: 0.3)),
                             ),
                             child: Text(
                               _isEditing ? 'Editing' : 'New Category',
@@ -423,7 +425,7 @@ class _AddEditCategoryScreenState extends State<AddEditCategoryScreen> {
                 },
                 child: Container(
                   decoration: BoxDecoration(
-                    color: isSelected ? Theme.of(context).colorScheme.primary.withOpacity(0.1) : null,
+                    color: isSelected ? Theme.of(context).colorScheme.primary.withValues(alpha: 0.1) : null,
                     border: Border.all(
                       color: isSelected 
                           ? Theme.of(context).colorScheme.primary

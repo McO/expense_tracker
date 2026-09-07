@@ -1,5 +1,5 @@
+// ignore_for_file: avoid_print
 import 'dart:io';
-import 'dart:typed_data';
 
 void main() {
   // Create a simple 1024x1024 PNG icon

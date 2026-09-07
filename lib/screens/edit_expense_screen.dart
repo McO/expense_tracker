@@ -504,10 +504,10 @@ class _EditExpenseScreenState extends State<EditExpenseScreen> {
                                       width: 32,
                                       height: 32,
                                       decoration: BoxDecoration(
-                                        color: category.toColor().withOpacity(0.1),
+                                        color: category.toColor().withValues(alpha: 0.1),
                                         borderRadius: BorderRadius.circular(8),
                                         border: Border.all(
-                                          color: category.toColor().withOpacity(0.3),
+                                          color: category.toColor().withValues(alpha: 0.3),
                                           width: 1,
                                         ),
                                       ),

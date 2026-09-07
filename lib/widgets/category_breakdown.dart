@@ -131,10 +131,10 @@ class _CategoryBreakdownState extends State<CategoryBreakdown> {
     return Container(
       padding: const EdgeInsets.all(8),
       decoration: BoxDecoration(
-        color: isIncome ? Colors.green.withOpacity(0.05) : Colors.red.withOpacity(0.05),
+        color: isIncome ? Colors.green.withValues(alpha: 0.05) : Colors.red.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(8),
         border: Border.all(
-          color: isIncome ? Colors.green.withOpacity(0.2) : Colors.red.withOpacity(0.2),
+          color: isIncome ? Colors.green.withValues(alpha: 0.2) : Colors.red.withValues(alpha: 0.2),
         ),
       ),
       child: Row(
@@ -185,7 +185,7 @@ class _CategoryBreakdownState extends State<CategoryBreakdown> {
       elevation: 6,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(20),
-        side: BorderSide(color: color.withOpacity(0.3), width: 2),
+        side: BorderSide(color: color.withValues(alpha: 0.3), width: 2),
       ),
       child: Container(
         decoration: BoxDecoration(
@@ -193,8 +193,8 @@ class _CategoryBreakdownState extends State<CategoryBreakdown> {
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
             colors: [
-              color.withOpacity(0.08),
-              color.withOpacity(0.03),
+              color.withValues(alpha: 0.08),
+              color.withValues(alpha: 0.03),
             ],
           ),
           borderRadius: BorderRadius.circular(20),
@@ -210,9 +210,9 @@ class _CategoryBreakdownState extends State<CategoryBreakdown> {
                     width: 32,
                     height: 32,
                     decoration: BoxDecoration(
-                      color: color.withOpacity(0.15),
+                      color: color.withValues(alpha: 0.15),
                       shape: BoxShape.circle,
-                      border: Border.all(color: color.withOpacity(0.4), width: 1),
+                      border: Border.all(color: color.withValues(alpha: 0.4), width: 1),
                     ),
                     child: Center(
                       child: Text(

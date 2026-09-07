@@ -210,7 +210,7 @@ class _ExpensesListScreenState extends State<ExpensesListScreen> {
                   children: [
                     Expanded(
                       child: DropdownButtonFormField<TransactionType?>(
-                        value: _selectedTransactionType,
+                        initialValue: _selectedTransactionType,
                         decoration: InputDecoration(
                           labelText: 'Transaction Type',
                           border: OutlineInputBorder(
@@ -253,7 +253,7 @@ class _ExpensesListScreenState extends State<ExpensesListScreen> {
                     // Category Filter
                     Expanded(
                       child: DropdownButtonFormField<Category?>(
-                        value: _selectedCategory != null && _availableCategories.any((cat) => cat.id == _selectedCategory!.id) 
+                        initialValue: _selectedCategory != null && _availableCategories.any((cat) => cat.id == _selectedCategory!.id)
                             ? _availableCategories.firstWhere((cat) => cat.id == _selectedCategory!.id)
                             : null,
                         decoration: InputDecoration(
@@ -457,10 +457,10 @@ class _ExpensesListScreenState extends State<ExpensesListScreen> {
             width: 48,
             height: 48,
             decoration: BoxDecoration(
-              color: expense.category.toColor().withOpacity(0.1),
+              color: expense.category.toColor().withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(12),
               border: Border.all(
-                color: expense.category.toColor().withOpacity(0.3),
+                color: expense.category.toColor().withValues(alpha: 0.3),
                 width: 1,
               ),
             ),

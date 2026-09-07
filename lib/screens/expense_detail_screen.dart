@@ -56,7 +56,7 @@ class ExpenseDetailScreen extends StatelessWidget {
           children: [
             // Amount Card
             Card(
-              color: _transactionTypeColor.withOpacity(0.1),
+              color: _transactionTypeColor.withValues(alpha: 0.1),
               child: Padding(
                 padding: const EdgeInsets.all(24),
                 child: Row(

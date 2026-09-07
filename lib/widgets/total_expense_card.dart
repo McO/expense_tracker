@@ -70,7 +70,7 @@ class TotalExpenseCard extends StatelessWidget {
                   Text(
                     'Savings Rate: ${((totalIncome - totalExpenses) / totalIncome * 100).toStringAsFixed(1)}%',
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: (netBalance >= 0 ? Colors.blue.shade700 : Colors.orange.shade700).withOpacity(0.7),
+                      color: (netBalance >= 0 ? Colors.blue.shade700 : Colors.orange.shade700).withValues(alpha: 0.7),
                     ),
                   ),
                 ],
@@ -79,7 +79,7 @@ class TotalExpenseCard extends StatelessWidget {
                   Text(
                     'Combined from ${currencyTotals.length} currencies',
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: (netBalance >= 0 ? Colors.blue.shade700 : Colors.orange.shade700).withOpacity(0.7),
+                      color: (netBalance >= 0 ? Colors.blue.shade700 : Colors.orange.shade700).withValues(alpha: 0.7),
                     ),
                   ),
                 ],

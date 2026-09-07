@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import '../models/category.dart';
-import '../models/transaction_type.dart';
 import '../services/category_service.dart';
 import 'add_edit_category_screen.dart';
 
@@ -207,9 +206,9 @@ class _CategoryManagementScreenState extends State<CategoryManagementScreen> {
           width: 56,
           height: 56,
           decoration: BoxDecoration(
-            color: color.withOpacity(0.1),
+            color: color.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: color.withOpacity(0.3), width: 1),
+            border: Border.all(color: color.withValues(alpha: 0.3), width: 1),
           ),
           child: Center(
             child: Text(
@@ -241,9 +240,9 @@ class _CategoryManagementScreenState extends State<CategoryManagementScreen> {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                   decoration: BoxDecoration(
-                    color: color.withOpacity(0.1),
+                    color: color.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: color.withOpacity(0.3)),
+                    border: Border.all(color: color.withValues(alpha: 0.3)),
                   ),
                   child: Text(
                     category.isDefault ? 'Default' : 'Custom',
