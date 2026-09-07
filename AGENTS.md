@@ -25,14 +25,14 @@ lib/
 │   ├── account.dart                   # Account: name, currency, emoji, ARGB hex, isDefault
 │   └── transaction_type.dart          # Enum: expense | income
 ├── services/
-│   ├── expense_service.dart           # CRUD + CSV export; all reads/writes via SharedPreferences
+│   ├── expense_service.dart           # CRUD + CSV building (`buildCSV`); all reads/writes via SharedPreferences
 │   ├── account_service.dart           # CRUD for accounts; auto-creates default if list is empty
 │   ├── category_service.dart          # CRUD for categories; seeds defaults once (v2 migration flag)
 │   ├── currency_service.dart          # CRUD for user-defined custom currencies
 │   ├── settings_service.dart          # Default currency preference
 │   └── theme_service.dart             # Theme mode preference (light/dark/system)
 ├── screens/
-│   ├── home_screen.dart               # Dashboard: account selector, totals, category breakdown, recents
+│   ├── home_screen.dart               # Dashboard: account selector, totals, category breakdown, recents; also drives CSV export (account + date-range pickers, storage permission request, writes file to Downloads)
 │   ├── add_expense_screen.dart        # Add transaction form
 │   ├── edit_expense_screen.dart       # Edit transaction form (pre-populated)
 │   ├── expenses_list_screen.dart      # Full list with search & category filter
@@ -43,7 +43,7 @@ lib/
 │   ├── currency_management_screen.dart# CRUD UI for custom currencies
 │   └── settings_screen.dart          # Theme selection only
 └── widgets/
-    ├── total_expense_card.dart        # Net balance + income/expense summary row
+    ├── total_expense_card.dart        # Net balance + income/expense summary row; groups totals by currency when multiple currencies are present
     ├── category_breakdown.dart        # Auto-scrolling PageView of category spending cards
     ├── recent_expenses.dart           # Dismissible list of 5 most recent transactions
     └── transaction_type_selector.dart # Two-button toggle: Expense / Income
