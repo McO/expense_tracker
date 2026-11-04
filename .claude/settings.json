@@ -1,0 +1,13 @@
+{
+  "enabledPlugins": {
+    "agentheim@agentheim-local": true
+  },
+  "extraKnownMarketplaces": {
+    "agentheim-local": {
+      "source": {
+        "source": "directory",
+        "path": "/Users/marco/Dev/agentheim-local-marketplace"
+      }
+    }
+  }
+}
