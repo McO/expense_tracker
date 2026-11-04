@@ -5,6 +5,30 @@ Newest entries on top.
 
 ---
 
+## 2026-11-04 20:16 -- Task verified and completed: design-system-001 - Capture the existing look as a styleguide and sign it off before new UI work
+
+**Type:** Work / Task completion
+**Task:** design-system-001 - Capture the existing look as a styleguide and sign it off before new UI work
+**Summary:** Styleguide capturing the existing look (tokens, components, patterns) plus the approved quick-glance chart style; owner signed off
+**Duration:** 5m50s
+**Verification:** PASS (iteration 2)
+**Files changed:** 1
+**Tests added:** 0
+**ADRs written:** none
+
+---
+
+## 2026-11-04 20:13 -- Verification failed: design-system-001 - Capture the existing look as a styleguide and sign it off before new UI work
+
+**Type:** Work / Verification failure
+**Task:** design-system-001 - Capture the existing look as a styleguide and sign it off before new UI work
+**Iteration:** 1 of 3
+**Reasons:** management-lists row misdescribes account and currency screens and omits the AlertDialog form pattern, elevation-2 usage list incomplete, category alpha range wrong
+**Iteration hint:** likely-fixable
+**Next:** re-dispatched worker
+
+---
+
 ## 2026-11-04 20:11 -- Task completed (verification skipped): cash-ledger-ngxsa - Record the existing CSV export as an ADR (per-wallet date range to Downloads, for MoneyMoney)
 
 **Type:** Work / Task completion

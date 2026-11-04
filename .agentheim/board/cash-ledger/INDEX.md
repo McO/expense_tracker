@@ -10,7 +10,7 @@ Catalog of this bounded context's tasks by status.
 ## Tasks by status
 
 <!-- task-counts:start -->
-- **Backlog:** 0
+- **Backlog:** 1
 - **Todo:** 0
 - **Doing:** 0
 - **Done:** 1
@@ -43,6 +43,7 @@ prior-art matcher additionally checks `done-archive/` when present.
 
 ### Backlog
 <!-- backlog-list:start -->
+- **cash-ledger-p53v9** — Make the summary card's money colors work in dark mode (bug) — `backlog/cash-ledger-p53v9-summary-card-dark-mode-colors.md`
 <!-- backlog-list:end -->
 
 ## Pointers
