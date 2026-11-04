@@ -5,6 +5,17 @@ Newest entries on top.
 
 ---
 
+## 2026-11-04 20:11 -- Task completed (verification skipped): cash-ledger-ngxsa - Record the existing CSV export as an ADR (per-wallet date range to Downloads, for MoneyMoney)
+
+**Type:** Work / Task completion
+**Task:** cash-ledger-ngxsa - Record the existing CSV export as an ADR (per-wallet date range to Downloads, for MoneyMoney)
+**Summary:** Verified the draft CSV export ADR against buildCSV, the home screen export flow and the manifest; filled in the real six-column format and corrected the draft (signed amounts, file naming, permission fallback, date-range edge, hardcoded Downloads path). No source changes.
+**Duration:** 3m41s
+**Verification:** SKIPPED — decision-only task
+**Files changed:** 0
+
+---
+
 ## 2026-11-04 20:10 -- Batch started: [cash-ledger-ngxsa, design-system-001]
 
 **Type:** Work / Batch start

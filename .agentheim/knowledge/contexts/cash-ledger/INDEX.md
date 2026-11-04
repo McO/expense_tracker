@@ -10,6 +10,7 @@ Catalog of ADRs, research, and concept synthesis pages scoped to this bounded co
 ## ADRs scoped to this BC
 
 <!-- adr-local:start -->
+- **0005** — Per-wallet date-range CSV export to Downloads, shaped for MoneyMoney import — 2026-11-04 — `../../decisions/0005-per-wallet-date-range-csv-export-to-downloads-for-moneymoney.md`
 <!-- adr-local:end -->
 
 ## Research touching this BC

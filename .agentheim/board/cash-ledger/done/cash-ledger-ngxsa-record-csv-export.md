@@ -1,14 +1,14 @@
 ---
 id: cash-ledger-ngxsa
 title: Record the existing CSV export as an ADR (per-wallet date range to Downloads, for MoneyMoney)
-status: doing
+status: done
 type: decision
 context: cash-ledger
 created: 2026-11-04
 depends_on: []
 blocks: []
 tags: [adr-backfill, export, csv, moneymoney, permissions]
-related_adrs: [ADR-0001]
+related_adrs: [ADR-0001, ADR-0005]
 related_research: []
 prior_art: []
 ---
@@ -75,3 +75,9 @@ permission. Nothing records which movements were exported.
   worth a later task.
 - **Export tracking (last-exported marker)** — rejected for now; duplicates are cheap to remove.
 ```
+
+## Outcome
+
+Verified the draft ADR against `ExpenseService.buildCSV` (`lib/services/expense_service.dart`), `_exportToCSV` in `lib/screens/home_screen.dart`, `Category.effectiveExportName` (`lib/models/category.dart`) and `android/app/src/main/AndroidManifest.xml`. Filled in the placeholder column list (`Date,Title,Category,Amount,Currency,Description`) and corrected/extended the draft: amounts are signed (expense `-`, income unsigned, two decimals), category falls back to name when `exportName` is blank, permission request tries `manageExternalStorage` then `storage`, the file goes to a hardcoded `/storage/emulated/0/Download[s]` as `expenses_<from>_<to>.csv` (wallet not in the name, overwrite on same name), and the date filter's end bound is inclusive of one extra day. Reported as provisional ADR-0005 (`0005-per-wallet-date-range-csv-export-to-downloads-for-moneymoney.md`). Top-up/correction export remains an open question, kept honest in the negatives. No source or test files changed.
+
+ADR recorded as **0005** (`knowledge/decisions/0005-per-wallet-date-range-csv-export-to-downloads-for-moneymoney.md`).
