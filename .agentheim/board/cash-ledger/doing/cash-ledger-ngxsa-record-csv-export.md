@@ -1,7 +1,7 @@
 ---
 id: cash-ledger-ngxsa
 title: Record the existing CSV export as an ADR (per-wallet date range to Downloads, for MoneyMoney)
-status: todo
+status: doing
 type: decision
 context: cash-ledger
 created: 2026-11-04

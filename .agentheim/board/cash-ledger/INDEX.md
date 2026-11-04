@@ -11,18 +11,18 @@ Catalog of this bounded context's tasks by status.
 
 <!-- task-counts:start -->
 - **Backlog:** 0
-- **Todo:** 1
-- **Doing:** 0
+- **Todo:** 0
+- **Doing:** 1
 - **Done:** 0
 <!-- task-counts:end -->
 
 ### Todo
 <!-- todo-list:start -->
-- **cash-ledger-ngxsa** — Record the existing CSV export as an ADR (per-wallet date range to Downloads, for MoneyMoney) (decision) — `todo/cash-ledger-ngxsa-record-csv-export.md`
 <!-- todo-list:end -->
 
 ### Doing
 <!-- doing-list:start -->
+- **cash-ledger-ngxsa** — Record the existing CSV export as an ADR (per-wallet date range to Downloads, for MoneyMoney) (decision) — `doing/cash-ledger-ngxsa-record-csv-export.md`
 <!-- doing-list:end -->
 
 ### Done (most recent first; older entries kept for prior-art search)

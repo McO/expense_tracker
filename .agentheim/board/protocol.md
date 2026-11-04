@@ -5,6 +5,14 @@ Newest entries on top.
 
 ---
 
+## 2026-11-04 20:10 -- Batch started: [cash-ledger-ngxsa, design-system-001]
+
+**Type:** Work / Batch start
+**Tasks:** cash-ledger-ngxsa - Record the existing CSV export as an ADR (per-wallet date range to Downloads, for MoneyMoney), design-system-001 - Capture the existing look as a styleguide and sign it off before new UI work
+**Parallel:** yes (2 workers) — the whole remaining ready set, second wave after the three infrastructure ADR backfills
+
+---
+
 ## 2026-11-04 20:09 -- Task completed (verification skipped): infrastructure-r5v4d - Record the existing persistence as an ADR (SharedPreferences JSON lists, no schema migration)
 
 **Type:** Work / Task completion

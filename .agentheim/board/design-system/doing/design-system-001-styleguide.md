@@ -1,7 +1,7 @@
 ---
 id: design-system-001
 title: Capture the existing look as a styleguide and sign it off before new UI work
-status: todo
+status: doing
 type: feature
 context: design-system
 created: 2026-11-04
