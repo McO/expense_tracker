@@ -11,11 +11,15 @@ For BC-scoped artifacts, see each BC's `INDEX.md`.
 ## Bounded contexts
 
 <!-- bc-list:start -->
+- **design-system** — tokens, components, patterns and the styleguide gate for new UI — `contexts/design-system/INDEX.md`
+- **infrastructure** — globally-true tech concerns: platform, toolchain and dependency updates, persistence, app-wide conventions, builds — `contexts/infrastructure/INDEX.md`
+- **cash-ledger** — recording cash movements per currency wallet, balances, quick-glance cash statistics, CSV export for MoneyMoney — `contexts/cash-ledger/INDEX.md`
 <!-- bc-list:end -->
 
 ## Global ADRs (scope: global)
 
 <!-- adr-global:start -->
+- **0001** — The app is a cash-only ledger; MoneyMoney is the system of record — 2026-11-04 — `knowledge/decisions/0001-cash-only-ledger-moneymoney-system-of-record.md`
 <!-- adr-global:end -->
 
 ## Cross-BC research
