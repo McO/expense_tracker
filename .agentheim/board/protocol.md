@@ -5,6 +5,17 @@ Newest entries on top.
 
 ---
 
+## 2026-11-04 20:08 -- Task completed (verification skipped): infrastructure-pr7em - Record the existing platform and toolchain as an ADR (Android-only Flutter, manual builds)
+
+**Type:** Work / Task completion
+**Task:** infrastructure-pr7em - Record the existing platform and toolchain as an ADR (Android-only Flutter, manual builds)
+**Summary:** Verified the draft platform/toolchain ADR against pubspec.yaml, android/ build files and lib/main.dart, and added the verified toolchain versions (AGP 9.1.0, Gradle 9.3.1, Kotlin 2.4.0, Java 11, Flutter-provided SDK levels, debug-key release signing). No source changes.
+**Duration:** 1m53s
+**Verification:** SKIPPED — decision-only task
+**Files changed:** 0
+
+---
+
 ## 2026-11-04 20:06 -- Batch started: [infrastructure-pr7em, infrastructure-bza94, infrastructure-r5v4d]
 
 **Type:** Work / Batch start

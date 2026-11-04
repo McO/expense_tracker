@@ -1,14 +1,14 @@
 ---
 id: infrastructure-pr7em
 title: Record the existing platform and toolchain as an ADR (Android-only Flutter, manual builds)
-status: doing
+status: done
 type: decision
 context: infrastructure
 created: 2026-11-04
 depends_on: []
 blocks: []
 tags: [adr-backfill, platform, toolchain, build]
-related_adrs: [ADR-0001]
+related_adrs: [ADR-0001, ADR-0002]
 related_research: []
 prior_art: []
 ---
@@ -74,3 +74,9 @@ installed by hand; `flutter analyze` is the static gate. No CI/CD.
 
 Verify current Gradle/AGP/Kotlin versions from `android/` before committing (recent commit
 `e0783e2` migrated to the AGP 9 DSL).
+
+## Outcome
+
+Verified the draft ADR against the repo and returned the final ADR (provisional 0002, `scope: global`) in the ADRS block. Corrections and additions to the draft: AGP 9.1.0, Kotlin plugin 2.4.0, Gradle wrapper 9.3.1, Java 11 target, compileSdk/minSdk/targetSdk/versionCode taken from Flutter plugin defaults (not pinned), release builds signed with the debug keystore, version 1.0.0+1. Dart constraint, app id, and theme seed (`0xFF6366F1`, M3) were confirmed unchanged. No code or test changes.
+
+ADR recorded as **0002** (`knowledge/decisions/0002-android-only-flutter-stable-manual-builds.md`).
