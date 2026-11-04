@@ -1,7 +1,7 @@
 ---
 id: cash-ledger-qjysm
 title: Replace the top-up/correction kinds with signed amounts plus a per-category "count in statistics" flag
-status: todo
+status: doing
 type: feature
 context: cash-ledger
 created: 2026-11-04

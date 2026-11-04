@@ -5,6 +5,14 @@ Newest entries on top.
 
 ---
 
+## 2026-11-04 21:09 -- Batch started: [cash-ledger-qjysm]
+
+**Type:** Work / Batch start
+**Tasks:** cash-ledger-qjysm - Replace the top-up/correction kinds with signed amounts plus a per-category "count in statistics" flag
+**Parallel:** no (1 worker) — only ready task; cash-ledger-vsszp waits in backlog until this is done
+
+---
+
 ## 2026-11-04 21:03 -- Modeling / Refined: cash-ledger-vsszp - Enter movements as a signed amount with a ± toggle, correct a wallet balance from the counted cash, and flag categories that do not count in statistics
 
 **Type:** Modeling / Refine
