@@ -5,6 +5,15 @@ Newest entries on top.
 
 ---
 
+## 2026-11-04 21:03 -- Modeling / Captured: cash-ledger-qjysm - Replace the top-up/correction kinds with signed amounts plus a per-category "count in statistics" flag
+
+**Type:** Modeling / Capture
+**BC:** cash-ledger
+**Filed to:** todo
+**Summary:** Owner redesign after eye-checking the build: a movement is a signed amount plus a category; Top-up and Correction become categories with a per-category count-in-statistics flag; supersedes the kinds from cash-ledger-s2v1q (ADR-0006).
+
+---
+
 ## 2026-11-04 21:02 -- Work session ended
 
 **Type:** Work / Session end

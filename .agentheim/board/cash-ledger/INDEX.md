@@ -11,13 +11,14 @@ Catalog of this bounded context's tasks by status.
 
 <!-- task-counts:start -->
 - **Backlog:** 2
-- **Todo:** 0
+- **Todo:** 1
 - **Doing:** 0
 - **Done:** 2
 <!-- task-counts:end -->
 
 ### Todo
 <!-- todo-list:start -->
+- **cash-ledger-qjysm** — Replace the top-up/correction kinds with signed amounts plus a per-category "count in statistics" flag (feature) — `todo/cash-ledger-qjysm-signed-amount-and-category-flag.md`
 <!-- todo-list:end -->
 
 ### Doing
