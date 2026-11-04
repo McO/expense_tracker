@@ -19,6 +19,7 @@ For BC-scoped artifacts, see each BC's `INDEX.md`.
 ## Global ADRs (scope: global)
 
 <!-- adr-global:start -->
+- **0003** — Plain setState, screen-owned services and imperative navigation — 2026-11-04 — `knowledge/decisions/0003-plain-setstate-screen-owned-services-imperative-navigation.md`
 - **0002** — Android-only Flutter app on the stable channel, built and released manually — 2026-11-04 — `knowledge/decisions/0002-android-only-flutter-stable-manual-builds.md`
 - **0001** — The app is a cash-only ledger; MoneyMoney is the system of record — 2026-11-04 — `knowledge/decisions/0001-cash-only-ledger-moneymoney-system-of-record.md`
 <!-- adr-global:end -->

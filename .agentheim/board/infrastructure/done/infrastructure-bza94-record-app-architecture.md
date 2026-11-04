@@ -1,14 +1,14 @@
 ---
 id: infrastructure-bza94
 title: Record the existing app architecture as an ADR (setState, screen-owned services, imperative navigation)
-status: doing
+status: done
 type: decision
 context: infrastructure
 created: 2026-11-04
 depends_on: []
 blocks: []
 tags: [adr-backfill, architecture, state-management, navigation]
-related_adrs: []
+related_adrs: [ADR-0003]
 related_research: []
 prior_art: []
 ---
@@ -74,3 +74,9 @@ Riverpod, BLoC, GetX, `ChangeNotifier` or `InheritedWidget`.
 - **Provider / Riverpod / BLoC** — not adopted; overhead not justified at this size.
 - **go_router / named routes** — not adopted; no deep links or web routing needed.
 ```
+
+## Outcome
+
+Verified the draft ADR against `lib/main.dart`, `lib/screens/*` and `lib/services/expense_service.dart`. Corrections made: the refresh method is not uniformly `_loadData()` (it is `_loadAccounts` / `_loadCategories` / `_loadExpenses` in several screens); `ExpenseService` instantiates other services itself; the theme path is root -> `HomeScreen` -> `SettingsScreen`; no reactive builders are used. ADR provisionally numbered 0002 (`0002-plain-setstate-screen-owned-services-imperative-navigation.md`), scope global. No source or test files changed.
+
+ADR recorded as **0003** (`knowledge/decisions/0003-plain-setstate-screen-owned-services-imperative-navigation.md`).

@@ -5,6 +5,17 @@ Newest entries on top.
 
 ---
 
+## 2026-11-04 20:09 -- Task completed (verification skipped): infrastructure-bza94 - Record the existing app architecture as an ADR (setState, screen-owned services, imperative navigation)
+
+**Type:** Work / Task completion
+**Task:** infrastructure-bza94 - Record the existing app architecture as an ADR (setState, screen-owned services, imperative navigation)
+**Summary:** Verified the draft architecture ADR against lib/ and corrected it (loader names vary per screen, services also nest, theme path is root to HomeScreen to SettingsScreen); final ADR returned for materialization.
+**Duration:** 2m02s
+**Verification:** SKIPPED — decision-only task
+**Files changed:** 0
+
+---
+
 ## 2026-11-04 20:08 -- Task completed (verification skipped): infrastructure-pr7em - Record the existing platform and toolchain as an ADR (Android-only Flutter, manual builds)
 
 **Type:** Work / Task completion
