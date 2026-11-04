@@ -1,7 +1,7 @@
 ---
 id: cash-ledger-vsszp
 title: Let the owner record top-ups and correct a wallet's balance by entering the counted cash
-status: todo
+status: doing
 type: feature
 context: cash-ledger
 created: 2026-11-04
