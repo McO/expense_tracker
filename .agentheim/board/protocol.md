@@ -5,6 +5,24 @@ Newest entries on top.
 
 ---
 
+## 2026-11-04 21:02 -- Work session ended
+
+**Type:** Work / Session end
+**Duration:** 26m (20:36 batch start to 21:02)
+**Completed:** 1 (first-try PASS: 0, re-dispatched: 1, skipped: 0)
+**Bounced:** 1 (cash-ledger-vsszp — verified PASS, then bounced on the owner's redesign after eye-checking the running build: signed amount + category instead of kinds)
+**Failed:** 0
+**Escalated after verification:** 0
+**Lost-result re-dispatches:** 0
+**Lost-result escalations:** 0
+**Dispatches:** cash-ledger-s2v1q: 2, cash-ledger-vsszp: 1
+**Commits:** 5 (2 batch starts, 1 task integration, 1 bounce, this bookkeeping commit)
+**Vision-conformance:** none — batch aligns with vision
+**Batch mix:** 100% product-facing / 0% harness / 0% bookkeeping (1 task)
+**Carry-over:** none — working tree clean
+
+---
+
 ## 2026-11-04 21:02 -- Task bounced: cash-ledger-vsszp - Let the owner record top-ups and correct a wallet's balance by entering the counted cash
 
 **Type:** Work / Task bounced
