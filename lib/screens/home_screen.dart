@@ -431,7 +431,7 @@ class _HomeScreenState extends State<HomeScreen> {
       floatingActionButton: FloatingActionButton.extended(
         onPressed: _navigateToAddExpense,
         icon: const Icon(Icons.add),
-        label: const Text('Add Expense'),
+        label: const Text('Add movement'),
       ),
     );
   }
