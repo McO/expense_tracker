@@ -1,7 +1,7 @@
 ---
 id: infrastructure-bza94
 title: Record the existing app architecture as an ADR (setState, screen-owned services, imperative navigation)
-status: todo
+status: doing
 type: decision
 context: infrastructure
 created: 2026-11-04

@@ -1,7 +1,7 @@
 ---
 id: infrastructure-r5v4d
 title: Record the existing persistence as an ADR (SharedPreferences JSON lists, no schema migration)
-status: todo
+status: doing
 type: decision
 context: infrastructure
 created: 2026-11-04

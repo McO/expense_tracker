@@ -1,7 +1,7 @@
 ---
 id: infrastructure-pr7em
 title: Record the existing platform and toolchain as an ADR (Android-only Flutter, manual builds)
-status: todo
+status: doing
 type: decision
 context: infrastructure
 created: 2026-11-04

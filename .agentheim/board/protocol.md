@@ -5,6 +5,14 @@ Newest entries on top.
 
 ---
 
+## 2026-11-04 20:06 -- Batch started: [infrastructure-pr7em, infrastructure-bza94, infrastructure-r5v4d]
+
+**Type:** Work / Batch start
+**Tasks:** infrastructure-pr7em - Record the existing platform and toolchain as an ADR (Android-only Flutter, manual builds), infrastructure-bza94 - Record the existing app architecture as an ADR (setState, screen-owned services, imperative navigation), infrastructure-r5v4d - Record the existing persistence as an ADR (SharedPreferences JSON lists, no schema migration)
+**Parallel:** yes (3 workers, MAX_PARALLEL 3) — cash-ledger-ngxsa and design-system-001 held to the next wave by the cap; grouped the three infrastructure ADR backfills first since they are one BC and code-free
+
+---
+
 ## 2026-11-04 20:00 -- Brainstorm: cash ledger feeding MoneyMoney
 
 **Type:** Brainstorm
