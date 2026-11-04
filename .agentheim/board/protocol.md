@@ -5,6 +5,15 @@ Newest entries on top.
 
 ---
 
+## 2026-11-04 20:35 -- Modeling / Captured: cash-ledger-vsszp - Let the owner record top-ups and correct a wallet's balance by entering the counted cash
+
+**Type:** Modeling / Capture
+**BC:** cash-ledger
+**Filed to:** todo
+**Summary:** UI for the new movement kinds: Top-up in the add/edit forms, a Correct balance dialog that takes the counted cash and records the difference, distinct row display, and a settings field for the correction export category. Depends on cash-ledger-s2v1q and the styleguide.
+
+---
+
 ## 2026-11-04 20:34 -- Modeling / Captured: cash-ledger-s2v1q - Add top-up and correction movement kinds to the model, totals and CSV export (no UI)
 
 **Type:** Modeling / Capture

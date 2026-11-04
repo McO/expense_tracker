@@ -11,13 +11,14 @@ Catalog of this bounded context's tasks by status.
 
 <!-- task-counts:start -->
 - **Backlog:** 1
-- **Todo:** 1
+- **Todo:** 2
 - **Doing:** 0
 - **Done:** 1
 <!-- task-counts:end -->
 
 ### Todo
 <!-- todo-list:start -->
+- **cash-ledger-vsszp** — Let the owner record top-ups and correct a wallet's balance by entering the counted cash (feature) — `todo/cash-ledger-vsszp-movement-kinds-ui.md`
 - **cash-ledger-s2v1q** — Add top-up and correction movement kinds to the model, totals and CSV export (no UI) (feature) — `todo/cash-ledger-s2v1q-movement-kinds-model-totals-export.md`
 <!-- todo-list:end -->
 
