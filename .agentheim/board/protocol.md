@@ -5,6 +5,14 @@ Newest entries on top.
 
 ---
 
+## 2026-11-04 21:14 -- Batch started: [cash-ledger-vsszp]
+
+**Type:** Work / Batch start
+**Tasks:** cash-ledger-vsszp - Enter movements as a signed amount with a ± toggle, correct a wallet's balance from the counted cash, and flag categories that don't count in statistics
+**Parallel:** no (1 worker) — only ready task, unblocked by cash-ledger-qjysm
+
+---
+
 ## 2026-11-04 21:14 -- Modeling / Promoted: cash-ledger-vsszp - Enter movements as a signed amount with a ± toggle, correct a wallet's balance from the counted cash, and flag categories that don't count in statistics
 
 **Type:** Modeling / Promote
