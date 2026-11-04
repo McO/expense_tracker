@@ -1,7 +1,7 @@
 ---
 id: cash-ledger-s2v1q
 title: Add top-up and correction movement kinds to the model, totals and CSV export (no UI)
-status: todo
+status: doing
 type: feature
 context: cash-ledger
 created: 2026-11-04

@@ -5,6 +5,14 @@ Newest entries on top.
 
 ---
 
+## 2026-11-04 20:36 -- Batch started: [cash-ledger-s2v1q]
+
+**Type:** Work / Batch start
+**Tasks:** cash-ledger-s2v1q - Add top-up and correction movement kinds to the model, totals and CSV export (no UI)
+**Parallel:** no (1 worker) — cash-ledger-vsszp depends on this task and runs in the next wave
+
+---
+
 ## 2026-11-04 20:35 -- Modeling / Captured: cash-ledger-vsszp - Let the owner record top-ups and correct a wallet's balance by entering the counted cash
 
 **Type:** Modeling / Capture
