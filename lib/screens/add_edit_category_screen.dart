@@ -20,6 +20,7 @@ class _AddEditCategoryScreenState extends State<AddEditCategoryScreen> {
   String _selectedIcon = '';
   String _selectedColor = '';
   bool _isLoading = false;
+  bool _countsInStatistics = true;
 
   bool get _isEditing => widget.category != null;
 
@@ -31,6 +32,7 @@ class _AddEditCategoryScreenState extends State<AddEditCategoryScreen> {
       _exportNameController.text = widget.category!.exportName ?? '';
       _selectedIcon = widget.category!.icon;
       _selectedColor = widget.category!.color;
+      _countsInStatistics = widget.category!.countsInStatistics;
     } else {
       // Set default values for new category
       _selectedIcon = CategoryService.availableIcons.first;
@@ -96,6 +98,7 @@ class _AddEditCategoryScreenState extends State<AddEditCategoryScreen> {
           exportName: exportName.isEmpty ? null : exportName,
           icon: _selectedIcon,
           color: _selectedColor,
+          countsInStatistics: _countsInStatistics,
         );
         await _categoryService.updateCategory(category);
       } else {
@@ -108,6 +111,7 @@ class _AddEditCategoryScreenState extends State<AddEditCategoryScreen> {
           icon: _selectedIcon,
           color: _selectedColor,
           isDefault: false,
+          countsInStatistics: _countsInStatistics,
         );
         await _categoryService.saveCategory(category);
       }
@@ -383,6 +387,16 @@ class _AddEditCategoryScreenState extends State<AddEditCategoryScreen> {
             helperText: 'If empty, the category name will be used for exports',
           ),
           onChanged: (value) => setState(() {}), // Update preview
+        ),
+        const SizedBox(height: 8),
+        SwitchListTile(
+          key: const Key('counts-in-statistics-switch'),
+          contentPadding: EdgeInsets.zero,
+          title: const Text('Count in statistics'),
+          subtitle: const Text(
+              'Off: movements stay in the wallet balance but are not counted as income or spending'),
+          value: _countsInStatistics,
+          onChanged: (v) => setState(() => _countsInStatistics = v),
         ),
       ],
     );

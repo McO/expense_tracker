@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../widgets/movement_style.dart';
 import 'package:intl/intl.dart';
 import '../models/expense.dart';
 import 'edit_expense_screen.dart';
@@ -26,7 +27,7 @@ class ExpenseDetailScreen extends StatelessWidget {
   }
 
   Color get _transactionTypeColor {
-    return expense.increasesBalance ? Colors.green : Colors.red;
+    return movementColor(expense);
   }
 
   IconData get _transactionTypeIcon {
@@ -105,6 +106,10 @@ class ExpenseDetailScreen extends StatelessWidget {
                               color: Colors.grey[600],
                             ),
                           ),
+                          if (!expense.countsInStatistics) ...[
+                            const SizedBox(height: 8),
+                            const NotCountedMarker(),
+                          ],
                         ],
                       ),
                     ),

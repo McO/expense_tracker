@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../widgets/movement_style.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 import '../models/expense.dart';
@@ -482,6 +483,10 @@ class _ExpensesListScreenState extends State<ExpensesListScreen> {
                 '${expense.category.name} • ${DateFormat('MMM d, yyyy • h:mm a').format(expense.date)}',
                 style: Theme.of(context).textTheme.bodySmall,
               ),
+              if (!expense.countsInStatistics) ...[
+                const SizedBox(height: 4),
+                const NotCountedMarker(),
+              ],
               if (expense.description.isNotEmpty) ...[
                 const SizedBox(height: 4),
                 Text(
@@ -503,7 +508,7 @@ class _ExpensesListScreenState extends State<ExpensesListScreen> {
                 expense.formattedAmountWithSign,
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
                   fontWeight: FontWeight.bold,
-                  color: expense.increasesBalance ? Colors.green : Colors.red,
+                  color: movementColor(expense),
                 ),
               ),
               PopupMenuButton<String>(

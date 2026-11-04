@@ -8,7 +8,8 @@ import '../models/transaction_type.dart';
 import '../services/expense_service.dart';
 import '../services/category_service.dart';
 import '../services/account_service.dart';
-import '../widgets/transaction_type_selector.dart';
+import '../widgets/sign_toggle.dart';
+import '../widgets/movement_style.dart';
 
 class AddExpenseScreen extends StatefulWidget {
   const AddExpenseScreen({super.key});
@@ -78,19 +79,13 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
   }
 
   void _onTransactionTypeChanged(TransactionType type) {
-    setState(() {
-      _selectedType = type;
-      // Don't reset category - categories are now universal
-    });
+    setState(() => _selectedType = type);
   }
 
-  Color get _transactionTypeColor {
-    return _selectedType == TransactionType.income ? Colors.green : Colors.red;
-  }
+  Color get _transactionTypeColor => directionColor(_selectedType);
 
-  IconData get _transactionTypeIcon {
-    return _selectedType == TransactionType.income ? Icons.trending_up : Icons.trending_down;
-  }
+  IconData get _transactionTypeIcon =>
+      _selectedType == TransactionType.income ? Icons.trending_up : Icons.trending_down;
 
   Future<void> _selectDate() async {
     final DateTime? picked = await showDatePicker(
@@ -176,7 +171,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('${_selectedType.name} added successfully!'),
+            content: Text('Movement added successfully!'),
             backgroundColor: Colors.green,
           ),
         );
@@ -205,7 +200,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          'Add ${_selectedType.name}',
+          'Add movement',
           style: TextStyle(fontWeight: FontWeight.bold),
         ),
         actions: [
@@ -237,12 +232,6 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              TransactionTypeSelector(
-                selectedType: _selectedType,
-                onChanged: _onTransactionTypeChanged,
-              ),
-              const SizedBox(height: 16),
-
               // Title Field
               Card(
                 child: Padding(
@@ -251,7 +240,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Expense Details',
+                        'Movement details',
                         style: Theme.of(context).textTheme.titleMedium?.copyWith(
                           fontWeight: FontWeight.bold,
                         ),
@@ -261,7 +250,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                         controller: _titleController,
                         decoration: const InputDecoration(
                           labelText: 'Title',
-                          hintText: 'Enter expense title',
+                          hintText: 'What was it for?',
                           prefixIcon: Icon(Icons.title),
                           border: OutlineInputBorder(),
                         ),
@@ -277,6 +266,11 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                       // Amount and Currency Row
                       Row(
                         children: [
+                          SignToggle(
+                            type: _selectedType,
+                            onChanged: _onTransactionTypeChanged,
+                          ),
+                          const SizedBox(width: 12),
                           Expanded(
                             flex: 2,
                             child:                       TextFormField(
@@ -317,14 +311,14 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                               decoration: BoxDecoration(
                                 border: Border.all(color: Colors.grey),
                                 borderRadius: BorderRadius.circular(4),
-                                color: Colors.grey[100],
+                                color: Theme.of(context).colorScheme.surfaceContainerHighest,
                               ),
                               child: Center(
                                 child: Text(
                                   _selectedCurrency.symbol,
                                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
                                     fontWeight: FontWeight.bold,
-                                    color: Colors.grey[600],
+                                    color: Theme.of(context).colorScheme.onSurfaceVariant,
                                   ),
                                 ),
                               ),
@@ -507,7 +501,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                           ),
                         )
                       : Text(
-                          'Add ${_selectedType.name}',
+                          'Add movement',
                           style: const TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,

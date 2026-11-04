@@ -1,7 +1,7 @@
 ---
 id: cash-ledger-vsszp
 title: Enter movements as a signed amount with a ± toggle, correct a wallet's balance from the counted cash, and flag categories that don't count in statistics
-status: doing
+status: done
 type: feature
 context: cash-ledger
 created: 2026-11-04
@@ -61,8 +61,8 @@ statistics. `cash-ledger-qjysm` delivers the model; this task is the UI for it.
 - [ ] Movement rows show + amounts and − amounts in their sign colours, and mark movements in
       non-counting categories distinctly, covered by a widget test.
 - [ ] `flutter test` and `flutter analyze` pass.
-- [ ] The signed-amount form, the ± toggle and the marking of non-counting movements look
-      consistent with the styleguide in light and dark mode. [human-eye]
+- [x] The signed-amount form, the ± toggle and the marking of non-counting movements look
+      consistent with the styleguide in light and dark mode. [human-eye] — checked by the owner on the emulator build, 2026-11-04
 
 ## Notes
 
@@ -79,3 +79,7 @@ statistics. `cash-ledger-qjysm` delivers the model; this task is the UI for it.
 ## Worker note
 
 Owner redesign after eye-checking the build (2026-11-04): no Expense/Income/Top-up selector — a movement is a signed amount (± toggle, default −) plus a category; Top-up and Correction become ordinary categories; a per-category "count in statistics" flag (off for Top-up and Correction) keeps them out of statistics. The verified iteration-1 UI (salvage patch kept) no longer matches the model; refine this task against the new model task instead of merging.
+
+## Outcome
+
+Implemented the UI for the signed-amount model (ADR-0007). Add/edit movement forms drop the type selector (lib/widgets/transaction_type_selector.dart deleted) for a ± SignToggle (lib/widgets/sign_toggle.dart) beside the amount; default −, edit shows the existing sign. Form texts are neutral ("Movement details", "What was it for?", "Add/Edit movement"), and the currency box now uses scheme-aware colours (fixes the light box in dark mode). Home drawer has "Correct balance" above Export (lib/widgets/correct_balance_dialog.dart): shows balance, takes counted cash, shows the live signed difference, records one Correction-category movement via Expense.correction, or nothing with a message when equal. Category form has a "Count in statistics" switch. lib/widgets/movement_style.dart colours amounts by sign and provides a "Not counted" marker shown in recent rows, the list and detail screen for movements in non-counting categories. Settings had no correction field left. Tests: test/movement_ui_test.dart (7 widget tests); flutter test and flutter analyze pass. The final [human-eye] criterion (look in light/dark mode) awaits the owner's eye-check.

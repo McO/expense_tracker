@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../widgets/movement_style.dart';
 import 'package:intl/intl.dart';
 import '../models/expense.dart';
 import '../screens/expenses_list_screen.dart';
@@ -158,14 +159,23 @@ class RecentExpenses extends StatelessWidget {
                           expense.title,
                           style: const TextStyle(fontWeight: FontWeight.bold),
                         ),
-                        subtitle: Text(
-                          '${expense.category.name} • ${DateFormat('MMM d, yyyy • h:mm a').format(expense.date)}',
+                        subtitle: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              '${expense.category.name} • ${DateFormat('MMM d, yyyy • h:mm a').format(expense.date)}',
+                            ),
+                            if (!expense.countsInStatistics) ...[
+                              const SizedBox(height: 4),
+                              const NotCountedMarker(),
+                            ],
+                          ],
                         ),
                         trailing: Text(
                           expense.formattedAmountWithSign,
                           style: Theme.of(context).textTheme.titleMedium?.copyWith(
                                 fontWeight: FontWeight.bold,
-                                color: expense.increasesBalance ? Colors.green : Colors.red,
+                                color: movementColor(expense),
                               ),
                         ),
                         onTap: () async {

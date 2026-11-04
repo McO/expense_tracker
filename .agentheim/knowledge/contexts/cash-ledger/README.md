@@ -43,6 +43,8 @@ This is the whole reason the app exists (ADR-0001): MoneyMoney sees everything e
 - Record movement, edit movement, delete movement
 - Manage wallets, categories, currencies
 - Export wallet movements for a date range
+- Correct balance — enter the counted cash for a wallet; records one Correction-category movement signed by the difference (nothing when equal)
+- Enter movement with a ± toggle beside the amount (default −); Top-up is just the Top-up category with +
 
 ## Frontend rule — styleguide gate
 This BC has a UI. **Every frontend task in this BC must `depends_on: [design-system-001]`**

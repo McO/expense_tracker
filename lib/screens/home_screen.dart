@@ -14,6 +14,7 @@ import '../services/account_service.dart';
 import '../widgets/total_expense_card.dart';
 import '../widgets/category_breakdown.dart';
 import '../widgets/recent_expenses.dart';
+import '../widgets/correct_balance_dialog.dart';
 import 'add_expense_screen.dart';
 import 'expenses_list_screen.dart';
 import 'settings_screen.dart';
@@ -596,6 +597,17 @@ class _HomeScreenState extends State<HomeScreen> {
                 context,
                 MaterialPageRoute(builder: (context) => const CategoryManagementScreen()),
               );
+              await _loadData();
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.tune),
+            title: const Text('Correct balance'),
+            onTap: () async {
+              Navigator.pop(context);
+              final account = _selectedAccount;
+              if (account == null) return;
+              await correctBalance(context, account: account, balance: _balance);
               await _loadData();
             },
           ),

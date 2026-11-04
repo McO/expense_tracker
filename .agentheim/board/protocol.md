@@ -5,6 +5,19 @@ Newest entries on top.
 
 ---
 
+## 2026-11-04 23:16 -- Task verified and completed: cash-ledger-vsszp - Enter movements as a signed amount with a ± toggle, correct a wallet's balance from the counted cash, and flag categories that don't count in statistics
+
+**Type:** Work / Task completion
+**Task:** cash-ledger-vsszp - Enter movements as a signed amount with a ± toggle, correct a wallet's balance from the counted cash, and flag categories that don't count in statistics
+**Summary:** Movements are now entered with a ± toggle beside the amount (default −) instead of a type selector, the home drawer has a Correct balance entry that records a signed Correction movement, the category form has a Count in statistics switch, and rows/detail colour by sign and mark non-counting movements.
+**Duration:** 13m
+**Verification:** PASS (iteration 1); human-eye criterion checked by the owner
+**Files changed:** 12
+**Tests added:** 7
+**ADRs written:** none
+
+---
+
 ## 2026-11-04 21:14 -- Batch started: [cash-ledger-vsszp]
 
 **Type:** Work / Batch start

@@ -8,7 +8,8 @@ import '../models/transaction_type.dart';
 import '../services/expense_service.dart';
 import '../services/category_service.dart';
 import '../services/account_service.dart';
-import '../widgets/transaction_type_selector.dart';
+import '../widgets/sign_toggle.dart';
+import '../widgets/movement_style.dart';
 
 class EditExpenseScreen extends StatefulWidget {
   final Expense expense;
@@ -103,19 +104,13 @@ class _EditExpenseScreenState extends State<EditExpenseScreen> {
   }
 
   void _onTransactionTypeChanged(TransactionType type) {
-    setState(() {
-      _selectedType = type;
-      // Don't reset category - categories are now universal
-    });
+    setState(() => _selectedType = type);
   }
 
-  Color get _transactionTypeColor {
-    return _selectedType == TransactionType.income ? Colors.green : Colors.red;
-  }
+  Color get _transactionTypeColor => directionColor(_selectedType);
 
-  IconData get _transactionTypeIcon {
-    return _selectedType == TransactionType.income ? Icons.trending_up : Icons.trending_down;
-  }
+  IconData get _transactionTypeIcon =>
+      _selectedType == TransactionType.income ? Icons.trending_up : Icons.trending_down;
 
   Future<void> _selectDate() async {
     final DateTime? picked = await showDatePicker(
@@ -199,7 +194,7 @@ class _EditExpenseScreenState extends State<EditExpenseScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('${_selectedType.name} updated successfully!'),
+            content: Text('Movement updated successfully!'),
             backgroundColor: Colors.green,
           ),
         );
@@ -228,7 +223,7 @@ class _EditExpenseScreenState extends State<EditExpenseScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          'Edit ${_selectedType.name}',
+          'Edit movement',
           style: const TextStyle(fontWeight: FontWeight.bold),
         ),
         actions: [
@@ -260,12 +255,6 @@ class _EditExpenseScreenState extends State<EditExpenseScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              TransactionTypeSelector(
-                selectedType: _selectedType,
-                onChanged: _onTransactionTypeChanged,
-              ),
-              const SizedBox(height: 16),
-
               // Info Card
               Card(
                 child: Padding(
@@ -283,7 +272,7 @@ class _EditExpenseScreenState extends State<EditExpenseScreen> {
                       Text(
                         'Original: ${widget.expense.formattedAmount} • ${DateFormat('MMM d, yyyy').format(widget.expense.date)}',
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: Colors.grey[600],
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
                         ),
                       ),
                     ],
@@ -300,7 +289,7 @@ class _EditExpenseScreenState extends State<EditExpenseScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Expense Details',
+                        'Movement details',
                         style: Theme.of(context).textTheme.titleMedium?.copyWith(
                           fontWeight: FontWeight.bold,
                         ),
@@ -310,7 +299,7 @@ class _EditExpenseScreenState extends State<EditExpenseScreen> {
                         controller: _titleController,
                         decoration: const InputDecoration(
                           labelText: 'Title',
-                          hintText: 'Enter expense title',
+                          hintText: 'What was it for?',
                           prefixIcon: Icon(Icons.title),
                           border: OutlineInputBorder(),
                         ),
@@ -326,6 +315,11 @@ class _EditExpenseScreenState extends State<EditExpenseScreen> {
                       // Amount and Currency Row
                       Row(
                         children: [
+                          SignToggle(
+                            type: _selectedType,
+                            onChanged: _onTransactionTypeChanged,
+                          ),
+                          const SizedBox(width: 12),
                           Expanded(
                             flex: 2,
                             child:                       TextFormField(
@@ -366,14 +360,14 @@ class _EditExpenseScreenState extends State<EditExpenseScreen> {
                               decoration: BoxDecoration(
                                 border: Border.all(color: Colors.grey),
                                 borderRadius: BorderRadius.circular(4),
-                                color: Colors.grey[100],
+                                color: Theme.of(context).colorScheme.surfaceContainerHighest,
                               ),
                               child: Center(
                                 child: Text(
                                   _selectedCurrency.symbol,
                                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
                                     fontWeight: FontWeight.bold,
-                                    color: Colors.grey[600],
+                                    color: Theme.of(context).colorScheme.onSurfaceVariant,
                                   ),
                                 ),
                               ),
@@ -447,7 +441,7 @@ class _EditExpenseScreenState extends State<EditExpenseScreen> {
                                     Text(
                                       account.currency.code,
                                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                        color: Colors.grey[600],
+                                        color: Theme.of(context).colorScheme.onSurfaceVariant,
                                       ),
                                     ),
                                   ],
@@ -617,7 +611,7 @@ class _EditExpenseScreenState extends State<EditExpenseScreen> {
                           ),
                         )
                       : const Text(
-                          'Update Expense',
+                          'Update movement',
                           style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
