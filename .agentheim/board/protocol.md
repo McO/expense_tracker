@@ -5,6 +5,24 @@ Newest entries on top.
 
 ---
 
+## 2026-11-04 23:17 -- Work session ended
+
+**Type:** Work / Session end
+**Duration:** about 2h (21:09 batch start, paused on a usage limit, to session end)
+**Completed:** 2 (first-try PASS: 2, re-dispatched: 0, skipped: 0)
+**Bounced:** 0
+**Failed:** 0
+**Escalated after verification:** 0
+**Lost-result re-dispatches:** 0
+**Lost-result escalations:** 0
+**Dispatches:** cash-ledger-qjysm: 1, cash-ledger-vsszp: 1
+**Commits:** 7 (2 batch starts, 1 promotion, 2 task integrations, 1 owner-requested label fix for cash-ledger-vsszp, this bookkeeping commit)
+**Vision-conformance:** none — batch aligns with vision
+**Batch mix:** 100% product-facing / 0% harness / 0% bookkeeping (2 tasks)
+**Carry-over:** none — working tree clean
+
+---
+
 ## 2026-11-04 23:16 -- Task verified and completed: cash-ledger-vsszp - Enter movements as a signed amount with a ± toggle, correct a wallet's balance from the counted cash, and flag categories that don't count in statistics
 
 **Type:** Work / Task completion
