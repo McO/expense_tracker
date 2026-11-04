@@ -5,6 +5,15 @@ Newest entries on top.
 
 ---
 
+## 2026-11-04 21:02 -- Task bounced: cash-ledger-vsszp - Let the owner record top-ups and correct a wallet's balance by entering the counted cash
+
+**Type:** Work / Task bounced
+**BC:** cash-ledger
+**From → To:** doing → backlog
+**Reason:** Owner redesign after eye-checking the build (2026-11-04): no Expense/Income/Top-up selector — a movement is a signed amount (± toggle, default −) plus a category; Top-up and Correction become ordinary categories; a per-category "count in statistics" flag (off for Top-up and Correction) keeps them out of statistics. The verified iteration-1 UI (salvage patch kept) no longer matches the model; refine this task against the new model task instead of merging.
+
+---
+
 ## 2026-11-04 20:44 -- Batch started: [cash-ledger-vsszp]
 
 **Type:** Work / Batch start

@@ -1,7 +1,7 @@
 ---
 id: cash-ledger-vsszp
 title: Let the owner record top-ups and correct a wallet's balance by entering the counted cash
-status: doing
+status: backlog
 type: feature
 context: cash-ledger
 created: 2026-11-04
@@ -68,3 +68,7 @@ work out the difference (owner decision, 2026-11-04).
   the light-only `shadeNN` tints, see `cash-ledger-p53v9`); green = income, red = expense, so pick a
   neutral color for top-ups/corrections.
 - Exchange (cash for cash) stays out of scope.
+
+## Worker note
+
+Owner redesign after eye-checking the build (2026-11-04): no Expense/Income/Top-up selector — a movement is a signed amount (± toggle, default −) plus a category; Top-up and Correction become ordinary categories; a per-category "count in statistics" flag (off for Top-up and Correction) keeps them out of statistics. The verified iteration-1 UI (salvage patch kept) no longer matches the model; refine this task against the new model task instead of merging.
