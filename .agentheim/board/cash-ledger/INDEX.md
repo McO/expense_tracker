@@ -10,14 +10,15 @@ Catalog of this bounded context's tasks by status.
 ## Tasks by status
 
 <!-- task-counts:start -->
-- **Backlog:** 2
-- **Todo:** 0
+- **Backlog:** 1
+- **Todo:** 1
 - **Doing:** 0
 - **Done:** 3
 <!-- task-counts:end -->
 
 ### Todo
 <!-- todo-list:start -->
+- **cash-ledger-vsszp** — Enter movements as a signed amount with a ± toggle, correct a wallet's balance from the counted cash, and flag categories that don't count in statistics (feature) — `todo/cash-ledger-vsszp-movement-kinds-ui.md`
 <!-- todo-list:end -->
 
 ### Doing
@@ -45,7 +46,6 @@ prior-art matcher additionally checks `done-archive/` when present.
 
 ### Backlog
 <!-- backlog-list:start -->
-- **cash-ledger-vsszp** — Let the owner record top-ups and correct a wallet's balance by entering the counted cash (feature) — `backlog/cash-ledger-vsszp-movement-kinds-ui.md`
 - **cash-ledger-p53v9** — Make the summary card's money colors work in dark mode (bug) — `backlog/cash-ledger-p53v9-summary-card-dark-mode-colors.md`
 <!-- backlog-list:end -->
 

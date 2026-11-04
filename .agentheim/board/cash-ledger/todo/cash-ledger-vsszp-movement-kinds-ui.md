@@ -1,7 +1,7 @@
 ---
 id: cash-ledger-vsszp
 title: Enter movements as a signed amount with a ± toggle, correct a wallet's balance from the counted cash, and flag categories that don't count in statistics
-status: backlog
+status: todo
 type: feature
 context: cash-ledger
 created: 2026-11-04

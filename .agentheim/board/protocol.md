@@ -5,6 +5,14 @@ Newest entries on top.
 
 ---
 
+## 2026-11-04 21:14 -- Modeling / Promoted: cash-ledger-vsszp - Enter movements as a signed amount with a ± toggle, correct a wallet's balance from the counted cash, and flag categories that don't count in statistics
+
+**Type:** Modeling / Promote
+**BC:** cash-ledger
+**From → To:** backlog → todo
+
+---
+
 ## 2026-11-04 21:13 -- Task verified and completed: cash-ledger-qjysm - Replace the top-up/correction kinds with signed amounts plus a per-category "count in statistics" flag
 
 **Type:** Work / Task completion
