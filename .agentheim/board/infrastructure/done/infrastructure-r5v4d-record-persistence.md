@@ -1,14 +1,14 @@
 ---
 id: infrastructure-r5v4d
 title: Record the existing persistence as an ADR (SharedPreferences JSON lists, no schema migration)
-status: doing
+status: done
 type: decision
 context: infrastructure
 created: 2026-11-04
 depends_on: []
 blocks: []
 tags: [adr-backfill, persistence, shared-preferences, migration]
-related_adrs: []
+related_adrs: [ADR-0004]
 related_research: []
 prior_art: []
 ---
@@ -76,3 +76,9 @@ flag suffix (`_v3`).
 - **SQLite / Drift** — more robust migrations; not needed at this volume.
 - **Hive / Isar** — typed storage; adds a dependency for little gain today.
 ```
+
+## Outcome
+
+Verified the draft ADR against the code and reported it as provisional ADR 0002 (scope: global). Corrections to the draft: full key table with owning services; per-model `fromJson` tolerance (Expense defaults and the other -> first category -> built-in fallback chain; Account and Category have required fields with no fallback); the accounts default-seeding pattern (empty list, no flag) alongside the category flag; and a negative noting that a flag bump overwrites the `categories` list wholesale. No source or test files changed.
+
+ADR recorded as **0004** (`knowledge/decisions/0004-all-data-in-sharedpreferences-json-lists-without-schema-migration.md`).

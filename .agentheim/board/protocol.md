@@ -5,6 +5,17 @@ Newest entries on top.
 
 ---
 
+## 2026-11-04 20:09 -- Task completed (verification skipped): infrastructure-r5v4d - Record the existing persistence as an ADR (SharedPreferences JSON lists, no schema migration)
+
+**Type:** Work / Task completion
+**Task:** infrastructure-r5v4d - Record the existing persistence as an ADR (SharedPreferences JSON lists, no schema migration)
+**Summary:** Verified the draft persistence ADR against lib/services and lib/models, corrected it (key table, per-model fromJson tolerance, two seeding patterns) and report it as ADR 0002.
+**Duration:** 2m09s
+**Verification:** SKIPPED — decision-only task
+**Files changed:** 0
+
+---
+
 ## 2026-11-04 20:09 -- Task completed (verification skipped): infrastructure-bza94 - Record the existing app architecture as an ADR (setState, screen-owned services, imperative navigation)
 
 **Type:** Work / Task completion
