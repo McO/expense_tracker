@@ -1,73 +1,80 @@
 ---
 id: cash-ledger-vsszp
-title: Let the owner record top-ups and correct a wallet's balance by entering the counted cash
+title: Enter movements as a signed amount with a ± toggle, correct a wallet's balance from the counted cash, and flag categories that don't count in statistics
 status: backlog
 type: feature
 context: cash-ledger
 created: 2026-11-04
 completed:
-depends_on: [cash-ledger-s2v1q, design-system-001]
+depends_on: [cash-ledger-qjysm, design-system-001]
 blocks: []
-tags: [movement-kinds, top-up, correction, ui, settings]
+tags: [movement-kinds, top-up, correction, category, ui]
 related_adrs: [ADR-0003, ADR-0005]
 related_research: []
-prior_art: [design-system-001]
+prior_art: [design-system-001, cash-ledger-s2v1q]
 ---
 
 ## Why
 
-`cash-ledger-s2v1q` adds top-up and correction movement kinds to the model, totals and export, but
-nothing in the app lets the owner create them. Top-ups (ATM withdrawals, currency bought) need to be
-recordable like any movement, and corrections exist to make the app's balance match the physical
-wallet — so the natural way to enter one is to type what is actually in the wallet and let the app
-work out the difference (owner decision, 2026-11-04).
+The owner redesigned the model after eye-checking the first UI build (2026-11-04): a movement is a
+signed amount plus a category, with no Expense/Income/Top-up selector. Top-up and Correction are
+ordinary categories, and a per-category "count in statistics" flag keeps them out of the
+statistics. `cash-ledger-qjysm` delivers the model; this task is the UI for it.
 
 ## What
 
-- **Top-up in the forms.** The add and edit movement screens (`add_expense_screen.dart`,
-  `edit_expense_screen.dart`) offer Top-up alongside Expense and Income in the type selector
-  (`transaction_type_selector.dart`). A top-up has title, amount, category, date and description like
-  the other kinds. Existing records can be switched to Top-up via edit — this is how the owner
-  reclassifies old income records by hand (no migration).
-- **Correct balance.** A "Correct balance" entry in the home screen's app-bar menu (beside Export)
-  for the selected wallet opens a dialog (styleguide: dialog form pattern) showing the current
-  balance and asking for the **counted cash**. The dialog shows the resulting difference before
-  saving; on confirm it records one correction movement (in or out) dated now, with the difference
-  as its amount. Equal values record nothing and say so. Corrections are created only this way, not
-  via the add form.
-- **Display.** Movement rows (`recent_expenses.dart`, `expenses_list_screen.dart`) show top-ups and
-  corrections distinctly from income and spending (label/icon and a neutral color, scheme-aware per
-  the styleguide), with the signed amount. Editing a correction allows changing its amount, date and
-  description; deleting works like any movement.
-- **Settings.** The settings screen gains a text field for the correction export category (the
-  SharedPreferences value added in `cash-ledger-s2v1q`, default `Correction`).
+- **Signed amount entry.** In the add and edit movement forms (`add_expense_screen.dart`,
+  `edit_expense_screen.dart`) the Expense/Income type selector (`transaction_type_selector.dart`) is
+  replaced by a **± toggle beside the amount field**. A new movement defaults to **−** (money out);
+  tapping the toggle flips it. The amount field itself only takes the positive number. Editing an
+  existing movement shows its current sign. Form texts no longer say "Expense" where the movement may
+  be income (e.g. "Movement details", a neutral title placeholder).
+- **Top-up is a category.** Recording a top-up = choosing the Top-up category with **+**. No special
+  path.
+- **Correct balance.** An entry in the home screen's drawer directly above Export (that drawer is
+  where Export lives) opens a dialog (styleguide dialog-form pattern) for the selected wallet: it
+  shows the current balance, takes the **counted cash**, shows the signed difference live, and on
+  confirm records one movement dated now in the **Correction** category, signed by the difference.
+  Equal values record nothing and say so.
+- **Category flag.** Category management / the add-edit category screen
+  (`add_edit_category_screen.dart`) gains a "Count in statistics" switch for the
+  `countsInStatistics` flag. Management-list controls follow the category style (styleguide
+  decision 2026-11-04).
+- **Display.** Movement rows (`recent_expenses.dart`, `expenses_list_screen.dart`) and the detail
+  screen colour the signed amount by sign (+ green, − red, per the styleguide); movements in a
+  category that doesn't count in statistics (e.g. Top-up, Correction) are visibly marked so they read
+  as "not income/spending" (e.g. a neutral, scheme-aware colour or a small label).
+- **Settings.** Nothing new; make sure no correction-export-category field remains (the setting is
+  removed by `cash-ledger-qjysm`).
 - Follow the signed-off styleguide (`.agentheim/knowledge/contexts/design-system/styleguide/README.md`).
 
 ## Acceptance criteria
 
-- [ ] The add and edit movement forms offer Top-up as a kind, and saving produces a stored movement
-      of kind top-up, covered by a widget test.
-- [ ] An existing income movement can be changed to Top-up via the edit screen, covered by a widget
-      test.
-- [ ] "Correct balance" from the home screen's app-bar menu records a correction-in when the counted
-      cash exceeds the balance, a correction-out when it is lower, and nothing (with a message) when
-      equal; afterwards the wallet balance equals the counted cash. Covered by a widget or service
-      test.
-- [ ] The settings screen reads and saves the correction export category, covered by a widget test.
-- [ ] Movement rows show top-ups and corrections with a label distinct from income and expense,
-      covered by a widget test.
+- [ ] The add form has no Expense/Income/Top-up selector; a ± toggle beside the amount defaults to −,
+      and saving stores a movement whose direction matches the toggle, covered by a widget test.
+- [ ] The edit form shows an existing movement's sign on the toggle and saving after flipping it
+      changes the stored direction, covered by a widget test.
+- [ ] "Correct balance" in the home drawer records one movement in the Correction category, + when
+      the counted cash exceeds the balance and − when lower, and nothing (with a message) when equal;
+      afterwards the wallet balance equals the counted cash. Covered by a widget or service test.
+- [ ] The category form reads and saves the "Count in statistics" switch, covered by a widget test.
+- [ ] Movement rows show + amounts and − amounts in their sign colours, and mark movements in
+      non-counting categories distinctly, covered by a widget test.
 - [ ] `flutter test` and `flutter analyze` pass.
-- [ ] Top-ups and corrections look distinct but consistent with the styleguide, in light and dark
-      mode. [human-eye]
+- [ ] The signed-amount form, the ± toggle and the marking of non-counting movements look
+      consistent with the styleguide in light and dark mode. [human-eye]
 
 ## Notes
 
-- Depends on `cash-ledger-s2v1q` (kinds, totals, export, settings value) and the signed-off
-  styleguide `design-system-001`.
-- Styleguide rules that apply: dialog form pattern for small entities; scheme-aware colors (avoid
-  the light-only `shadeNN` tints, see `cash-ledger-p53v9`); green = income, red = expense, so pick a
-  neutral color for top-ups/corrections.
-- Exchange (cash for cash) stays out of scope.
+- Depends on `cash-ledger-qjysm` (model: direction from sign, Top-up/Correction categories,
+  `countsInStatistics`, statistics by flag, export by category name) and the signed-off styleguide
+  `design-system-001`.
+- Refined 2026-11-04 after the owner's redesign. The earlier, verified UI for the old kinds is
+  salvaged at `.agentheim/salvage/cash-ledger-vsszp-bounced.patch` — reusable pieces: the Correct
+  balance dialog (`correct_balance_dialog.dart`), `movement_style.dart`, the drawer entry, widget
+  test scaffolding. Its type-selector and settings-field parts are obsolete.
+- Owner observations from the eye-check, fold in here: the form said "Expense Details" / "Enter
+  expense title" for a top-up, and the `$` currency box had a light background in dark mode.
 
 ## Worker note
 

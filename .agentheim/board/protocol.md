@@ -5,6 +5,16 @@ Newest entries on top.
 
 ---
 
+## 2026-11-04 21:03 -- Modeling / Refined: cash-ledger-vsszp - Enter movements as a signed amount with a ± toggle, correct a wallet balance from the counted cash, and flag categories that do not count in statistics
+
+**Type:** Modeling / Refine
+**BC:** cash-ledger
+**Status after:** todo
+**Summary:** Rewritten against the owner redesign: ± toggle (default −) replaces the Expense/Income/Top-up selector, Correct balance records a signed movement in the Correction category, category form gains a Count in statistics switch, rows colour by sign and mark non-counting categories. Now depends on cash-ledger-qjysm instead of cash-ledger-s2v1q.
+**ADRs written:** none
+
+---
+
 ## 2026-11-04 21:03 -- Modeling / Captured: cash-ledger-qjysm - Replace the top-up/correction kinds with signed amounts plus a per-category "count in statistics" flag
 
 **Type:** Modeling / Capture
