@@ -120,4 +120,5 @@ app.*.symbols
 # Agentheim runtime artifacts (advisory state, salvage patches, worker worktrees)
 .agentheim/state/
 .agentheim/salvage/
+.agentheim/.dashboard/
 .worktrees/
