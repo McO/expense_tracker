@@ -21,13 +21,13 @@ This is the whole reason the app exists (ADR-0001): MoneyMoney sees everything e
   - **Spending** — cash paid out for something. Counts in statistics.
   - **Income** — cash received from someone else. Counts in statistics.
   - **Top-up** — cash entering a wallet from the owner's own money (ATM withdrawal, currency bought
-    by card). Moves the balance; not income.
+    by card). Moves the balance; not income. Exports like income (unsigned, its category's export name).
   - **Correction** — adjusts the balance to match the physical wallet, either direction. Moves the
-    balance; not spending or income.
+    balance; not spending or income. Exports signed under the configurable correction export
+    category (default `Correction`).
   - **Exchange** *(nice-to-have)* — cash swapped for cash; leaves one wallet and enters another at
     the rate actually received.
-  *Current code: `Expense` with `TransactionType` `expense | income` only; top-ups and corrections
-  are recorded as income today.*
+  *Current code: `TransactionType` = `expense | income | topUp | correctionIn | correctionOut` (ADR-0006); the two correction values are presented to the UI later as one "Correction" kind. `LedgerTotals` (`lib/services/ledger_totals.dart`) computes balance (all kinds) and statistics (spending and income only). Old income records that were really top-ups/corrections are not migrated.
 - **Balance** — sum of all movements in a wallet; should equal the physical cash.
 - **Category** — what a spending or income movement was for.
 - **Export name** — the MoneyMoney category a category maps to on export
@@ -57,14 +57,17 @@ This is the whole reason the app exists (ADR-0001): MoneyMoney sees everything e
 This BC has a UI. **Every frontend task in this BC must `depends_on: [design-system-001]`**
 and may not be promoted until the owner has signed off on the styleguide.
 
+## Test command
+- `flutter test` (static check: `flutter analyze`). SharedPreferences is mocked with `SharedPreferences.setMockInitialValues({})`.
+
 ## Relationships with other contexts
 - **Customer of:** infrastructure (persistence, platform, build).
 - **Conformist to:** MoneyMoney's CSV import format.
 - **Customer of:** design-system (UI tokens and components).
 
 ## Open questions
-- How top-ups and corrections should appear in the CSV so MoneyMoney treats a top-up as a
-  transfer (open since 2026-11-04).
-- How existing income records that are really top-ups or corrections migrate, given no schema
-  migration (open since 2026-11-04).
+- ~~How top-ups and corrections should appear in the CSV so MoneyMoney treats a top-up as a
+  transfer (open since 2026-11-04).~~ — resolved 2026-11-04 by cash-ledger-s2v1q (ADR-0006): top-ups export like income, corrections signed under their own configurable category; old records are not migrated.
+- ~~How existing income records that are really top-ups or corrections migrate, given no schema
+  migration (open since 2026-11-04).~~ — resolved 2026-11-04 by cash-ledger-s2v1q (ADR-0006): top-ups export like income, corrections signed under their own configurable category; old records are not migrated.
 - Default burn-rate period (open since 2026-11-04).

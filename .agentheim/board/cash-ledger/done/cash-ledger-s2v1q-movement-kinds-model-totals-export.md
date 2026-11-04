@@ -1,7 +1,7 @@
 ---
 id: cash-ledger-s2v1q
 title: Add top-up and correction movement kinds to the model, totals and CSV export (no UI)
-status: doing
+status: done
 type: feature
 context: cash-ledger
 created: 2026-11-04
@@ -9,7 +9,7 @@ completed:
 depends_on: []
 blocks: [cash-ledger-vsszp]
 tags: [movement-kinds, top-up, correction, export, persistence, statistics]
-related_adrs: [ADR-0001, ADR-0004, ADR-0005]
+related_adrs: [ADR-0001, ADR-0004, ADR-0005, ADR-0006]
 related_research: []
 prior_art: [cash-ledger-ngxsa]
 ---
@@ -85,3 +85,19 @@ kinds underneath the UI so the data, totals and export are right before any scre
   by these decisions; strike them in `vision.md` at integration.
 - Prior art: `cash-ledger-ngxsa` (ADR-0005, the export contract). Persistence rules: ADR-0004
   (tolerant `fromJson`, no schema migration).
+
+## Verifier note (iteration 1)
+
+**REASONS:**
+- Criterion 3 ("Wallet balance = income + top-ups + corrections-in − spending − corrections-out") is covered only for `LedgerTotals.balance` (lib/services/ledger_totals.dart:58-59, test 'wallet balance counts every kind'), which no production code calls. The wallet balance the app actually shows is the home screen's "Net Balance", computed by `TotalExpenseCard` as `totalIncome - totalExpenses` (lib/widgets/total_expense_card.dart:21). After this diff home_screen.dart (~89-95, ~122-128) feeds it `LedgerTotals.statistics(...)` figures, which exclude top-ups and corrections — so the shown balance now omits them, contradicting "The wallet balance counts every movement" and ADR-0006's claim that LedgerTotals is what the home screen uses.
+- Same root cause, criterion 9: the Net Balance card is a balance, not an income/expense total; once cash-ledger-vsszp lets users record top-ups/corrections, the balance figure would silently drop them.
+- Secondary (fix together if cheap): amount colour is still chosen from `isIncome` (lib/widgets/recent_expenses.dart:168, lib/screens/expenses_list_screen.dart:506, lib/screens/expense_detail_screen.dart:29,33) while `formattedAmountWithSign` uses `increasesBalance` — a top-up/correction-in would show "+$50.00" in red with a trending-down icon.
+- Passing context: `flutter test` 8/8 green, `flutter analyze` clean; legacy loading unchanged and tested; CSV signs/category and the `correction_export_category` setting correct and tested; no new UI; no `.agentheim/` paths.
+
+**SUGGESTED_FIX:** Feed the home screen's Net Balance from `LedgerTotals.balance(filteredExpenses)` (e.g. pass a `balance` parameter into `TotalExpenseCard` instead of deriving it from income − expenses); keep savings rate and the income/expense rows on statistics. Add a test that fails if the shown balance excludes top-ups or corrections (e.g. a widget test of `TotalExpenseCard`/home with a top-up record). Optionally switch colour/icon checks from `isIncome` to `increasesBalance`.
+
+**ITERATION_HINT:** likely-fixable
+
+## Outcome
+
+Added top-up and correction (in/out) movement kinds underneath the UI. `TransactionType` (lib/models/transaction_type.dart) now has five values with codes `topup`, `correction_in`, `correction_out`, plus `increasesBalance`/`countsInStatistics`/`isCorrection`; `Expense.signedAmount` is the balance contribution. New pure `LedgerTotals` (lib/services/ledger_totals.dart) gives balance (all kinds) and statistics (spending and income only: totals, savings rate, category and currency maps); `home_screen.dart` now uses it: Net Balance (TotalExpenseCard `balance`) counts all kinds while income/expense rows, savings rate and breakdown exclude top-ups/corrections; amount colours/icons follow `increasesBalance`. `ExpenseService.buildCSV` exports top-ups like income and corrections signed under `SettingsService.getCorrectionExportCategory()` (key `correction_export_category`, default `Correction`; setter `setCorrectionExportCategory`). Legacy records load unchanged; no migration. Broken `test/widget_test.dart` replaced; new `test/movement_kinds_test.dart` covers round-trip, legacy loading, balance, statistics, CSV and the setting. `flutter test` and `flutter analyze` are green. ADR-0006 reported. Vision open questions 1 and 2 are answered by this task and should be struck at integration. No new UI; cash-ledger-vsszp can use `LedgerTotals.balance`, `SettingsService` getter/setter and the type's properties.

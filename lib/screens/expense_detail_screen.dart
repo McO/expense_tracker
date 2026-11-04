@@ -26,11 +26,11 @@ class ExpenseDetailScreen extends StatelessWidget {
   }
 
   Color get _transactionTypeColor {
-    return expense.isIncome ? Colors.green : Colors.red;
+    return expense.increasesBalance ? Colors.green : Colors.red;
   }
 
   IconData get _transactionTypeIcon {
-    return expense.isIncome ? Icons.trending_up : Icons.trending_down;
+    return expense.increasesBalance ? Icons.trending_up : Icons.trending_down;
   }
 
   @override

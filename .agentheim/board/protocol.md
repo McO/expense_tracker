@@ -5,6 +5,31 @@ Newest entries on top.
 
 ---
 
+## 2026-11-04 20:44 -- Task verified and completed: cash-ledger-s2v1q - Add top-up and correction movement kinds to the model, totals and CSV export (no UI)
+
+**Type:** Work / Task completion
+**Task:** cash-ledger-s2v1q - Add top-up and correction movement kinds to the model, totals and CSV export (no UI)
+**Summary:** TransactionType now has top-up and correction (in/out) kinds that round-trip through storage, count in the wallet balance but are excluded from income/expense totals, savings rate and category breakdown, and export to CSV (top-up like income, correction signed under a configurable category defaulting to "Correction"). The broken widget test is replaced and flutter test and flutter analyze are green.
+**Duration:** 8m40s
+**Verification:** PASS (iteration 2)
+**Files changed:** 13
+**Tests added:** 9
+**ADRs written:** 0006
+**README delta:** README.md §Ubiquitous language anchor "Movement": merged — observed current text: "- **Movement** — any change to a wallet's balance. Kinds:" (the worker's `expected` omitted " Kinds:"); the superseded pre-change Movement entry was then removed by hand so only the new one remains
+
+---
+
+## 2026-11-04 20:41 -- Verification failed: cash-ledger-s2v1q - Add top-up and correction movement kinds to the model, totals and CSV export (no UI)
+
+**Type:** Work / Verification failure
+**Task:** cash-ledger-s2v1q - Add top-up and correction movement kinds to the model, totals and CSV export (no UI)
+**Iteration:** 1 of 3
+**Reasons:** home Net Balance still computed as income − expenses from statistics figures so it omits top-ups and corrections (LedgerTotals.balance unused), amount colour still keyed on isIncome while the sign uses increasesBalance
+**Iteration hint:** likely-fixable
+**Next:** re-dispatched worker
+
+---
+
 ## 2026-11-04 20:36 -- Batch started: [cash-ledger-s2v1q]
 
 **Type:** Work / Batch start

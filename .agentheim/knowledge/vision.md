@@ -75,8 +75,8 @@ accounts on my Mac.
   statistics above.
 
 ## Open questions
-- How should top-ups and corrections appear in the CSV export, so MoneyMoney treats a top-up as a transfer and not as income? (open since 2026-11-04)
-- How do existing records, where top-ups and corrections were logged as income, move to the new movement kinds on an install with real data and no schema migration? (open since 2026-11-04)
+- ~~How should top-ups and corrections appear in the CSV export, so MoneyMoney treats a top-up as a transfer and not as income? (open since 2026-11-04)~~ — resolved 2026-11-04 by cash-ledger-s2v1q (ADR-0006): top-ups export like income, corrections signed under their own configurable category; old records are not migrated.
+- ~~How do existing records, where top-ups and corrections were logged as income, move to the new movement kinds on an install with real data and no schema migration? (open since 2026-11-04)~~ — resolved 2026-11-04 by cash-ledger-s2v1q (ADR-0006): top-ups export like income, corrections signed under their own configurable category; old records are not migrated.
 - What period does the burn rate cover by default (this month, last 30 days, since the last top-up)? (open since 2026-11-04)
 - Exchange (cash for cash): when, and how is the received rate recorded? (open since 2026-11-04)
 - Overlap with OpenSpec: the repo also carries `openspec/` for spec-driven changes; which one is the source of truth for planning? (open since 2026-11-04)

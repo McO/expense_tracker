@@ -12,8 +12,8 @@ Catalog of this bounded context's tasks by status.
 <!-- task-counts:start -->
 - **Backlog:** 1
 - **Todo:** 1
-- **Doing:** 1
-- **Done:** 1
+- **Doing:** 0
+- **Done:** 2
 <!-- task-counts:end -->
 
 ### Todo
@@ -23,11 +23,11 @@ Catalog of this bounded context's tasks by status.
 
 ### Doing
 <!-- doing-list:start -->
-- **cash-ledger-s2v1q** — Add top-up and correction movement kinds to the model, totals and CSV export (no UI) (feature) — `doing/cash-ledger-s2v1q-movement-kinds-model-totals-export.md`
 <!-- doing-list:end -->
 
 ### Done (most recent first; older entries kept for prior-art search)
 <!-- done-list:start -->
+- **cash-ledger-s2v1q** — Add top-up and correction movement kinds to the model, totals and CSV export (no UI) (feature) — `done/cash-ledger-s2v1q-movement-kinds-model-totals-export.md`
 - **cash-ledger-ngxsa** — Record the existing CSV export as an ADR (per-wallet date range to Downloads, for MoneyMoney) (decision) — `done/cash-ledger-ngxsa-record-csv-export.md`
 <!-- done-list:end -->
 

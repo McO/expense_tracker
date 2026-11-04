@@ -8,6 +8,7 @@ import '../models/currency.dart';
 import '../models/category.dart';
 import '../models/account.dart';
 import '../services/expense_service.dart';
+import '../services/ledger_totals.dart';
 import '../services/theme_service.dart';
 import '../services/account_service.dart';
 import '../widgets/total_expense_card.dart';
@@ -40,6 +41,7 @@ class _HomeScreenState extends State<HomeScreen> {
   List<Expense> _recentExpenses = [];
   List<Expense> _allExpenses = [];
   List<Expense> _filteredExpenses = [];
+  double _balance = 0.0;
   double _totalIncome = 0.0;
   double _totalExpenses = 0.0;
   Map<Category, double> _categoryTotals = {};
@@ -85,33 +87,19 @@ class _HomeScreenState extends State<HomeScreen> {
     }
     filteredExpenses.sort((a, b) => b.date.compareTo(a.date));
 
-    double totalIncome = 0.0;
-    double totalExpenses = 0.0;
-    final Map<Category, double> categoryTotals = {};
-    final Map<Category, double> categoryIncomeTotal = {};
-    final Map<Category, double> categoryExpenseTotal = {};
-    final Map<Currency, double> currencyTotals = {};
-
-    for (final expense in filteredExpenses) {
-      if (expense.isIncome) {
-        totalIncome += expense.amount;
-        categoryIncomeTotal[expense.category] =
-            (categoryIncomeTotal[expense.category] ?? 0) + expense.amount;
-      } else {
-        totalExpenses += expense.amount;
-        categoryExpenseTotal[expense.category] =
-            (categoryExpenseTotal[expense.category] ?? 0) + expense.amount;
-      }
-      categoryTotals[expense.category] =
-          (categoryTotals[expense.category] ?? 0) + expense.amount;
-      currencyTotals[expense.currency] =
-          (currencyTotals[expense.currency] ?? 0) + expense.amount;
-    }
+    final stats = LedgerTotals.statistics(filteredExpenses);
+    final totalIncome = stats.totalIncome;
+    final totalExpenses = stats.totalExpenses;
+    final categoryTotals = stats.categoryTotals;
+    final categoryIncomeTotal = stats.categoryIncomeTotal;
+    final categoryExpenseTotal = stats.categoryExpenseTotal;
+    final currencyTotals = stats.currencyTotals;
 
     setState(() {
       _allExpenses = expenses;
       _filteredExpenses = filteredExpenses;
       _recentExpenses = filteredExpenses.take(5).toList();
+      _balance = LedgerTotals.balance(filteredExpenses);
       _totalIncome = totalIncome;
       _totalExpenses = totalExpenses;
       _categoryTotals = categoryTotals;
@@ -133,28 +121,18 @@ class _HomeScreenState extends State<HomeScreen> {
     filteredExpenses.sort((a, b) => b.date.compareTo(a.date));
 
     // Calculate totals for filtered data
-    double totalIncome = 0.0;
-    double totalExpenses = 0.0;
-    final Map<Category, double> categoryTotals = {};
-    final Map<Category, double> categoryIncomeTotal = {};
-    final Map<Category, double> categoryExpenseTotal = {};
-    final Map<Currency, double> currencyTotals = {};
-
-    for (final expense in filteredExpenses) {
-      if (expense.isIncome) {
-        totalIncome += expense.amount;
-        categoryIncomeTotal[expense.category] = (categoryIncomeTotal[expense.category] ?? 0) + expense.amount;
-      } else {
-        totalExpenses += expense.amount;
-        categoryExpenseTotal[expense.category] = (categoryExpenseTotal[expense.category] ?? 0) + expense.amount;
-      }
-      categoryTotals[expense.category] = (categoryTotals[expense.category] ?? 0) + expense.amount;
-      currencyTotals[expense.currency] = (currencyTotals[expense.currency] ?? 0) + expense.amount;
-    }
+    final stats = LedgerTotals.statistics(filteredExpenses);
+    final totalIncome = stats.totalIncome;
+    final totalExpenses = stats.totalExpenses;
+    final categoryTotals = stats.categoryTotals;
+    final categoryIncomeTotal = stats.categoryIncomeTotal;
+    final categoryExpenseTotal = stats.categoryExpenseTotal;
+    final currencyTotals = stats.currencyTotals;
 
     setState(() {
       _filteredExpenses = filteredExpenses;
       _recentExpenses = filteredExpenses.take(5).toList();
+      _balance = LedgerTotals.balance(filteredExpenses);
       _totalIncome = totalIncome;
       _totalExpenses = totalExpenses;
       _categoryTotals = categoryTotals;
@@ -459,6 +437,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget _buildTotalExpenseCard() {
     return TotalExpenseCard(
+      balance: _balance,
       totalIncome: _totalIncome,
       totalExpenses: _totalExpenses,
       currencyTotals: _currencyTotals,

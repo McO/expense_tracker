@@ -165,7 +165,7 @@ class RecentExpenses extends StatelessWidget {
                           expense.formattedAmountWithSign,
                           style: Theme.of(context).textTheme.titleMedium?.copyWith(
                                 fontWeight: FontWeight.bold,
-                                color: expense.isIncome ? Colors.green : Colors.red,
+                                color: expense.increasesBalance ? Colors.green : Colors.red,
                               ),
                         ),
                         onTap: () async {

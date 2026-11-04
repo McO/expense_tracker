@@ -4,6 +4,9 @@ import '../models/currency.dart';
 class TotalExpenseCard extends StatelessWidget {
   final double totalIncome;
   final double totalExpenses;
+  /// Wallet balance counting every movement kind (top-ups and corrections
+  /// included). Defaults to income - expenses when not given.
+  final double? balance;
   final Map<Currency, double> currencyTotals;
   final Currency defaultCurrency;
 
@@ -11,6 +14,7 @@ class TotalExpenseCard extends StatelessWidget {
     super.key,
     required this.totalIncome,
     required this.totalExpenses,
+    this.balance,
     required this.currencyTotals,
     required this.defaultCurrency,
   });
@@ -18,7 +22,7 @@ class TotalExpenseCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // Calculate net balance
-    final netBalance = totalIncome - totalExpenses;
+    final netBalance = balance ?? (totalIncome - totalExpenses);
     
     // Determine currency to display
     Currency displayCurrency = defaultCurrency;

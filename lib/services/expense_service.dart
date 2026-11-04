@@ -6,6 +6,7 @@ import '../models/category.dart';
 import 'category_service.dart';
 import 'currency_service.dart';
 import 'account_service.dart';
+import 'settings_service.dart';
 
 class ExpenseService {
   static const String _expensesKey = 'expenses';
@@ -107,13 +108,16 @@ class ExpenseService {
 
     if (expenses.isEmpty) return null;
 
+    final correctionCategory = await SettingsService().getCorrectionExportCategory();
     final buf = StringBuffer();
     buf.writeln('Date,Title,Category,Amount,Currency,Description');
     for (final expense in expenses) {
       final date = DateFormat('yyyy-MM-dd').format(expense.date);
       final title = _escapeCsvField(expense.title);
-      final category = _escapeCsvField(expense.category.effectiveExportName);
-      final amount = '${expense.isIncome ? '' : '-'}${expense.amount.toStringAsFixed(2)}';
+      final category = _escapeCsvField(expense.isCorrection
+          ? correctionCategory
+          : expense.category.effectiveExportName);
+      final amount = '${expense.increasesBalance ? '' : '-'}${expense.amount.toStringAsFixed(2)}';
       final currency = expense.currency.code;
       final description = _escapeCsvField(expense.description);
       buf.writeln('$date,$title,$category,$amount,$currency,$description');

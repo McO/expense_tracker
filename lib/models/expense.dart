@@ -28,13 +28,21 @@ class Expense {
   // Helper getters
   bool get isExpense => type == TransactionType.expense;
   bool get isIncome => type == TransactionType.income;
-  
-  // Signed amount for calculations (positive for income, negative for expenses)
-  double get signedAmount => isIncome ? amount : -amount;
-  
+  bool get isTopUp => type == TransactionType.topUp;
+  bool get isCorrection => type.isCorrection;
+
+  /// True for spending and income; false for top-ups and corrections.
+  bool get countsInStatistics => type.countsInStatistics;
+
+  /// True when this movement adds to the wallet balance.
+  bool get increasesBalance => type.increasesBalance;
+
+  // Signed amount for the wallet balance (positive when the movement adds cash)
+  double get signedAmount => increasesBalance ? amount : -amount;
+
   // Formatted amount with sign
   String get formattedAmountWithSign {
-    final sign = isIncome ? '+' : '-';
+    final sign = increasesBalance ? '+' : '-';
     return '$sign${currency.symbol}${amount.toStringAsFixed(2)}';
   }
 
