@@ -5,6 +5,20 @@ Newest entries on top.
 
 ---
 
+## 2026-11-04 21:13 -- Task verified and completed: cash-ledger-qjysm - Replace the top-up/correction kinds with signed amounts plus a per-category "count in statistics" flag
+
+**Type:** Work / Task completion
+**Task:** cash-ledger-qjysm - Replace the top-up/correction kinds with signed amounts plus a per-category "count in statistics" flag
+**Summary:** A movement is now a signed amount plus a category. Top-up and Correction are seeded categories, and a per-category countsInStatistics flag keeps them out of statistics while the balance still counts them. The correction export setting is gone.
+**Duration:** 5m50s
+**Verification:** PASS (iteration 1)
+**Files changed:** 9
+**Tests added:** 10
+**ADRs written:** 0007
+**README delta:** README.md §Ubiquitous language anchors "Movement" and "Export name": merged — observed current text: "- **Movement** — any change to a wallet's balance. Kinds:" and "- **Export name** — the MoneyMoney category a category maps to on export" (both multi-line bullets; a first-line `expected` does not match the whole bullet, so the delta tool appended instead of replacing); the superseded entries were removed by hand and the Aggregates "Movement" line updated to the new model. ADR-0006 marked superseded_by ADR-0007.
+
+---
+
 ## 2026-11-04 21:09 -- Batch started: [cash-ledger-qjysm]
 
 **Type:** Work / Batch start

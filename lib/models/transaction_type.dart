@@ -1,12 +1,10 @@
-/// Movement kinds of the cash ledger. Amounts are always stored positive
-/// (ADR-0004); the kind decides the direction and whether the movement
-/// counts in statistics (see ADR-0006).
+/// Direction of a movement. Amounts are always stored positive (ADR-0004);
+/// the owner's sign decides the direction: income = money in, expense = money
+/// out. Whether a movement counts in statistics is decided by its category
+/// (`Category.countsInStatistics`), not by the type (see ADR-0007).
 enum TransactionType {
   expense,
   income,
-  topUp,
-  correctionIn,
-  correctionOut,
 }
 
 extension TransactionTypeExtension on TransactionType {
@@ -16,11 +14,6 @@ extension TransactionTypeExtension on TransactionType {
         return 'Expense';
       case TransactionType.income:
         return 'Income';
-      case TransactionType.topUp:
-        return 'Top-up';
-      case TransactionType.correctionIn:
-      case TransactionType.correctionOut:
-        return 'Correction';
     }
   }
 
@@ -30,41 +23,23 @@ extension TransactionTypeExtension on TransactionType {
         return 'expense';
       case TransactionType.income:
         return 'income';
-      case TransactionType.topUp:
-        return 'topup';
-      case TransactionType.correctionIn:
-        return 'correction_in';
-      case TransactionType.correctionOut:
-        return 'correction_out';
     }
   }
 
   /// True when the movement adds to the wallet balance.
-  bool get increasesBalance =>
-      this == TransactionType.income ||
-      this == TransactionType.topUp ||
-      this == TransactionType.correctionIn;
+  bool get increasesBalance => this == TransactionType.income;
 
-  /// True for spending and income only; top-ups and corrections move the
-  /// balance but are excluded from statistics.
-  bool get countsInStatistics =>
-      this == TransactionType.expense || this == TransactionType.income;
-
-  bool get isCorrection =>
-      this == TransactionType.correctionIn ||
-      this == TransactionType.correctionOut;
-
+  /// Interim s2v1q codes (`topup`, `correction_in`, `correction_out`) stay
+  /// readable: they load as income, income and expense. Unknown codes fall
+  /// back to expense.
   static TransactionType fromCode(String code) {
     switch (code.toLowerCase()) {
       case 'income':
-        return TransactionType.income;
       case 'topup':
-        return TransactionType.topUp;
       case 'correction_in':
-        return TransactionType.correctionIn;
-      case 'correction_out':
-        return TransactionType.correctionOut;
+        return TransactionType.income;
       case 'expense':
+      case 'correction_out':
       default:
         return TransactionType.expense;
     }

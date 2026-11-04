@@ -10,6 +10,7 @@ Catalog of ADRs, research, and concept synthesis pages scoped to this bounded co
 ## ADRs scoped to this BC
 
 <!-- adr-local:start -->
+- **0007** — Movements are signed amounts with a per-category statistics flag — 2026-11-04 — `../../decisions/0007-movements-are-signed-amounts-with-a-per-category-statistics-flag.md`
 - **0006** — Movement kinds are TransactionType values; correction direction is two internal values — 2026-11-04 — `../../decisions/0006-movement-kinds-and-correction-direction.md`
 - **0005** — Per-wallet date-range CSV export to Downloads, shaped for MoneyMoney import — 2026-11-04 — `../../decisions/0005-per-wallet-date-range-csv-export-to-downloads-for-moneymoney.md`
 <!-- adr-local:end -->

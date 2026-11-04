@@ -2,7 +2,8 @@
 id: ADR-0006
 title: Movement kinds are TransactionType values; correction direction is two internal values
 scope: cash-ledger
-status: accepted
+status: superseded
+superseded_by: [ADR-0007]
 date: 2026-11-04
 related_tasks: [cash-ledger-s2v1q]
 related_adrs: [ADR-0001, ADR-0004, ADR-0005]

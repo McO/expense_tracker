@@ -8,6 +8,13 @@ class Category {
   final bool isDefault; // Whether it's a default category that can't be deleted
   final String? exportName; // Optional name used for CSV exports
 
+  /// Whether movements in this category count as spending/income in
+  /// statistics. Top-up and Correction are not counted (ADR-0007).
+  final bool countsInStatistics;
+
+  static const String topUpId = 'topup';
+  static const String correctionId = 'correction';
+
   const Category({
     required this.id,
     required this.name,
@@ -15,6 +22,7 @@ class Category {
     required this.color,
     this.isDefault = false,
     this.exportName,
+    this.countsInStatistics = true,
   });
 
   Map<String, dynamic> toJson() {
@@ -25,6 +33,7 @@ class Category {
       'color': color,
       'isDefault': isDefault,
       'exportName': exportName,
+      'countsInStatistics': countsInStatistics,
     };
   }
 
@@ -36,6 +45,7 @@ class Category {
       color: json['color'],
       isDefault: json['isDefault'] ?? false,
       exportName: json['exportName'],
+      countsInStatistics: json['countsInStatistics'] ?? true,
     );
   }
 
@@ -46,6 +56,7 @@ class Category {
     String? color,
     bool? isDefault,
     String? exportName,
+    bool? countsInStatistics,
   }) {
     return Category(
       id: id ?? this.id,
@@ -54,6 +65,7 @@ class Category {
       color: color ?? this.color,
       isDefault: isDefault ?? this.isDefault,
       exportName: exportName ?? this.exportName,
+      countsInStatistics: countsInStatistics ?? this.countsInStatistics,
     );
   }
 
@@ -75,6 +87,29 @@ class Category {
 
   // Get the name to use for exports
   String get effectiveExportName => exportName?.trim().isNotEmpty == true ? exportName! : name;
+
+  /// Built-in categories for cash that does not count as spending or income.
+  /// Seeded non-destructively by `CategoryService` (separate from the
+  /// defaults list so existing installs gain them without losing anything).
+  static const Category topUp = Category(
+    id: topUpId,
+    name: 'Top-up',
+    icon: '🏧',
+    color: 'FF009688',
+    isDefault: true,
+    countsInStatistics: false,
+  );
+
+  static const Category correction = Category(
+    id: correctionId,
+    name: 'Correction',
+    icon: '⚖️',
+    color: 'FF607D8B',
+    isDefault: true,
+    countsInStatistics: false,
+  );
+
+  static List<Category> get ledgerCategories => [topUp, correction];
 
   // Default categories (universal - can be used for both expenses and income)
   static List<Category> get defaultCategories => [

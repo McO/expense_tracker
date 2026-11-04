@@ -5,6 +5,7 @@ import '../models/category.dart';
 class CategoryService {
   static const String _categoriesKey = 'categories';
   static const String _defaultsInitializedKey = 'categories_defaults_initialized_v2';
+  static const String _ledgerCategoriesKey = 'categories_ledger_ensured_v1';
 
   Future<List<Category>> getCategories() async {
     final prefs = await SharedPreferences.getInstance();
@@ -15,6 +16,10 @@ class CategoryService {
       await _initializeDefaultCategories();
     }
     
+    if (!(prefs.getBool(_ledgerCategoriesKey) ?? false)) {
+      await _ensureLedgerCategories();
+    }
+
     final categoriesJson = prefs.getStringList(_categoriesKey) ?? [];
     return categoriesJson.map((json) => Category.fromJson(jsonDecode(json))).toList();
   }
@@ -28,6 +33,19 @@ class CategoryService {
     
     // Mark defaults as initialized
     await prefs.setBool(_defaultsInitializedKey, true);
+  }
+
+  /// Idempotent: inserts the built-in Top-up/Correction categories only if
+  /// missing by id; never touches existing categories (ADR-0004, ADR-0007).
+  Future<void> _ensureLedgerCategories() async {
+    final prefs = await SharedPreferences.getInstance();
+    final json = prefs.getStringList(_categoriesKey) ?? [];
+    final existing = json.map((j) => Category.fromJson(jsonDecode(j))).toList();
+    for (final c in Category.ledgerCategories) {
+      if (!existing.any((e) => e.id == c.id)) existing.add(c);
+    }
+    await _saveCategories(existing);
+    await prefs.setBool(_ledgerCategoriesKey, true);
   }
 
   Future<void> _saveCategories(List<Category> categories) async {

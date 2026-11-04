@@ -7,12 +7,12 @@ import 'package:expense_tracker/services/ledger_totals.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-Expense _e(double a, TransactionType t) => Expense(
+Expense _e(double a, TransactionType t, [Category? c]) => Expense(
       id: '$a$t',
       title: 't',
       amount: a,
       currency: Currency.usd,
-      category: Category.defaultCategories.first,
+      category: c ?? Category.defaultCategories.first,
       date: DateTime(2026, 11, 4),
       type: t,
       accountId: 'a1',
@@ -24,9 +24,9 @@ void main() {
     final all = [
       _e(100, TransactionType.income),
       _e(30, TransactionType.expense),
-      _e(50, TransactionType.topUp),
-      _e(7, TransactionType.correctionIn),
-      _e(3, TransactionType.correctionOut),
+      _e(50, TransactionType.income, Category.topUp),
+      _e(7, TransactionType.income, Category.correction),
+      _e(3, TransactionType.expense, Category.correction),
     ];
     final stats = LedgerTotals.statistics(all);
     await tester.pumpWidget(MaterialApp(

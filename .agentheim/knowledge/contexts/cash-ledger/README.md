@@ -17,21 +17,11 @@ This is the whole reason the app exists (ADR-0001): MoneyMoney sees everything e
 ## Ubiquitous language
 - **Wallet** — the cash held in one currency; mirrors exactly one MoneyMoney cash account.
   *Named `Account` in the current code (`lib/models/account.dart`).*
-- **Movement** — any change to a wallet's balance. Kinds:
-  - **Spending** — cash paid out for something. Counts in statistics.
-  - **Income** — cash received from someone else. Counts in statistics.
-  - **Top-up** — cash entering a wallet from the owner's own money (ATM withdrawal, currency bought
-    by card). Moves the balance; not income. Exports like income (unsigned, its category's export name).
-  - **Correction** — adjusts the balance to match the physical wallet, either direction. Moves the
-    balance; not spending or income. Exports signed under the configurable correction export
-    category (default `Correction`).
-  - **Exchange** *(nice-to-have)* — cash swapped for cash; leaves one wallet and enters another at
-    the rate actually received.
-  *Current code: `TransactionType` = `expense | income | topUp | correctionIn | correctionOut` (ADR-0006); the two correction values are presented to the UI later as one "Correction" kind. `LedgerTotals` (`lib/services/ledger_totals.dart`) computes balance (all kinds) and statistics (spending and income only). Old income records that were really top-ups/corrections are not migrated.
+- **Movement** — any change to a wallet's balance: a signed amount (positive = money in, negative = money out) plus a category. There are no movement kinds; Top-up (cash entering from the owner's own money) and Correction (aligning the balance with the physical wallet) are ordinary built-in categories with `countsInStatistics: false`. Whether a movement counts as spending/income is decided by its category's flag, so the owner chooses. *Exchange (nice-to-have)* — cash swapped for cash; leaves one wallet and enters another at the rate actually received.
+  *Current code (ADR-0007, supersedes ADR-0006): `TransactionType` = `expense | income` (direction, amount stays positive; stored codes `topup`, `correction_in`, `correction_out` from the interim build still load as income/income/expense in the Top-up/Correction category). `Expense.signedAmount`, `Expense.correction(difference: ...)` builds a correction from a signed difference. `LedgerTotals` computes balance (every movement by sign) and statistics (only categories with `countsInStatistics`).
 - **Balance** — sum of all movements in a wallet; should equal the physical cash.
-- **Category** — what a spending or income movement was for.
-- **Export name** — the MoneyMoney category a category maps to on export
-  (`Category.exportName`).
+- **Category** — what a movement was for. Carries a `countsInStatistics` flag (default true); the seeded Top-up (`Category.topUpId`) and Correction (`Category.correctionId`) categories have it false. They are ensured non-destructively by `CategoryService` under their own flag (`categories_ledger_ensured_v1`).
+- **Export name** — the MoneyMoney category a category maps to on export (`Category.exportName`); the CSV Category column always uses it, corrections included (the former correction export category setting is removed).
 - **Currency** — a wallet's currency; predefined or user-defined custom.
 - **Export** — a CSV of one wallet's movements over a chosen date range.
 - **Wallet check / Burn rate / Spending mix / Leftover foreign cash** — the four quick-glance
@@ -39,8 +29,9 @@ This is the whole reason the app exists (ADR-0001): MoneyMoney sees everything e
 
 ## Aggregates
 - **Wallet** — has exactly one currency; its balance is the sum of its movements.
-- **Movement** — amount is always positive, its kind decides direction; belongs to exactly one
-  wallet (an exchange touches two).
+- **Movement** — amount is stored positive and its direction (in/out, from the entered sign)
+  decides the balance effect; its category decides whether it counts in statistics; belongs to
+  exactly one wallet (an exchange touches two).
 - **Category** — default categories are seeded once; a movement whose category no longer exists
   falls back to "other" (intentional, keep it).
 

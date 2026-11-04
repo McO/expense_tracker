@@ -28,11 +28,11 @@ class Expense {
   // Helper getters
   bool get isExpense => type == TransactionType.expense;
   bool get isIncome => type == TransactionType.income;
-  bool get isTopUp => type == TransactionType.topUp;
-  bool get isCorrection => type.isCorrection;
+  bool get isTopUp => category.id == Category.topUpId;
+  bool get isCorrection => category.id == Category.correctionId;
 
-  /// True for spending and income; false for top-ups and corrections.
-  bool get countsInStatistics => type.countsInStatistics;
+  /// Decided by the movement's category flag (ADR-0007).
+  bool get countsInStatistics => category.countsInStatistics;
 
   /// True when this movement adds to the wallet balance.
   bool get increasesBalance => type.increasesBalance;
@@ -44,6 +44,30 @@ class Expense {
   String get formattedAmountWithSign {
     final sign = increasesBalance ? '+' : '-';
     return '$sign${currency.symbol}${amount.toStringAsFixed(2)}';
+  }
+
+  /// Builds a correction movement from the signed difference between the
+  /// counted cash and the recorded balance (positive = cash was missing from
+  /// the books, i.e. money in).
+  factory Expense.correction({
+    required String id,
+    required double difference,
+    required Currency currency,
+    required DateTime date,
+    required String accountId,
+    Category category = Category.correction,
+    String title = 'Correction',
+  }) {
+    return Expense(
+      id: id,
+      title: title,
+      amount: difference.abs(),
+      currency: currency,
+      category: category,
+      date: date,
+      type: difference >= 0 ? TransactionType.income : TransactionType.expense,
+      accountId: accountId,
+    );
   }
 
   Map<String, dynamic> toJson() {
@@ -61,17 +85,33 @@ class Expense {
   }
 
   factory Expense.fromJson(Map<String, dynamic> json, List<Category> categories, {List<Currency> customCurrencies = const [], String? defaultAccountId}) {
+    // Interim s2v1q codes carry their category when none is stored (ADR-0007)
+    final rawType = (json['type'] ?? 'expense').toString().toLowerCase();
+    final interimId = rawType == 'topup'
+        ? Category.topUpId
+        : (rawType == 'correction_in' || rawType == 'correction_out')
+            ? Category.correctionId
+            : null;
+    final wantedId = categories.any((cat) => cat.id == json['categoryId'])
+        ? json['categoryId']
+        : (interimId ?? json['categoryId']);
+
     // Find the category by ID, fall back to 'other' if not found
     Category category;
     try {
-      category = categories.firstWhere((cat) => cat.id == json['categoryId']);
+      category = categories.firstWhere((cat) => cat.id == wantedId);
     } catch (e) {
-      // If category not found, try to find 'other' category
-      try {
-        category = categories.firstWhere((cat) => cat.id == 'other');
-      } catch (e) {
-        // If 'other' not found either, use the first available category
-        category = categories.isNotEmpty ? categories.first : Category.defaultCategories.first;
+      final builtIn = Category.ledgerCategories.where((cat) => cat.id == wantedId);
+      if (builtIn.isNotEmpty) {
+        category = builtIn.first;
+      } else {
+        // If category not found, try to find 'other' category
+        try {
+          category = categories.firstWhere((cat) => cat.id == 'other');
+        } catch (e) {
+          // If 'other' not found either, use the first available category
+          category = categories.isNotEmpty ? categories.first : Category.defaultCategories.first;
+        }
       }
     }
 

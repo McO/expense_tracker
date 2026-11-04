@@ -3,7 +3,7 @@ import '../models/currency.dart';
 import '../models/expense.dart';
 
 /// Pure aggregation over movements: wallet balance counts every kind, while
-/// income/expense/category figures count only spending and income (ADR-0006).
+/// income/expense/category figures count only categories flagged countsInStatistics (ADR-0007).
 class LedgerTotals {
   final double totalIncome;
   final double totalExpenses;
@@ -54,7 +54,7 @@ class LedgerTotals {
     );
   }
 
-  /// Wallet balance = income + top-ups + corrections-in - spending - corrections-out.
+  /// Wallet balance = sum of every movement by sign.
   static double balance(Iterable<Expense> expenses) =>
       expenses.fold(0.0, (sum, e) => sum + e.signedAmount);
 }
