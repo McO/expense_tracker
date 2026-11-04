@@ -5,6 +5,15 @@ Newest entries on top.
 
 ---
 
+## 2026-11-04 20:34 -- Modeling / Captured: cash-ledger-s2v1q - Add top-up and correction movement kinds to the model, totals and CSV export (no UI)
+
+**Type:** Modeling / Capture
+**BC:** cash-ledger
+**Filed to:** todo
+**Summary:** Adds top-up and correction movement kinds underneath the UI: model, tolerant persistence, balance vs. statistics totals, CSV export rules (top-up like income, correction with its own configurable category), and a green flutter test.
+
+---
+
 ## 2026-11-04 20:29 -- Work session ended
 
 **Type:** Work / Session end
