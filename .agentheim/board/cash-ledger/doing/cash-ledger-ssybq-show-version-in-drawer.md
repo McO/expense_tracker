@@ -1,7 +1,7 @@
 ---
 id: cash-ledger-ssybq
 title: Show the app version and build number at the bottom of the home drawer
-status: todo
+status: doing
 type: feature
 context: cash-ledger
 created: 2026-11-05

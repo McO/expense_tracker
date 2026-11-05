@@ -5,6 +5,14 @@ Newest entries on top.
 
 ---
 
+## 2026-11-05 19:35 -- Batch started: [cash-ledger-ssybq]
+
+**Type:** Work / Batch start
+**Tasks:** cash-ledger-ssybq - Show the app version and build number at the bottom of the home drawer
+**Parallel:** no (1 worker — only ready task)
+
+---
+
 ## 2026-11-05 19:35 -- Modeling / Captured: cash-ledger-ssybq - Show the app version and build number at the bottom of the home drawer
 
 **Type:** Modeling / Capture

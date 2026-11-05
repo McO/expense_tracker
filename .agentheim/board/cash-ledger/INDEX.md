@@ -11,18 +11,18 @@ Catalog of this bounded context's tasks by status.
 
 <!-- task-counts:start -->
 - **Backlog:** 0
-- **Todo:** 1
-- **Doing:** 0
+- **Todo:** 0
+- **Doing:** 1
 - **Done:** 12
 <!-- task-counts:end -->
 
 ### Todo
 <!-- todo-list:start -->
-- **cash-ledger-ssybq** — Show the app version and build number at the bottom of the home drawer (feature) — `todo/cash-ledger-ssybq-show-version-in-drawer.md`
 <!-- todo-list:end -->
 
 ### Doing
 <!-- doing-list:start -->
+- **cash-ledger-ssybq** — Show the app version and build number at the bottom of the home drawer (feature) — `doing/cash-ledger-ssybq-show-version-in-drawer.md`
 <!-- doing-list:end -->
 
 ### Done (most recent first; older entries kept for prior-art search)
