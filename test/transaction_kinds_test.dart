@@ -2,10 +2,10 @@ import 'dart:convert';
 
 import 'package:expense_tracker/models/category.dart';
 import 'package:expense_tracker/models/currency.dart';
-import 'package:expense_tracker/models/expense.dart';
+import 'package:expense_tracker/models/transaction.dart';
 import 'package:expense_tracker/models/transaction_type.dart';
 import 'package:expense_tracker/services/category_service.dart';
-import 'package:expense_tracker/services/expense_service.dart';
+import 'package:expense_tracker/services/transaction_service.dart';
 import 'package:expense_tracker/services/ledger_totals.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -16,9 +16,9 @@ final _other = _cats[1];
 final _topUp = Category.topUp;
 final _correction = Category.correction;
 
-Expense _e(String id, double amount, TransactionType type,
+Transaction _e(String id, double amount, TransactionType type,
         {Category? category}) =>
-    Expense(
+    Transaction(
       id: id,
       title: 'T$id',
       amount: amount,
@@ -36,7 +36,7 @@ void main() {
     expect(TransactionType.values, [TransactionType.expense, TransactionType.income]);
     for (final t in TransactionType.values) {
       final json = jsonDecode(jsonEncode(_e('1', 5, t, category: _topUp).toJson()));
-      final back = Expense.fromJson(json, _cats);
+      final back = Transaction.fromJson(json, _cats);
       expect(back.type, t);
       expect(back.amount, 5);
       expect(back.category, _topUp);
@@ -48,26 +48,26 @@ void main() {
         _e('1', 5, TransactionType.expense).toJson()
           ..['type'] = code
           ..['categoryId'] = cat;
-    final top = Expense.fromJson(rec('topup', 'food'), _cats);
+    final top = Transaction.fromJson(rec('topup', 'food'), _cats);
     expect(top.type, TransactionType.income);
     expect(top.category, _food); // already carried another category id
-    final topNoCat = Expense.fromJson(rec('topup', 'gone'), _cats);
+    final topNoCat = Transaction.fromJson(rec('topup', 'gone'), _cats);
     expect(topNoCat.category, _topUp);
-    final cin = Expense.fromJson(rec('correction_in', 'gone'), _cats);
+    final cin = Transaction.fromJson(rec('correction_in', 'gone'), _cats);
     expect(cin.type, TransactionType.income);
     expect(cin.category, _correction);
-    final cout = Expense.fromJson(rec('correction_out', 'gone'), _cats);
+    final cout = Transaction.fromJson(rec('correction_out', 'gone'), _cats);
     expect(cout.type, TransactionType.expense);
     expect(cout.category, _correction);
   });
 
   test('legacy records load as before', () {
     Map<String, dynamic> base() => _e('1', 5, TransactionType.expense).toJson();
-    expect(Expense.fromJson(base()..['type'] = 'income', _cats).type,
+    expect(Transaction.fromJson(base()..['type'] = 'income', _cats).type,
         TransactionType.income);
-    expect(Expense.fromJson(base()..['type'] = 'expense', _cats).type,
+    expect(Transaction.fromJson(base()..['type'] = 'expense', _cats).type,
         TransactionType.expense);
-    expect(Expense.fromJson(base()..remove('type'), _cats).type,
+    expect(Transaction.fromJson(base()..remove('type'), _cats).type,
         TransactionType.expense);
   });
 
@@ -121,7 +121,7 @@ void main() {
     _e('5', 3, TransactionType.expense, category: _correction),
   ];
 
-  test('wallet balance counts every movement by sign', () {
+  test('account balance counts every transaction by sign', () {
     expect(LedgerTotals.balance(all), 100 + 50 + 7 - 30 - 3);
   });
 
@@ -142,13 +142,13 @@ void main() {
     expect(s.totalExpenses, 0);
   });
 
-  test('Correction.fromSignedDifference builds a signed correction movement', () {
-    final up = Expense.correction(
+  test('Correction.fromSignedDifference builds a signed correction transaction', () {
+    final up = Transaction.correction(
         id: 'c1', difference: 7.5, currency: Currency.usd, date: DateTime(2026, 11, 4), accountId: 'a1');
     expect(up.type, TransactionType.income);
     expect(up.amount, 7.5);
     expect(up.category, _correction);
-    final down = Expense.correction(
+    final down = Transaction.correction(
         id: 'c2', difference: -3, currency: Currency.usd, date: DateTime(2026, 11, 4), accountId: 'a1');
     expect(down.type, TransactionType.expense);
     expect(down.amount, 3);
@@ -157,10 +157,10 @@ void main() {
 
   test('buildCSV: signed rows, Category column is the category export name',
       () async {
-    final svc = ExpenseService();
-    await svc.saveExpense(_e('1', 50, TransactionType.income, category: _topUp));
-    await svc.saveExpense(_e('2', 3, TransactionType.expense, category: _correction));
-    await svc.saveExpense(_e('3', 4, TransactionType.expense,
+    final svc = TransactionService();
+    await svc.saveTransaction(_e('1', 50, TransactionType.income, category: _topUp));
+    await svc.saveTransaction(_e('2', 3, TransactionType.expense, category: _correction));
+    await svc.saveTransaction(_e('3', 4, TransactionType.expense,
         category: _correction.copyWith(exportName: 'Cash diff')));
     final lines = (await svc.buildCSV())!.trim().split('\n');
     final byTitle = {for (final l in lines.skip(1)) l.split(',')[1]: l.split(',')};

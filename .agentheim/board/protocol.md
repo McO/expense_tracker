@@ -5,6 +5,41 @@ Newest entries on top.
 
 ---
 
+## 2026-11-05 10:10 -- Task verified and completed: cash-ledger-ydqbw - Use Account and Transaction consistently in code and on screen (no Wallet, Movement or Expense-for-record)
+
+**Type:** Work / Task completion
+**Task:** cash-ledger-ydqbw - Use Account and Transaction consistently in code and on screen (no Wallet, Movement or Expense-for-record)
+**Summary:** Account and Transaction used consistently in code, on screen and in the CSV file name (transactions_<from>_<to>.csv); stored keys unchanged
+**Duration:** 16m
+**Verification:** PASS (iteration 3)
+**Files changed:** 47
+**Tests added:** 2
+**ADRs written:** none
+
+---
+
+## 2026-11-05 10:08 -- Verification failed: cash-ledger-ydqbw - Use Account and Transaction consistently in code and on screen
+
+**Type:** Work / Verification failure
+**Task:** cash-ledger-ydqbw
+**Iteration:** 2 of 3
+**Reasons:** one more direction-sense comment in category.dart; AGENTS.md tree misses transaction_style.dart
+**Iteration hint:** likely-fixable
+**Next:** re-dispatched worker
+
+---
+
+## 2026-11-05 10:06 -- Verification failed: cash-ledger-ydqbw - Use Account and Transaction consistently in code and on screen
+
+**Type:** Work / Verification failure
+**Task:** cash-ledger-ydqbw
+**Iteration:** 1 of 3
+**Reasons:** blanket rename turned direction-sense expense into transaction in 3 test names and 2 comments, a account typo, stale AGENTS.md tree
+**Iteration hint:** likely-fixable
+**Next:** re-dispatched worker
+
+---
+
 ## 2026-11-05 10:00 -- Batch started: [cash-ledger-ydqbw]
 
 **Type:** Work / Batch start

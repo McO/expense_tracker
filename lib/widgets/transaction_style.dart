@@ -1,22 +1,22 @@
 import 'package:flutter/material.dart';
-import '../models/expense.dart';
+import '../models/transaction.dart';
 import '../models/transaction_type.dart';
 
 /// + green, − red (styleguide). Scheme-aware shades so both modes read well.
 Color directionColor(TransactionType type) =>
     type.increasesBalance ? Colors.green : Colors.red;
 
-/// Colour of a movement's signed amount.
-Color movementColor(Expense e) => directionColor(e.type);
+/// Colour of a transaction's signed amount.
+Color transactionColor(Transaction e) => directionColor(e.type);
 
-/// Small label for movements that do not count as income/spending.
+/// Small label for transactions that do not count as income/spending.
 const String notCountedLabel = 'Not counted';
 
-/// Neutral, scheme-aware colour used to mark non-counting movements.
+/// Neutral, scheme-aware colour used to mark non-counting transactions.
 Color notCountedColor(BuildContext context) =>
     Theme.of(context).colorScheme.onSurfaceVariant;
 
-/// Chip-like marker, shown only for movements outside the statistics.
+/// Chip-like marker, shown only for transactions outside the statistics.
 class NotCountedMarker extends StatelessWidget {
   const NotCountedMarker({super.key});
 

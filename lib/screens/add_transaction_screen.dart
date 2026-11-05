@@ -1,31 +1,29 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import '../models/expense.dart';
+import '../models/transaction.dart';
 import '../models/currency.dart';
 import '../models/category.dart';
 import '../models/account.dart';
 import '../models/transaction_type.dart';
-import '../services/expense_service.dart';
+import '../services/transaction_service.dart';
 import '../services/category_service.dart';
 import '../services/account_service.dart';
 import '../widgets/sign_toggle.dart';
-import '../widgets/movement_style.dart';
+import '../widgets/transaction_style.dart';
 
-class EditExpenseScreen extends StatefulWidget {
-  final Expense expense;
-
-  const EditExpenseScreen({super.key, required this.expense});
+class AddTransactionScreen extends StatefulWidget {
+  const AddTransactionScreen({super.key});
 
   @override
-  State<EditExpenseScreen> createState() => _EditExpenseScreenState();
+  State<AddTransactionScreen> createState() => _AddTransactionScreenState();
 }
 
-class _EditExpenseScreenState extends State<EditExpenseScreen> {
+class _AddTransactionScreenState extends State<AddTransactionScreen> {
   final _formKey = GlobalKey<FormState>();
   final _titleController = TextEditingController();
   final _amountController = TextEditingController();
   final _descriptionController = TextEditingController();
-  final ExpenseService _expenseService = ExpenseService();
+  final TransactionService _transactionService = TransactionService();
   final CategoryService _categoryService = CategoryService();
   final AccountService _accountService = AccountService();
 
@@ -33,7 +31,6 @@ class _EditExpenseScreenState extends State<EditExpenseScreen> {
   List<Category> _categories = [];
   Currency _selectedCurrency = Currency.usd;
   Account? _selectedAccount;
-  List<Account> _accounts = [];
   DateTime _selectedDate = DateTime.now();
   TimeOfDay _selectedTime = TimeOfDay.now();
   TransactionType _selectedType = TransactionType.expense;
@@ -42,9 +39,8 @@ class _EditExpenseScreenState extends State<EditExpenseScreen> {
   @override
   void initState() {
     super.initState();
-    _initializeFields();
+    _loadSelectedAccount();
     _loadCategories();
-    _loadAccount();
   }
 
   @override
@@ -55,15 +51,17 @@ class _EditExpenseScreenState extends State<EditExpenseScreen> {
     super.dispose();
   }
 
-  void _initializeFields() {
-    _titleController.text = widget.expense.title;
-    _amountController.text = widget.expense.amount.toString();
-    _descriptionController.text = widget.expense.description;
-    _selectedCategory = widget.expense.category;
-    _selectedCurrency = widget.expense.currency;
-    _selectedDate = widget.expense.date;
-    _selectedTime = TimeOfDay.fromDateTime(widget.expense.date);
-    _selectedType = widget.expense.type;
+  Future<void> _loadSelectedAccount() async {
+    try {
+      final account = await _accountService.getSelectedAccount();
+      setState(() {
+        _selectedAccount = account;
+        // Set currency from account
+        _selectedCurrency = account?.currency ?? Currency.usd;
+      });
+    } catch (e) {
+      // Use default USD if there's an error
+    }
   }
 
   Future<void> _loadCategories() async {
@@ -71,31 +69,8 @@ class _EditExpenseScreenState extends State<EditExpenseScreen> {
       final categories = await _categoryService.getCategories();
       setState(() {
         _categories = categories;
-        
-        // Ensure the current expense's category exists in the list
-        if (_selectedCategory != null && 
-            !_categories.any((cat) => cat.id == _selectedCategory!.id)) {
-          // Category doesn't exist, find a replacement
-          _selectedCategory = _categories.isNotEmpty ? _categories.first : null;
-        }
-      });
-    } catch (e) {
-      // Handle error
-    }
-  }
-
-  Future<void> _loadAccount() async {
-    try {
-      // Load all accounts
-      final accounts = await _accountService.getAccounts();
-      // Load the account for the expense
-      final account = await _accountService.getAccountById(widget.expense.accountId);
-      setState(() {
-        _accounts = accounts;
-        _selectedAccount = account;
-        // Update currency to match the account
-        if (account != null) {
-          _selectedCurrency = account.currency;
+        if (_categories.isNotEmpty && _selectedCategory == null) {
+          _selectedCategory = _categories.first;
         }
       });
     } catch (e) {
@@ -148,7 +123,7 @@ class _EditExpenseScreenState extends State<EditExpenseScreen> {
     );
   }
 
-  Future<void> _updateExpense() async {
+  Future<void> _saveTransaction() async {
     if (!_formKey.currentState!.validate()) {
       return;
     }
@@ -163,22 +138,24 @@ class _EditExpenseScreenState extends State<EditExpenseScreen> {
       return;
     }
 
-    if (_selectedAccount == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please select an account'),
-          backgroundColor: Colors.red,
-        ),
-      );
-      return;
-    }
-
     setState(() {
       _isLoading = true;
     });
 
     try {
-      final updatedExpense = widget.expense.copyWith(
+      if (_selectedAccount == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('No account selected'),
+            backgroundColor: Colors.red,
+          ),
+        );
+        setState(() => _isLoading = false);
+        return;
+      }
+
+      final transaction = Transaction(
+        id: DateTime.now().millisecondsSinceEpoch.toString(),
         title: _titleController.text.trim(),
         amount: double.parse(_amountController.text),
         currency: _selectedAccount!.currency,
@@ -189,12 +166,12 @@ class _EditExpenseScreenState extends State<EditExpenseScreen> {
         accountId: _selectedAccount!.id,
       );
 
-      await _expenseService.updateExpense(updatedExpense);
+      await _transactionService.saveTransaction(transaction);
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Movement updated successfully!'),
+            content: Text('Transaction added successfully!'),
             backgroundColor: Colors.green,
           ),
         );
@@ -223,8 +200,8 @@ class _EditExpenseScreenState extends State<EditExpenseScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          'Edit movement',
-          style: const TextStyle(fontWeight: FontWeight.bold),
+          'Add transaction',
+          style: TextStyle(fontWeight: FontWeight.bold),
         ),
         actions: [
           if (_isLoading)
@@ -240,7 +217,7 @@ class _EditExpenseScreenState extends State<EditExpenseScreen> {
             )
           else
             TextButton(
-              onPressed: _updateExpense,
+              onPressed: _saveTransaction,
               child: const Text(
                 'Save',
                 style: TextStyle(fontWeight: FontWeight.bold),
@@ -255,32 +232,6 @@ class _EditExpenseScreenState extends State<EditExpenseScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Info Card
-              Card(
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Editing: ${widget.expense.title}',
-                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        'Original: ${widget.expense.formattedAmount} • ${DateFormat('MMM d, yyyy').format(widget.expense.date)}',
-                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: Theme.of(context).colorScheme.onSurfaceVariant,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              const SizedBox(height: 16),
-
               // Title Field
               Card(
                 child: Padding(
@@ -289,7 +240,7 @@ class _EditExpenseScreenState extends State<EditExpenseScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Movement details',
+                        'Transaction details',
                         style: Theme.of(context).textTheme.titleMedium?.copyWith(
                           fontWeight: FontWeight.bold,
                         ),
@@ -385,71 +336,6 @@ class _EditExpenseScreenState extends State<EditExpenseScreen> {
                           border: OutlineInputBorder(),
                         ),
                         maxLines: 3,
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              const SizedBox(height: 16),
-
-              // Account Selection
-              Card(
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Account',
-                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-                      Container(
-                        width: double.infinity,
-                        padding: const EdgeInsets.symmetric(horizontal: 12),
-                        decoration: BoxDecoration(
-                          border: Border.all(color: Colors.grey),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: DropdownButtonHideUnderline(
-                          child: DropdownButton<Account>(
-                            value: _selectedAccount,
-                            isExpanded: true,
-                            onChanged: (Account? newValue) {
-                              if (newValue != null) {
-                                setState(() {
-                                  _selectedAccount = newValue;
-                                  // Update currency to match the account
-                                  _selectedCurrency = newValue.currency;
-                                });
-                              }
-                            },
-                            items: _accounts.map<DropdownMenuItem<Account>>((Account account) {
-                              return DropdownMenuItem<Account>(
-                                value: account,
-                                child: Row(
-                                  children: [
-                                    Text(
-                                      account.icon,
-                                      style: const TextStyle(fontSize: 18),
-                                    ),
-                                    const SizedBox(width: 12),
-                                    Expanded(child: Text(account.name)),
-                                    const SizedBox(width: 8),
-                                    Text(
-                                      account.currency.code,
-                                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                        color: Theme.of(context).colorScheme.onSurfaceVariant,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              );
-                            }).toList(),
-                          ),
-                        ),
                       ),
                     ],
                   ),
@@ -557,6 +443,8 @@ class _EditExpenseScreenState extends State<EditExpenseScreen> {
                                 DateFormat('EEEE, MMM d, yyyy').format(_selectedDate),
                                 style: Theme.of(context).textTheme.bodyLarge,
                               ),
+                              const Spacer(),
+                              const Icon(Icons.arrow_drop_down),
                             ],
                           ),
                         ),
@@ -578,6 +466,8 @@ class _EditExpenseScreenState extends State<EditExpenseScreen> {
                                 _selectedTime.format(context),
                                 style: Theme.of(context).textTheme.bodyLarge,
                               ),
+                              const Spacer(),
+                              const Icon(Icons.arrow_drop_down),
                             ],
                           ),
                         ),
@@ -588,12 +478,12 @@ class _EditExpenseScreenState extends State<EditExpenseScreen> {
               ),
               const SizedBox(height: 32),
 
-              // Update Button
+              // Save Button
               SizedBox(
                 width: double.infinity,
                 height: 56,
                 child: ElevatedButton(
-                  onPressed: _isLoading ? null : _updateExpense,
+                  onPressed: _isLoading ? null : _saveTransaction,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Theme.of(context).colorScheme.primary,
                     foregroundColor: Theme.of(context).colorScheme.onPrimary,
@@ -610,9 +500,9 @@ class _EditExpenseScreenState extends State<EditExpenseScreen> {
                             color: Colors.white,
                           ),
                         )
-                      : const Text(
-                          'Update movement',
-                          style: TextStyle(
+                      : Text(
+                          'Add transaction',
+                          style: const TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
                           ),

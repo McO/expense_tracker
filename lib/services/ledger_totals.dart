@@ -1,8 +1,8 @@
 import '../models/category.dart';
 import '../models/currency.dart';
-import '../models/expense.dart';
+import '../models/transaction.dart';
 
-/// Pure aggregation over movements: wallet balance counts every kind, while
+/// Pure aggregation over transactions: account balance counts every kind, while
 /// income/expense/category figures count only categories flagged countsInStatistics (ADR-0007).
 class LedgerTotals {
   final double totalIncome;
@@ -25,14 +25,14 @@ class LedgerTotals {
   double get savingsRate =>
       totalIncome > 0 ? ((totalIncome - totalExpenses) / totalIncome) * 100 : 0.0;
 
-  static LedgerTotals statistics(Iterable<Expense> expenses) {
+  static LedgerTotals statistics(Iterable<Transaction> transactions) {
     double income = 0.0;
     double spending = 0.0;
     final categoryTotals = <Category, double>{};
     final categoryIncome = <Category, double>{};
     final categoryExpense = <Category, double>{};
     final currencyTotals = <Currency, double>{};
-    for (final e in expenses) {
+    for (final e in transactions) {
       if (!e.countsInStatistics) continue;
       if (e.isIncome) {
         income += e.amount;
@@ -54,7 +54,7 @@ class LedgerTotals {
     );
   }
 
-  /// Wallet balance = sum of every movement by sign.
-  static double balance(Iterable<Expense> expenses) =>
-      expenses.fold(0.0, (sum, e) => sum + e.signedAmount);
+  /// Account balance = sum of every transaction by sign.
+  static double balance(Iterable<Transaction> transactions) =>
+      transactions.fold(0.0, (sum, e) => sum + e.signedAmount);
 }

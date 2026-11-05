@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
 import '../models/currency.dart';
 
-class TotalExpenseCard extends StatelessWidget {
+class BalanceSummaryCard extends StatelessWidget {
   final double totalIncome;
   final double totalExpenses;
-  /// Wallet balance counting every movement kind (top-ups and corrections
+  /// Account balance counting every transaction kind (top-ups and corrections
   /// included). Defaults to income - expenses when not given.
   final double? balance;
   final Map<Currency, double> currencyTotals;
   final Currency defaultCurrency;
 
-  const TotalExpenseCard({
+  const BalanceSummaryCard({
     super.key,
     required this.totalIncome,
     required this.totalExpenses,

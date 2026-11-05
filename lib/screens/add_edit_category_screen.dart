@@ -394,7 +394,7 @@ class _AddEditCategoryScreenState extends State<AddEditCategoryScreen> {
           contentPadding: EdgeInsets.zero,
           title: const Text('Count in statistics'),
           subtitle: const Text(
-              'Off: movements stay in the wallet balance but are not counted as income or spending'),
+              'Off: transactions stay in the account balance but are not counted as income or spending'),
           value: _countsInStatistics,
           onChanged: (v) => setState(() => _countsInStatistics = v),
         ),

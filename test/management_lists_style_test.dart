@@ -13,10 +13,10 @@ void _big(WidgetTester t) {
   addTearDown(t.view.reset);
 }
 
-Future<void> _wallets(int n) async {
+Future<void> _accounts(int n) async {
   final list = [
     for (var i = 1; i <= n; i++)
-      Account(id: 'w$i', name: 'Wallet$i', currency: Currency.eur, isDefault: i == 1)
+      Account(id: 'w$i', name: 'Account$i', currency: Currency.eur, isDefault: i == 1)
   ];
   SharedPreferences.setMockInitialValues({
     'accounts': list.map((a) => jsonEncode(a.toJson())).toList(),
@@ -33,18 +33,18 @@ void main() {
   group('account list', () {
     testWidgets('popup menu per item, no trailing icon buttons, extended FAB', (t) async {
       _big(t);
-      await _wallets(2);
+      await _accounts(2);
       await t.pumpWidget(const MaterialApp(home: AccountManagementScreen()));
       await t.pumpAndSettle();
       expect(find.byType(PopupMenuButton<String>), findsNWidgets(2));
       expect(find.byType(IconButton), findsNothing);
-      expect(find.widgetWithText(FloatingActionButton, 'Add wallet'), findsOneWidget);
+      expect(find.widgetWithText(FloatingActionButton, 'Add account'), findsOneWidget);
       expect(tester(t).isExtended, isTrue);
     });
 
     testWidgets('Edit opens the edit dialog', (t) async {
       _big(t);
-      await _wallets(2);
+      await _accounts(2);
       await t.pumpWidget(const MaterialApp(home: AccountManagementScreen()));
       await t.pumpAndSettle();
       await _openMenu(t);
@@ -55,17 +55,17 @@ void main() {
 
     testWidgets('FAB opens the add dialog', (t) async {
       _big(t);
-      await _wallets(2);
+      await _accounts(2);
       await t.pumpWidget(const MaterialApp(home: AccountManagementScreen()));
       await t.pumpAndSettle();
-      await t.tap(find.text('Add wallet'));
+      await t.tap(find.text('Add account'));
       await t.pumpAndSettle();
       expect(find.text('Add Account'), findsOneWidget);
     });
 
-    testWidgets('last wallet cannot be deleted', (t) async {
+    testWidgets('last account cannot be deleted', (t) async {
       _big(t);
-      await _wallets(1);
+      await _accounts(1);
       await t.pumpWidget(const MaterialApp(home: AccountManagementScreen()));
       await t.pumpAndSettle();
       await _openMenu(t);
@@ -75,7 +75,7 @@ void main() {
 
     testWidgets('cards use elevation 2', (t) async {
       _big(t);
-      await _wallets(2);
+      await _accounts(2);
       await t.pumpWidget(const MaterialApp(home: AccountManagementScreen()));
       await t.pumpAndSettle();
       expect(t.widget<Card>(find.byType(Card).first).elevation, 2);

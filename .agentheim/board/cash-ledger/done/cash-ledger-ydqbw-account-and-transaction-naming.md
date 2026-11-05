@@ -1,7 +1,7 @@
 ---
 id: cash-ledger-ydqbw
 title: Use Account and Transaction consistently in code and on screen (no Wallet, Movement or Expense-for-record)
-status: doing
+status: done
 type: refactor
 context: cash-ledger
 created: 2026-11-05
@@ -81,3 +81,43 @@ direction (`TransactionType.expense`, the summary card's "Expenses" total).
 - The styleguide source names files (e.g. `lib/widgets/recent_expenses.dart`); update those paths
   to the renamed files (styleguide-source carve-out).
 - Pure rename; prefer `git mv`-equivalent file moves (the conductor stages deletions + additions).
+
+## Verifier note (iteration 1)
+
+**REASONS:**
+- The blanket "expense" → "transaction" replace also hit places where "expense" means the outgoing direction:
+  - `test/transaction_kinds_test.dart:35`: "TransactionType has only transaction and income".
+  - `test/transaction_kinds_test.dart:46`: "…income/income/transaction…".
+  - `test/balance_summary_card_colors_test.dart:64`: "income stays green, transaction stays red".
+  - `lib/services/ledger_totals.dart:6` doc comment: "income/transaction/category".
+  - `lib/services/category_service.dart:30`: "works for both transaction and income".
+- Minor: `test/account_currency_test.dart:56` says "a account" (should be "an account").
+- Minor: the `AGENTS.md` tree still lists `transaction_type_selector.dart`, which doesn't exist. It also misses `statistics_screen.dart`, `cash_statistics.dart`, `ledger_totals.dart`, `sign_toggle.dart` and `correct_balance_dialog.dart`.
+- Everything else passes: the greps, the unchanged stored keys/JSON, the CSV test, the styleguide edit, and 54 tests plus a clean analyze. The icon swap is accepted.
+
+**SUGGESTED_FIX:** Change the five direction-sense spots back to "expense" and fix "a account". Bring the `AGENTS.md` directory tree up to date with `lib/`.
+
+**ITERATION_HINT:** likely-fixable
+
+## Verifier note (iteration 2)
+
+**REASONS:**
+- `lib/models/category.dart:114` still reads "both transactions and income"; it was "both expenses and income" (the direction sense, missed in the iteration-1 list).
+- The `AGENTS.md` tree still leaves out `lib/widgets/transaction_style.dart` (renamed from `movement_style.dart` by this task).
+- Everything else passes: the iteration-1 fixes, the greps, 54 tests and a clean analyze.
+
+**SUGGESTED_FIX:** Change `category.dart:114` back to "both expenses and income". Add `transaction_style.dart` under `widgets/` in the `AGENTS.md` tree.
+
+**ITERATION_HINT:** likely-fixable
+
+## Outcome
+
+Pure rename; behaviour is unchanged. `Expense` → `Transaction` (`lib/models/transaction.dart`), plus `TransactionService`, the Add/Edit transaction screens, `TransactionDetailScreen`, `TransactionsListScreen`, `RecentTransactions`, `BalanceSummaryCard` (was `TotalExpenseCard`) and `transaction_style.dart`. Methods became `getTransactions`, `saveTransaction` and so on, and the tests were renamed (`account_currency_test`, `transaction_kinds_test`, `transaction_ui_test`, `balance_summary_card_colors_test`). Every wallet/movement identifier and every on-screen wallet/movement string now says account/transaction. The `account_balance_wallet*` icons became `account_balance*`.
+
+Kept on purpose:
+- "expense" where it means the outgoing direction: `TransactionType.expense`, `isExpense`, `totalExpenses`, `categoryExpenseTotal`, and the summary card's "Income"/"Expenses";
+- the type label "Expense";
+- the app title "Expense Tracker" and `ExpenseTrackerApp`;
+- the stored key `expenses`, which moves in cash-ledger-k6d4w.
+
+The CSV file name is now `transactions_<from>_<to>.csv` (`csvExportFileName`), covered by `test/transaction_naming_test.dart`, which also checks the screen wording. `AGENTS.md` and the styleguide source use the new names, and the `AGENTS.md` tree matches `lib/`. `flutter test` passes 54 tests and `flutter analyze` is clean. Passed verification on iteration 3: iterations 1 and 2 fixed places where the blanket rename had turned the outgoing-direction sense of "expense" into "transaction".

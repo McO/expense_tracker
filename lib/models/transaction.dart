@@ -2,7 +2,7 @@ import 'currency.dart';
 import 'category.dart';
 import 'transaction_type.dart';
 
-class Expense {
+class Transaction {
   final String id;
   final String title;
   final double amount;
@@ -13,7 +13,7 @@ class Expense {
   final TransactionType type;
   final String accountId;
 
-  Expense({
+  Transaction({
     required this.id,
     required this.title,
     required this.amount,
@@ -31,13 +31,13 @@ class Expense {
   bool get isTopUp => category.id == Category.topUpId;
   bool get isCorrection => category.id == Category.correctionId;
 
-  /// Decided by the movement's category flag (ADR-0007).
+  /// Decided by the transaction's category flag (ADR-0007).
   bool get countsInStatistics => category.countsInStatistics;
 
-  /// True when this movement adds to the wallet balance.
+  /// True when this transaction adds to the account balance.
   bool get increasesBalance => type.increasesBalance;
 
-  // Signed amount for the wallet balance (positive when the movement adds cash)
+  // Signed amount for the account balance (positive when the transaction adds cash)
   double get signedAmount => increasesBalance ? amount : -amount;
 
   // Formatted amount with sign
@@ -46,10 +46,10 @@ class Expense {
     return '$sign${currency.symbol}${amount.toStringAsFixed(2)}';
   }
 
-  /// Builds a correction movement from the signed difference between the
+  /// Builds a correction transaction from the signed difference between the
   /// counted cash and the recorded balance (positive = cash was missing from
   /// the books, i.e. money in).
-  factory Expense.correction({
+  factory Transaction.correction({
     required String id,
     required double difference,
     required Currency currency,
@@ -58,7 +58,7 @@ class Expense {
     Category category = Category.correction,
     String title = 'Correction',
   }) {
-    return Expense(
+    return Transaction(
       id: id,
       title: title,
       amount: difference.abs(),
@@ -84,7 +84,7 @@ class Expense {
     };
   }
 
-  factory Expense.fromJson(Map<String, dynamic> json, List<Category> categories, {List<Currency> customCurrencies = const [], String? defaultAccountId}) {
+  factory Transaction.fromJson(Map<String, dynamic> json, List<Category> categories, {List<Currency> customCurrencies = const [], String? defaultAccountId}) {
     // Interim s2v1q codes carry their category when none is stored (ADR-0007)
     final rawType = (json['type'] ?? 'expense').toString().toLowerCase();
     final interimId = rawType == 'topup'
@@ -115,7 +115,7 @@ class Expense {
       }
     }
 
-    return Expense(
+    return Transaction(
       id: json['id'],
       title: json['title'],
       amount: json['amount'].toDouble(),
@@ -128,7 +128,7 @@ class Expense {
     );
   }
 
-  Expense copyWith({
+  Transaction copyWith({
     String? id,
     String? title,
     double? amount,
@@ -139,7 +139,7 @@ class Expense {
     TransactionType? type,
     String? accountId,
   }) {
-    return Expense(
+    return Transaction(
       id: id ?? this.id,
       title: title ?? this.title,
       amount: amount ?? this.amount,

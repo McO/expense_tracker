@@ -1,22 +1,22 @@
 import 'package:flutter/material.dart';
 import '../models/account.dart';
 import '../models/category.dart';
-import '../models/expense.dart';
+import '../models/transaction.dart';
 import '../services/category_service.dart';
-import '../services/expense_service.dart';
+import '../services/transaction_service.dart';
 
 /// Difference between counted cash and the current balance, rounded to cents.
 double balanceDifference(double balance, double counted) =>
     ((counted - balance) * 100).round() / 100;
 
-/// Opens the Correct balance dialog; on confirm records one movement in the
+/// Opens the Correct balance dialog; on confirm records one transaction in the
 /// Correction category signed by the difference (or nothing, with a message,
 /// when counted equals the balance). Returns true when one was recorded.
 Future<bool> correctBalance(
   BuildContext context, {
   required Account account,
   required double balance,
-  ExpenseService? expenseService,
+  TransactionService? transactionService,
 }) async {
   final counted = await showDialog<double>(
     context: context,
@@ -34,7 +34,7 @@ Future<bool> correctBalance(
   final category = categories.firstWhere((c) => c.id == Category.correctionId,
       orElse: () => Category.correction);
   final now = DateTime.now();
-  await (expenseService ?? ExpenseService()).saveExpense(Expense.correction(
+  await (transactionService ?? TransactionService()).saveTransaction(Transaction.correction(
     id: now.millisecondsSinceEpoch.toString(),
     difference: difference,
     currency: account.currency,

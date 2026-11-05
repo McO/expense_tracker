@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import '../models/account.dart';
 import '../models/category.dart';
 import '../services/cash_statistics.dart';
-import '../services/expense_service.dart';
+import '../services/transaction_service.dart';
 import '../widgets/correct_balance_dialog.dart';
 
-/// Quick-glance cash statistics for one wallet (styleguide section 4).
+/// Quick-glance cash statistics for one account (styleguide section 4).
 class StatisticsScreen extends StatefulWidget {
   final Account account;
 
@@ -19,7 +19,7 @@ class StatisticsScreen extends StatefulWidget {
 }
 
 class _StatisticsScreenState extends State<StatisticsScreen> {
-  final ExpenseService _expenseService = ExpenseService();
+  final TransactionService _transactionService = TransactionService();
   StatsPeriod _period = StatsPeriod.thisMonth;
   CashStatistics? _stats;
 
@@ -32,11 +32,11 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
   }
 
   Future<void> _load() async {
-    final expenses = await _expenseService.getExpenses();
+    final transactions = await _transactionService.getTransactions();
     if (!mounted) return;
     setState(() {
       _stats = CashStatistics.compute(
-        expenses: expenses,
+        transactions: transactions,
         accountId: widget.account.id,
         today: _today,
         period: _period,
@@ -103,7 +103,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
               fontWeight: FontWeight.bold,
               color: stats.balance < 0 ? Colors.red : theme.colorScheme.primary)),
       const SizedBox(height: 4),
-      Text('In your ${widget.account.currency.code} wallet',
+      Text('In your ${widget.account.currency.code} account',
           style: theme.textTheme.bodySmall),
       const SizedBox(height: 8),
       OutlinedButton.icon(

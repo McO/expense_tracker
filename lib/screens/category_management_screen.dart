@@ -88,7 +88,7 @@ class _CategoryManagementScreenState extends State<CategoryManagementScreen> {
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Delete Category'),
-        content: Text('Are you sure you want to delete "${category.name}"?\n\nExpenses using this category will be moved to "Other".'),
+        content: Text('Are you sure you want to delete "${category.name}"?\n\nTransactions using this category will be moved to "Other".'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),

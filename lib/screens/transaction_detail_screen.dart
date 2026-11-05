@@ -1,22 +1,22 @@
 import 'package:flutter/material.dart';
-import '../widgets/movement_style.dart';
+import '../widgets/transaction_style.dart';
 import 'package:intl/intl.dart';
-import '../models/expense.dart';
-import 'edit_expense_screen.dart';
+import '../models/transaction.dart';
+import 'edit_transaction_screen.dart';
 
-class ExpenseDetailScreen extends StatelessWidget {
-  final Expense expense;
+class TransactionDetailScreen extends StatelessWidget {
+  final Transaction transaction;
 
-  const ExpenseDetailScreen({
+  const TransactionDetailScreen({
     super.key,
-    required this.expense,
+    required this.transaction,
   });
 
   Future<void> _navigateToEdit(BuildContext context) async {
     final result = await Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => EditExpenseScreen(expense: expense),
+        builder: (context) => EditTransactionScreen(transaction: transaction),
       ),
     );
 
@@ -27,11 +27,11 @@ class ExpenseDetailScreen extends StatelessWidget {
   }
 
   Color get _transactionTypeColor {
-    return movementColor(expense);
+    return transactionColor(transaction);
   }
 
   IconData get _transactionTypeIcon {
-    return expense.increasesBalance ? Icons.trending_up : Icons.trending_down;
+    return transaction.increasesBalance ? Icons.trending_up : Icons.trending_down;
   }
 
   @override
@@ -39,14 +39,14 @@ class ExpenseDetailScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          '${expense.type.name} Details',
+          'Transaction details',
           style: const TextStyle(fontWeight: FontWeight.bold),
         ),
         actions: [
           IconButton(
             icon: const Icon(Icons.edit),
             onPressed: () => _navigateToEdit(context),
-            tooltip: 'Edit ${expense.type.name}',
+            tooltip: 'Edit transaction',
           ),
         ],
       ),
@@ -66,7 +66,7 @@ class ExpenseDetailScreen extends StatelessWidget {
                       radius: 30,
                       backgroundColor: _transactionTypeColor,
                       child: Text(
-                        expense.category.icon,
+                        transaction.category.icon,
                         style: const TextStyle(fontSize: 28),
                       ),
                     ),
@@ -84,7 +84,7 @@ class ExpenseDetailScreen extends StatelessWidget {
                               ),
                               const SizedBox(width: 8),
                               Text(
-                                expense.type.name,
+                                transaction.type.name,
                                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
                                   color: _transactionTypeColor,
                                   fontWeight: FontWeight.bold,
@@ -94,19 +94,19 @@ class ExpenseDetailScreen extends StatelessWidget {
                           ),
                           const SizedBox(height: 8),
                           Text(
-                            expense.formattedAmountWithSign,
+                            transaction.formattedAmountWithSign,
                             style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                               fontWeight: FontWeight.bold,
                               color: _transactionTypeColor,
                             ),
                           ),
                           Text(
-                            expense.category.name,
+                            transaction.category.name,
                             style: Theme.of(context).textTheme.titleMedium?.copyWith(
                               color: Colors.grey[600],
                             ),
                           ),
-                          if (!expense.countsInStatistics) ...[
+                          if (!transaction.countsInStatistics) ...[
                             const SizedBox(height: 8),
                             const NotCountedMarker(),
                           ],
@@ -124,7 +124,7 @@ class ExpenseDetailScreen extends StatelessWidget {
               context,
               icon: Icons.title,
               title: 'Title',
-              content: expense.title,
+              content: transaction.title,
             ),
             const SizedBox(height: 16),
 
@@ -133,17 +133,17 @@ class ExpenseDetailScreen extends StatelessWidget {
               context,
               icon: Icons.calendar_today,
               title: 'Date & Time',
-              content: DateFormat('EEEE, MMMM d, yyyy • h:mm a').format(expense.date),
+              content: DateFormat('EEEE, MMMM d, yyyy • h:mm a').format(transaction.date),
             ),
             const SizedBox(height: 16),
 
             // Description Section
-            if (expense.description.isNotEmpty) ...[
+            if (transaction.description.isNotEmpty) ...[
               _buildDetailCard(
                 context,
                 icon: Icons.description,
                 title: 'Description',
-                content: expense.description,
+                content: transaction.description,
                 isMultiline: true,
               ),
               const SizedBox(height: 16),
@@ -166,14 +166,14 @@ class ExpenseDetailScreen extends StatelessWidget {
                     _buildInfoRow(
                       context,
                       'Transaction ID',
-                      expense.id,
+                      transaction.id,
                       Icons.fingerprint,
                     ),
                     const Divider(),
                     _buildInfoRow(
                       context,
                       'Transaction Type',
-                      expense.type.name,
+                      transaction.type.name,
                       _transactionTypeIcon,
                       color: _transactionTypeColor,
                     ),
@@ -181,7 +181,7 @@ class ExpenseDetailScreen extends StatelessWidget {
                     _buildInfoRow(
                       context,
                       'Day of Week',
-                      DateFormat('EEEE').format(expense.date),
+                      DateFormat('EEEE').format(transaction.date),
                       Icons.today,
                     ),
                     const Divider(),
@@ -190,7 +190,7 @@ class ExpenseDetailScreen extends StatelessWidget {
                       'Time Added',
                       DateFormat('h:mm a').format(
                         DateTime.fromMillisecondsSinceEpoch(
-                          int.parse(expense.id),
+                          int.parse(transaction.id),
                         ),
                       ),
                       Icons.access_time,

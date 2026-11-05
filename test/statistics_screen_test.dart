@@ -1,11 +1,11 @@
 import 'package:expense_tracker/models/category.dart';
 import 'package:expense_tracker/models/currency.dart';
-import 'package:expense_tracker/models/expense.dart';
+import 'package:expense_tracker/models/transaction.dart';
 import 'package:expense_tracker/models/transaction_type.dart';
 import 'package:expense_tracker/screens/home_screen.dart';
 import 'package:expense_tracker/screens/statistics_screen.dart';
 import 'package:expense_tracker/services/account_service.dart';
-import 'package:expense_tracker/services/expense_service.dart';
+import 'package:expense_tracker/services/transaction_service.dart';
 import 'package:expense_tracker/services/theme_service.dart';
 import 'package:expense_tracker/widgets/correct_balance_dialog.dart';
 import 'package:flutter/material.dart';
@@ -14,9 +14,9 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 final today = DateTime(2026, 11, 10, 12);
 
-Expense _e(String id, double amt, DateTime d, String acc,
+Transaction _e(String id, double amt, DateTime d, String acc,
         {TransactionType type = TransactionType.expense, Category? cat}) =>
-    Expense(
+    Transaction(
         id: id,
         title: id,
         amount: amt,
@@ -36,16 +36,16 @@ void main() {
   setUp(() => SharedPreferences.setMockInitialValues({}));
 
   Future<void> seed(String acc) async {
-    final s = ExpenseService();
-    await s.saveExpense(_e('top', 1000, DateTime(2026, 11, 1), acc,
+    final s = TransactionService();
+    await s.saveTransaction(_e('top', 1000, DateTime(2026, 11, 1), acc,
         type: TransactionType.income, cat: Category.topUp));
-    await s.saveExpense(_e('early', 100, DateTime(2026, 11, 1), acc));
-    await s.saveExpense(_e('recent', 50, DateTime(2026, 11, 9), acc,
+    await s.saveTransaction(_e('early', 100, DateTime(2026, 11, 1), acc));
+    await s.saveTransaction(_e('recent', 50, DateTime(2026, 11, 9), acc,
         cat: Category.defaultCategories[1]));
-    await s.saveExpense(_e('elsewhere', 777, DateTime(2026, 11, 9), 'other-wallet'));
+    await s.saveTransaction(_e('elsewhere', 777, DateTime(2026, 11, 9), 'other-account'));
   }
 
-  testWidgets('drawer Statistics entry opens the screen for the selected wallet',
+  testWidgets('drawer Statistics entry opens the screen for the selected account',
       (tester) async {
     _big(tester);
     final acc = (await AccountService().getAccounts()).first;
@@ -91,7 +91,7 @@ void main() {
     }
   });
 
-  testWidgets('balance card shows the wallet balance; Correct balance opens dialog',
+  testWidgets('balance card shows the account balance; Correct balance opens dialog',
       (tester) async {
     _big(tester);
     final acc = (await AccountService().getAccounts()).first;

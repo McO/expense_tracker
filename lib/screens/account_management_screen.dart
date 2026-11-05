@@ -3,7 +3,7 @@ import '../models/account.dart';
 import '../models/currency.dart';
 import '../services/account_service.dart';
 import '../services/currency_service.dart';
-import '../services/expense_service.dart';
+import '../services/transaction_service.dart';
 
 class AccountManagementScreen extends StatefulWidget {
   const AccountManagementScreen({super.key});
@@ -201,10 +201,10 @@ class _AccountManagementScreenState extends State<AccountManagementScreen> {
   }
 
   Future<void> _deleteAccount(Account account) async {
-    final count = (await ExpenseService().getExpensesForAccount(account.id)).length;
+    final count = (await TransactionService().getTransactionsForAccount(account.id)).length;
     if (!mounted) return;
     final warning = count > 0
-        ? 'This also deletes $count ${count == 1 ? 'movement' : 'movements'}.'
+        ? 'This also deletes $count ${count == 1 ? 'transaction' : 'transactions'}.'
         : '';
     final confirm = await showDialog<bool>(
       context: context,
@@ -256,7 +256,7 @@ class _AccountManagementScreenState extends State<AccountManagementScreen> {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(Icons.account_balance_wallet_outlined, size: 64, color: Colors.grey[400]),
+                      Icon(Icons.account_balance_outlined, size: 64, color: Colors.grey[400]),
                       const SizedBox(height: 16),
                       Text(
                         'No accounts yet',
@@ -352,7 +352,7 @@ class _AccountManagementScreenState extends State<AccountManagementScreen> {
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => _showAddEditDialog(),
         icon: const Icon(Icons.add),
-        label: const Text('Add wallet'),
+        label: const Text('Add account'),
       ),
     );
   }

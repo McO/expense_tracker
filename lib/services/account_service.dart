@@ -120,7 +120,7 @@ class AccountService {
     
     await _saveAccounts(accounts);
 
-    // Deleting a wallet deletes its movements too
+    // Deleting an account deletes its transactions too
     final prefs = await SharedPreferences.getInstance();
     final stored = prefs.getStringList('expenses') ?? [];
     final kept = stored

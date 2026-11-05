@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import '../models/category.dart';
-import '../models/expense.dart';
+import '../models/transaction.dart';
 
 class CategoryBreakdown extends StatefulWidget {
   final Map<Category, double> categoryTotals;
@@ -9,7 +9,7 @@ class CategoryBreakdown extends StatefulWidget {
   final Map<Category, double> categoryExpenseTotal;
   final double totalIncome;
   final double totalExpenses;
-  final List<Expense> allExpenses;
+  final List<Transaction> allTransactions;
 
   const CategoryBreakdown({
     super.key,
@@ -18,7 +18,7 @@ class CategoryBreakdown extends StatefulWidget {
     required this.categoryExpenseTotal,
     required this.totalIncome,
     required this.totalExpenses,
-    required this.allExpenses,
+    required this.allTransactions,
   });
 
   @override
@@ -77,8 +77,8 @@ class _CategoryBreakdownState extends State<CategoryBreakdown> {
   }
 
   String _formatCategoryTotal(Category category, double amount) {
-    final categoryExpenses = widget.allExpenses.where((e) => e.category.id == category.id);
-    final categoryCurrencies = categoryExpenses.map((e) => e.currency).toSet();
+    final categoryTransactions = widget.allTransactions.where((e) => e.category.id == category.id);
+    final categoryCurrencies = categoryTransactions.map((e) => e.currency).toSet();
     
     if (categoryCurrencies.length == 1) {
       final currency = categoryCurrencies.first;

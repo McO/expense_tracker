@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import '../models/transaction_type.dart';
-import 'movement_style.dart';
+import 'transaction_style.dart';
 
 /// ± toggle beside the amount field: tapping flips the direction of the
-/// movement (− = money out, + = money in).
+/// transaction (− = money out, + = money in).
 class SignToggle extends StatelessWidget {
   final TransactionType type;
   final ValueChanged<TransactionType> onChanged;

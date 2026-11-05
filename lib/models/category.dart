@@ -8,7 +8,7 @@ class Category {
   final bool isDefault; // Whether it's a default category that can't be deleted
   final String? exportName; // Optional name used for CSV exports
 
-  /// Whether movements in this category count as spending/income in
+  /// Whether transactions in this category count as spending/income in
   /// statistics. Top-up and Correction are not counted (ADR-0007).
   final bool countsInStatistics;
 

@@ -1,6 +1,6 @@
 import 'package:expense_tracker/models/category.dart';
 import 'package:expense_tracker/models/currency.dart';
-import 'package:expense_tracker/models/expense.dart';
+import 'package:expense_tracker/models/transaction.dart';
 import 'package:expense_tracker/models/transaction_type.dart';
 import 'package:expense_tracker/services/cash_statistics.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -9,11 +9,11 @@ final today = DateTime(2026, 11, 10, 15);
 final food = Category.defaultCategories.first;
 final other = Category.defaultCategories[1];
 
-Expense e(double amt, DateTime date,
+Transaction e(double amt, DateTime date,
         {TransactionType type = TransactionType.expense,
         Category? cat,
         String acc = 'a'}) =>
-    Expense(
+    Transaction(
         id: '${amt}_${date.toIso8601String()}_$acc',
         title: 't',
         amount: amt,
@@ -23,8 +23,8 @@ Expense e(double amt, DateTime date,
         type: type,
         accountId: acc);
 
-CashStatistics stats(List<Expense> xs, StatsPeriod p) => CashStatistics.compute(
-    expenses: xs, accountId: 'a', today: today, period: p);
+CashStatistics stats(List<Transaction> xs, StatsPeriod p) => CashStatistics.compute(
+    transactions: xs, accountId: 'a', today: today, period: p);
 
 void main() {
   final data = [
@@ -51,7 +51,7 @@ void main() {
     expect(s.dailyAverage, closeTo(80 / 7, 1e-9));
   });
 
-  test('balance counts every movement of the wallet only', () {
+  test('balance counts every transaction of the account only', () {
     final s = stats(data, StatsPeriod.thisMonth);
     expect(s.balance, -100 - 50 - 30 + 999 - 40 + 70 - 25);
   });

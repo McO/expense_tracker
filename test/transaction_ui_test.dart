@@ -1,24 +1,24 @@
 import 'package:expense_tracker/models/account.dart';
 import 'package:expense_tracker/models/category.dart';
 import 'package:expense_tracker/models/currency.dart';
-import 'package:expense_tracker/models/expense.dart';
+import 'package:expense_tracker/models/transaction.dart';
 import 'package:expense_tracker/models/transaction_type.dart';
 import 'package:expense_tracker/screens/add_edit_category_screen.dart';
-import 'package:expense_tracker/screens/add_expense_screen.dart';
-import 'package:expense_tracker/screens/edit_expense_screen.dart';
+import 'package:expense_tracker/screens/add_transaction_screen.dart';
+import 'package:expense_tracker/screens/edit_transaction_screen.dart';
 import 'package:expense_tracker/services/account_service.dart';
 import 'package:expense_tracker/services/category_service.dart';
-import 'package:expense_tracker/services/expense_service.dart';
+import 'package:expense_tracker/services/transaction_service.dart';
 import 'package:expense_tracker/services/ledger_totals.dart';
 import 'package:expense_tracker/widgets/correct_balance_dialog.dart';
-import 'package:expense_tracker/widgets/recent_expenses.dart';
+import 'package:expense_tracker/widgets/recent_transactions.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-Expense _e(String id, double amount, TransactionType t, String accountId,
+Transaction _e(String id, double amount, TransactionType t, String accountId,
         {Category? category}) =>
-    Expense(
+    Transaction(
       id: id,
       title: 'Row$id',
       amount: amount,
@@ -41,31 +41,30 @@ void main() {
   testWidgets('add form has no type selector; ± toggle defaults to - and flips',
       (tester) async {
     _bigSurface(tester);
-    await tester.pumpWidget(const MaterialApp(home: AddExpenseScreen()));
+    await tester.pumpWidget(const MaterialApp(home: AddTransactionScreen()));
     await tester.pumpAndSettle();
     expect(find.text('Transaction Type'), findsNothing);
-    expect(find.text('Expense Details'), findsNothing);
-    expect(find.text('Movement details'), findsOneWidget);
+    expect(find.text('Transaction details'), findsOneWidget);
     expect(find.descendant(of: find.byKey(const Key('sign-toggle')), matching: find.text('−')),
         findsOneWidget);
 
     await tester.enterText(find.widgetWithText(TextFormField, 'Title'), 'Lunch');
     await tester.enterText(find.widgetWithText(TextFormField, 'Amount'), '12');
-    await tester.tap(find.widgetWithText(ElevatedButton, 'Add movement'));
+    await tester.tap(find.widgetWithText(ElevatedButton, 'Add transaction'));
     await tester.pumpAndSettle();
-    var stored = await ExpenseService().getExpenses();
+    var stored = await TransactionService().getTransactions();
     expect(stored.single.type, TransactionType.expense);
     expect(stored.single.signedAmount, -12);
 
-    await tester.pumpWidget(const MaterialApp(home: AddExpenseScreen(), key: Key('second')));
+    await tester.pumpWidget(const MaterialApp(home: AddTransactionScreen(), key: Key('second')));
     await tester.pumpAndSettle();
     await tester.tap(find.byKey(const Key('sign-toggle')));
     await tester.pump();
     await tester.enterText(find.widgetWithText(TextFormField, 'Title'), 'Salary');
     await tester.enterText(find.widgetWithText(TextFormField, 'Amount'), '30');
-    await tester.tap(find.widgetWithText(ElevatedButton, 'Add movement'));
+    await tester.tap(find.widgetWithText(ElevatedButton, 'Add transaction'));
     await tester.pumpAndSettle();
-    stored = await ExpenseService().getExpenses();
+    stored = await TransactionService().getTransactions();
     expect(stored.firstWhere((e) => e.title == 'Salary').signedAmount, 30);
   });
 
@@ -74,8 +73,8 @@ void main() {
     _bigSurface(tester);
     final account = (await AccountService().getAccounts()).first;
     final income = _e('1', 20, TransactionType.income, account.id);
-    await ExpenseService().saveExpense(income);
-    await tester.pumpWidget(MaterialApp(home: EditExpenseScreen(expense: income)));
+    await TransactionService().saveTransaction(income);
+    await tester.pumpWidget(MaterialApp(home: EditTransactionScreen(transaction: income)));
     await tester.pumpAndSettle();
     expect(find.descendant(of: find.byKey(const Key('sign-toggle')), matching: find.text('+')),
         findsOneWidget);
@@ -83,7 +82,7 @@ void main() {
     await tester.pump();
     await tester.tap(find.widgetWithText(TextButton, 'Save'));
     await tester.pumpAndSettle();
-    final stored = await ExpenseService().getExpenses();
+    final stored = await TransactionService().getTransactions();
     expect(stored.single.type, TransactionType.expense);
     expect(stored.single.signedAmount, -20);
   });
@@ -111,13 +110,13 @@ void main() {
     testWidgets('correct balance counted ${c.$1} records a signed correction',
         (tester) async {
       final account = (await AccountService().getAccounts()).first;
-      await ExpenseService()
-          .saveExpense(_e('1', 100, TransactionType.income, account.id));
+      await TransactionService()
+          .saveTransaction(_e('1', 100, TransactionType.income, account.id));
       await runCorrection(tester, account, 100, c.$1);
       expect(find.text(c.$3), findsOneWidget);
       await tester.tap(find.text('Save'));
       await tester.pumpAndSettle();
-      final stored = await ExpenseService().getExpenses();
+      final stored = await TransactionService().getTransactions();
       expect(stored.length, 2);
       final corr = stored.where((e) => e.category.id == Category.correctionId).single;
       expect(corr.signedAmount, c.$2);
@@ -127,12 +126,12 @@ void main() {
 
   testWidgets('correct balance with equal cash records nothing', (tester) async {
     final account = (await AccountService().getAccounts()).first;
-    await ExpenseService()
-        .saveExpense(_e('1', 100, TransactionType.income, account.id));
+    await TransactionService()
+        .saveTransaction(_e('1', 100, TransactionType.income, account.id));
     await runCorrection(tester, account, 100, '100');
     await tester.tap(find.text('Save'));
     await tester.pumpAndSettle();
-    expect((await ExpenseService().getExpenses()).length, 1);
+    expect((await TransactionService().getTransactions()).length, 1);
     expect(find.textContaining('nothing to correct'), findsOneWidget);
   });
 
@@ -154,13 +153,13 @@ void main() {
     expect(after.countsInStatistics, isTrue);
   });
 
-  testWidgets('rows colour by sign and mark non-counting movements', (tester) async {
+  testWidgets('rows colour by sign and mark non-counting transactions', (tester) async {
     _bigSurface(tester);
     await tester.pumpWidget(MaterialApp(
       home: Scaffold(
         body: SingleChildScrollView(
-          child: RecentExpenses(
-            expenses: [
+          child: RecentTransactions(
+            transactions: [
               _e('1', 5, TransactionType.income, 'a'),
               _e('2', 6, TransactionType.income, 'a', category: Category.topUp),
               _e('3', 8, TransactionType.expense, 'a'),

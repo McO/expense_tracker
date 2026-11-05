@@ -1,6 +1,6 @@
-/// Direction of a movement. Amounts are always stored positive (ADR-0004);
+/// Direction of a transaction. Amounts are always stored positive (ADR-0004);
 /// the owner's sign decides the direction: income = money in, expense = money
-/// out. Whether a movement counts in statistics is decided by its category
+/// out. Whether a transaction counts in statistics is decided by its category
 /// (`Category.countsInStatistics`), not by the type (see ADR-0007).
 enum TransactionType {
   expense,
@@ -26,7 +26,7 @@ extension TransactionTypeExtension on TransactionType {
     }
   }
 
-  /// True when the movement adds to the wallet balance.
+  /// True when the transaction adds to the account balance.
   bool get increasesBalance => this == TransactionType.income;
 
   /// Interim s2v1q codes (`topup`, `correction_in`, `correction_out`) stay

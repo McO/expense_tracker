@@ -1,13 +1,13 @@
 import '../models/category.dart';
-import '../models/expense.dart';
+import '../models/transaction.dart';
 import 'ledger_totals.dart';
 
 /// Period the burn rate and spending mix are computed over.
 enum StatsPeriod { thisMonth, last7Days }
 
-/// Pure quick-glance cash statistics for one wallet (cash-ledger-bktw5).
+/// Pure quick-glance cash statistics for one account (cash-ledger-bktw5).
 /// Spending = money out in categories that count in statistics (ADR-0007);
-/// the balance counts every movement. Nothing is converted across currencies.
+/// the balance counts every transaction. Nothing is converted across currencies.
 class CashStatistics {
   final double balance;
   final double spending;
@@ -36,23 +36,23 @@ class CashStatistics {
   static DateTime _day(DateTime d) => DateTime(d.year, d.month, d.day);
 
   static CashStatistics compute({
-    required Iterable<Expense> expenses,
+    required Iterable<Transaction> transactions,
     required String accountId,
     required DateTime today,
     required StatsPeriod period,
   }) {
     final t = _day(today);
-    final wallet = expenses.where((e) => e.accountId == accountId).toList();
-    final balance = LedgerTotals.balance(wallet);
+    final account = transactions.where((e) => e.accountId == accountId).toList();
+    final balance = LedgerTotals.balance(account);
     final counted =
-        wallet.where((e) => e.isExpense && e.countsInStatistics).toList();
+        account.where((e) => e.isExpense && e.countsInStatistics).toList();
 
     final start = period == StatsPeriod.thisMonth
         ? DateTime(t.year, t.month, 1)
         : DateTime(t.year, t.month, t.day - 6);
     final days = period == StatsPeriod.thisMonth ? t.day : 7;
 
-    bool inRange(DateTime from, Expense e) {
+    bool inRange(DateTime from, Transaction e) {
       final d = _day(e.date);
       return !d.isBefore(from) && !d.isAfter(t);
     }

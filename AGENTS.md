@@ -19,33 +19,38 @@ Personal finance Android app built with Flutter. Single developer, no CI/CD pipe
 lib/
 ├── main.dart                          # Entry point — instantiates ThemeService, builds MaterialApp
 ├── models/
-│   ├── expense.dart                   # Core Expense model (toJson/fromJson/copyWith)
+│   ├── transaction.dart               # Core Transaction model (toJson/fromJson/copyWith)
 │   ├── currency.dart                  # Currency class: 15 predefined + user-defined custom
 │   ├── category.dart                  # Category: hex color, emoji icon, isDefault flag
 │   ├── account.dart                   # Account: name, currency, emoji, ARGB hex, isDefault
 │   └── transaction_type.dart          # Enum: expense | income
 ├── services/
-│   ├── expense_service.dart           # CRUD + CSV building (`buildCSV`); all reads/writes via SharedPreferences
+│   ├── transaction_service.dart       # CRUD + CSV building (`buildCSV`; export file is `transactions_<from>_<to>.csv`); all reads/writes via SharedPreferences
+│   ├── cash_statistics.dart           # Pure quick-glance statistics for one account
+│   ├── ledger_totals.dart             # Pure aggregation: account balance and income/expense totals
 │   ├── account_service.dart           # CRUD for accounts; auto-creates default if list is empty
 │   ├── category_service.dart          # CRUD for categories; seeds defaults once (v2 migration flag)
 │   ├── currency_service.dart          # CRUD for user-defined custom currencies
 │   └── theme_service.dart             # Theme mode preference (light/dark/system)
 ├── screens/
 │   ├── home_screen.dart               # Dashboard: account selector, totals, category breakdown, recents; also drives CSV export (account + date-range pickers, storage permission request, writes file to Downloads)
-│   ├── add_expense_screen.dart        # Add transaction form
-│   ├── edit_expense_screen.dart       # Edit transaction form (pre-populated)
-│   ├── expenses_list_screen.dart      # Full list with search & category filter
-│   ├── expense_detail_screen.dart     # Read-only detail view
+│   ├── add_transaction_screen.dart    # Add transaction form
+│   ├── edit_transaction_screen.dart   # Edit transaction form (pre-populated)
+│   ├── transactions_list_screen.dart  # Full list with search & category filter
+│   ├── transaction_detail_screen.dart # Read-only detail view
 │   ├── account_management_screen.dart # CRUD UI for accounts
 │   ├── category_management_screen.dart# CRUD UI for categories
 │   ├── add_edit_category_screen.dart  # Add/edit form for a single category
 │   ├── currency_management_screen.dart# CRUD UI for custom currencies
+│   ├── statistics_screen.dart         # Quick-glance cash statistics for one account
 │   └── settings_screen.dart          # Theme selection only
 └── widgets/
-    ├── total_expense_card.dart        # Net balance + income/expense summary row; groups totals by currency when multiple currencies are present
+    ├── balance_summary_card.dart      # Net balance + income/expense summary row; groups totals by currency when multiple currencies are present
     ├── category_breakdown.dart        # Auto-scrolling PageView of category spending cards
-    ├── recent_expenses.dart           # Dismissible list of 5 most recent transactions
-    └── transaction_type_selector.dart # Two-button toggle: Expense / Income
+    ├── recent_transactions.dart       # Dismissible list of 5 most recent transactions
+    ├── transaction_style.dart         # Direction colour, non-counting marker and chip for a transaction row
+    ├── sign_toggle.dart               # Sign toggle for the amount (− = money out, + = money in)
+    └── correct_balance_dialog.dart    # Correct balance dialog; records one correction transaction
 ```
 
 Other notable files:
@@ -63,7 +68,7 @@ Other notable files:
 **Vanilla Flutter `StatefulWidget` + `setState` throughout — no external state management library.**
 
 - Each screen owns its local state
-- Services are instantiated directly inside screens: `final ExpenseService _expenseService = ExpenseService()`
+- Services are instantiated directly inside screens: `final TransactionService _transactionService = TransactionService()`
 - After any mutation (add/edit/delete), screens call `_loadData()` to re-fetch from SharedPreferences and then `setState()`
 - Theme mode is passed from the root `_ExpenseTrackerAppState` down via callback parameters (`onThemeModeChanged`)
 - No reactive streams, `ChangeNotifier`, `InheritedWidget`, Provider, Riverpod, BLoC, or GetX
@@ -78,7 +83,7 @@ All data is stored in **SharedPreferences as JSON strings**. No SQLite, Hive, or
 
 | Key | Type | Contents |
 |---|---|---|
-| `expenses` | `List<String>` | JSON-encoded `Expense` objects |
+| `expenses` | `List<String>` | JSON-encoded `Transaction` objects |
 | `accounts` | `List<String>` | JSON-encoded `Account` objects |
 | `selected_account_id` | `String` | Currently selected account ID |
 | `categories` | `List<String>` | JSON-encoded `Category` objects |
@@ -92,7 +97,7 @@ All data is stored in **SharedPreferences as JSON strings**. No SQLite, Hive, or
 
 ## Key Models
 
-### Expense
+### Transaction
 
 Fields: `id`, `title`, `amount` (double), `currency` (Currency), `category` (Category), `date`, `description`, `type` (TransactionType), `accountId`.
 
@@ -186,5 +191,5 @@ These are required for the CSV export feature, which writes to the device's Down
 - **The README is outdated** — it documents the original simpler version. The codebase has since added accounts, income/expense types, custom categories, custom currencies, and CSV export.
 - **SharedPreferences has no schema migration.** Adding or renaming fields in a model requires careful `fromJson` defaults to avoid crashes on existing installs.
 - **Theme is propagated via callbacks,** not `InheritedWidget`. If you add a screen deep in the tree that needs theme control, wire the callback through all intermediate screens.
-- **Category fallback:** `Expense.fromJson` falls back to the "other" category when a stored `categoryId` is not found. This is intentional — do not remove it.
+- **Category fallback:** `Transaction.fromJson` falls back to the "other" category when a stored `categoryId` is not found. This is intentional — do not remove it.
 - **`categories_defaults_initialized_v2` flag:** The `_v2` suffix exists because the original `_v1` flag was used for a smaller set of defaults. If you add more default categories, bump to `_v3` and seed accordingly.

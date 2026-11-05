@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:expense_tracker/models/currency.dart';
-import 'package:expense_tracker/widgets/total_expense_card.dart';
+import 'package:expense_tracker/widgets/balance_summary_card.dart';
 
 Widget _host(Brightness b, {double income = 100, double expenses = 40}) {
   return MaterialApp(
@@ -11,7 +11,7 @@ Widget _host(Brightness b, {double income = 100, double expenses = 40}) {
       useMaterial3: true,
     ),
     home: Scaffold(
-      body: TotalExpenseCard(
+      body: BalanceSummaryCard(
         totalIncome: income,
         totalExpenses: expenses,
         currencyTotals: const {},

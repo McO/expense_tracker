@@ -1,19 +1,19 @@
 import 'package:flutter/material.dart';
-import '../widgets/movement_style.dart';
+import '../widgets/transaction_style.dart';
 import 'package:intl/intl.dart';
-import '../models/expense.dart';
-import '../screens/expenses_list_screen.dart';
-import '../screens/expense_detail_screen.dart';
+import '../models/transaction.dart';
+import '../screens/transactions_list_screen.dart';
+import '../screens/transaction_detail_screen.dart';
 
-class RecentExpenses extends StatelessWidget {
-  final List<Expense> expenses;
-  final Function(Expense) onDelete;
+class RecentTransactions extends StatelessWidget {
+  final List<Transaction> transactions;
+  final Function(Transaction) onDelete;
   final Function() onViewAll;
   final Function() onRefresh;
 
-  const RecentExpenses({
+  const RecentTransactions({
     super.key,
-    required this.expenses,
+    required this.transactions,
     required this.onDelete,
     required this.onViewAll,
     required this.onRefresh,
@@ -33,12 +33,12 @@ class RecentExpenses extends StatelessWidget {
                     fontWeight: FontWeight.bold,
                   ),
             ),
-            if (expenses.isNotEmpty)
+            if (transactions.isNotEmpty)
               TextButton(
                 onPressed: () async {
                   await Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => const ExpensesListScreen()),
+                    MaterialPageRoute(builder: (context) => const TransactionsListScreen()),
                   );
                   onRefresh();
                 },
@@ -47,7 +47,7 @@ class RecentExpenses extends StatelessWidget {
           ],
         ),
         const SizedBox(height: 8),
-        expenses.isEmpty
+        transactions.isEmpty
             ? Card(
                 child: Padding(
                   padding: const EdgeInsets.all(24),
@@ -61,14 +61,14 @@ class RecentExpenses extends StatelessWidget {
                         ),
                         const SizedBox(height: 16),
                         Text(
-                          'No expenses yet',
+                          'No transactions yet',
                           style: Theme.of(context).textTheme.titleMedium?.copyWith(
                                 color: Colors.grey[600],
                               ),
                         ),
                         const SizedBox(height: 8),
                         Text(
-                          'Tap the + button to add your first expense',
+                          'Tap the + button to add your first transaction',
                           style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                                 color: Colors.grey[500],
                               ),
@@ -80,9 +80,9 @@ class RecentExpenses extends StatelessWidget {
                 ),
               )
             : Column(
-                children: expenses.map((expense) {
+                children: transactions.map((transaction) {
                   return Dismissible(
-                    key: Key(expense.id),
+                    key: Key(transaction.id),
                     direction: DismissDirection.endToStart,
                     background: Container(
                       alignment: Alignment.centerRight,
@@ -116,8 +116,8 @@ class RecentExpenses extends StatelessWidget {
                       return await showDialog<bool>(
                         context: context,
                         builder: (context) => AlertDialog(
-                          title: const Text('Delete Expense'),
-                          content: Text('Are you sure you want to delete "${expense.title}"?'),
+                          title: const Text('Delete Transaction'),
+                          content: Text('Are you sure you want to delete "${transaction.title}"?'),
                           actions: [
                             TextButton(
                               onPressed: () => Navigator.pop(context, false),
@@ -133,7 +133,7 @@ class RecentExpenses extends StatelessWidget {
                       );
                     },
                     onDismissed: (direction) async {
-                      await onDelete(expense);
+                      await onDelete(transaction);
                     },
                     child: Card(
                       child: ListTile(
@@ -141,48 +141,48 @@ class RecentExpenses extends StatelessWidget {
                           width: 40,
                           height: 40,
                           decoration: BoxDecoration(
-                            color: expense.category.toColor().withValues(alpha: 0.1),
+                            color: transaction.category.toColor().withValues(alpha: 0.1),
                             borderRadius: BorderRadius.circular(10),
                             border: Border.all(
-                              color: expense.category.toColor().withValues(alpha: 0.3),
+                              color: transaction.category.toColor().withValues(alpha: 0.3),
                               width: 1,
                             ),
                           ),
                           child: Center(
                             child: Text(
-                              expense.category.icon,
+                              transaction.category.icon,
                               style: const TextStyle(fontSize: 18),
                             ),
                           ),
                         ),
                         title: Text(
-                          expense.title,
+                          transaction.title,
                           style: const TextStyle(fontWeight: FontWeight.bold),
                         ),
                         subtitle: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              '${expense.category.name} • ${DateFormat('MMM d, yyyy • h:mm a').format(expense.date)}',
+                              '${transaction.category.name} • ${DateFormat('MMM d, yyyy • h:mm a').format(transaction.date)}',
                             ),
-                            if (!expense.countsInStatistics) ...[
+                            if (!transaction.countsInStatistics) ...[
                               const SizedBox(height: 4),
                               const NotCountedMarker(),
                             ],
                           ],
                         ),
                         trailing: Text(
-                          expense.formattedAmountWithSign,
+                          transaction.formattedAmountWithSign,
                           style: Theme.of(context).textTheme.titleMedium?.copyWith(
                                 fontWeight: FontWeight.bold,
-                                color: movementColor(expense),
+                                color: transactionColor(transaction),
                               ),
                         ),
                         onTap: () async {
                           final result = await Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => ExpenseDetailScreen(expense: expense),
+                              builder: (context) => TransactionDetailScreen(transaction: transaction),
                             ),
                           );
 

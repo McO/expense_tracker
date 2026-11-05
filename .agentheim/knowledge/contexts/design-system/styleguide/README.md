@@ -16,12 +16,12 @@ This documents the look as it exists in `lib/` today, plus one proposal (section
 
 ### Color
 - Brand and surfaces come from the seed `ColorScheme` (e.g. account selector uses `secondaryContainer` / `onSecondaryContainer`; the active page dot uses `primaryColor`).
-- Semantic money colors on the summary card (`total_expense_card.dart`) are scheme-aware: each card fill is the semantic colour as an alpha tint (0.16) blended over `colorScheme.surface`, and its text/icon colour is the semantic colour mixed 30% toward `colorScheme.onSurface`, so both adapt to light and dark mode:
+- Semantic money colors on the summary card (`balance_summary_card.dart`) are scheme-aware: each card fill is the semantic colour as an alpha tint (0.16) blended over `colorScheme.surface`, and its text/icon colour is the semantic colour mixed 30% toward `colorScheme.onSurface`, so both adapt to light and dark mode:
   - Income: green (`Colors.green`)
   - Expense: red (`Colors.red`)
   - Net balance: positive `colorScheme.primary`, negative orange (`Colors.orange`)
   - Inactive/empty hints: `Colors.grey[300..600]`
-- Category color: each `Category` carries its own hex color (`category.toColor()`); used as alpha tints and borders; `category_breakdown.dart` uses 0.03 and 0.08 (gradient), 0.15 (fill), 0.3 and 0.4 (borders), and `recent_expenses.dart` uses 0.1 (fill) and 0.3 (border).
+- Category color: each `Category` carries its own hex color (`category.toColor()`); used as alpha tints and borders; `category_breakdown.dart` uses 0.03 and 0.08 (gradient), 0.15 (fill), 0.3 and 0.4 (borders), and `recent_transactions.dart` uses 0.1 (fill) and 0.3 (border).
 - New components should prefer scheme roles or alpha tints (`color.withValues(alpha: ...)`) over fixed `Colors.x.shadeNN` tints, as the summary card, category and transaction widgets do.
 
 ### Typography
@@ -47,7 +47,7 @@ Multiples of 4, with 16 dominant.
 
 ### Elevation
 - 4: theme default card
-- 2: summary cards in `total_expense_card.dart` and the cards in `category_management_screen.dart`
+- 2: summary cards in `balance_summary_card.dart` and the cards in `category_management_screen.dart`
 - 6: carousel card and FAB
 - 0: app bar
 
@@ -55,15 +55,15 @@ Multiples of 4, with 16 dominant.
 
 | Component | Widget file | Notes |
 |---|---|---|
-| Net balance / income / expense summary | `lib/widgets/total_expense_card.dart` (`TotalExpenseCard`) | One larger tinted card (net balance, trend icon, savings rate or "Combined from N currencies") above two half-width cards (income green, expenses red). Icon + label row, then bold amount. |
+| Net balance / income / expense summary | `lib/widgets/balance_summary_card.dart` (`BalanceSummaryCard`) | One larger tinted card (net balance, trend icon, savings rate or "Combined from N currencies") above two half-width cards (income green, expenses red). Icon + label row, then bold amount. |
 | Category card carousel | `lib/widgets/category_breakdown.dart` (`CategoryBreakdown`) | `PageView`, auto-advances every 4 s, one card per category: radius 20, 2 px category-tinted border, light gradient of the category color, income/expense rows each with `LinearProgressIndicator` and percentage. Page counter ("1 of N") plus dot indicators (12 px active, 8 px inactive). Shows "Mixed currencies" when a category spans currencies. |
-| Transaction row and swipe-to-delete | `lib/widgets/recent_expenses.dart` (`RecentExpenses`) | `Card` + `ListTile`: 40 px category emoji tile (radius 10, tinted), bold title, "Category • date" subtitle, signed amount colored green/red. `Dismissible` end-to-start with red background (icon + "Delete"), confirmed by an `AlertDialog` (Cancel / red Delete). Header row with "View All" `TextButton`. Empty state: grey receipt icon, title, hint. |
+| Transaction row and swipe-to-delete | `lib/widgets/recent_transactions.dart` (`RecentTransactions`) | `Card` + `ListTile`: 40 px category emoji tile (radius 10, tinted), bold title, "Category • date" subtitle, signed amount colored green/red. `Dismissible` end-to-start with red background (icon + "Delete"), confirmed by an `AlertDialog` (Cancel / red Delete). Header row with "View All" `TextButton`. Empty state: grey receipt icon, title, hint. |
 | Transaction type toggle | `lib/widgets/transaction_type_selector.dart` (`TransactionTypeSelector`) | Card with two equal buttons (Expense red, Income green). Selected: 2 px border in the color, 0.1 alpha fill; unselected: grey. Radius 12, padding 16. |
 | Account selector | `lib/screens/home_screen.dart` (`_buildAccountSelector`) | `DropdownButton` hiding the underline inside a `secondaryContainer` rounded-12 container. |
-| Date picker and range picker | `lib/screens/add_expense_screen.dart`, `lib/screens/edit_expense_screen.dart` (`showDatePicker`); `lib/screens/home_screen.dart` (`showDateRangePicker`, CSV export) | Stock Material pickers, no custom styling. |
-| Forms (full screen) | `lib/screens/add_expense_screen.dart`, `edit_expense_screen.dart`, `add_edit_category_screen.dart` | `TextFormField` with `OutlineInputBorder`, 16 px vertical gaps, `DropdownButton` for category and currency, save action with validation. |
+| Date picker and range picker | `lib/screens/add_transaction_screen.dart`, `lib/screens/edit_transaction_screen.dart` (`showDatePicker`); `lib/screens/home_screen.dart` (`showDateRangePicker`, CSV export) | Stock Material pickers, no custom styling. |
+| Forms (full screen) | `lib/screens/add_transaction_screen.dart`, `edit_transaction_screen.dart`, `add_edit_category_screen.dart` | `TextFormField` with `OutlineInputBorder`, 16 px vertical gaps, `DropdownButton` for category and currency, save action with validation. |
 | Forms (dialog) | `lib/screens/account_management_screen.dart`, `lib/screens/currency_management_screen.dart` | Accounts and currencies are added/edited in an `AlertDialog` (via `showDialog`, stateful builder) holding `TextField`s with `OutlineInputBorder` (accounts also `DropdownButtonFormField`s), with dialog actions. Categories use a full screen instead. |
-| List with search/filter | `lib/screens/expenses_list_screen.dart` | Full transaction list reusing the row style. |
+| List with search/filter | `lib/screens/transactions_list_screen.dart` | Full transaction list reusing the row style. |
 | Management lists | `lib/screens/category_management_screen.dart`, `account_management_screen.dart`, `currency_management_screen.dart` | Card lists (elevation 2) with delete confirmed by `AlertDialog`. One unified pattern on all three screens: a trailing per-item `PopupMenuButton` (Edit, and Delete in the destructive colour where deletion is allowed) and a `FloatingActionButton.extended` to add ("Add category" / "Add account" / "Add currency"); no trailing icon buttons and no app-bar add button. Custom currencies have no edit dialog, so their menu holds Delete only. New management screens follow this pattern. |
 
 ## 3. Patterns
@@ -71,7 +71,7 @@ Multiples of 4, with 16 dominant.
 - **Card-first layout.** Content lives in rounded `Card`s on the scaffold surface; sections separated by 16 px.
 - **Tint plus tone.** Meaning is shown as a pale tint fill, a matching border or text tone, and an icon (trending up/down, arrow up/down). Green means income, red means expense.
 - **Signed amounts.** Always currency symbol plus two decimals, with `+` / `-` signs on summaries and signed amounts on rows.
-- **Dialog forms.** Small entities (accounts, currencies) are edited in an `AlertDialog` form; larger ones (expenses, categories) get a full screen.
+- **Dialog forms.** Small entities (accounts, currencies) are edited in an `AlertDialog` form; larger ones (transactions, categories) get a full screen.
 - **Feedback.** Errors and confirmations use `ScaffoldMessenger` `SnackBar`; destructive actions use an `AlertDialog` with a red confirm.
 - **Navigation.** Imperative `Navigator.push`/`pop`; the parent reloads data on return.
 - **Empty states.** Centered muted icon, title, one-line hint, inside a card.
@@ -93,6 +93,6 @@ Proposed rules:
 
 ## 5. Owner decisions (2026-11-04)
 - **Management lists — unify on the category style.** New and cleaned-up management screens use a per-item `PopupMenuButton` and a `FloatingActionButton.extended` to add, as `category_management_screen.dart` does. Account and currency screens now follow it (cash-ledger-f150f).
-- **Light-only shade colors — fix.** `total_expense_card.dart` should move to scheme-aware colors; captured as a backlog task in cash-ledger.
+- **Light-only shade colors — fix.** `balance_summary_card.dart` should move to scheme-aware colors; captured as a backlog task in cash-ledger.
 - **Chart style — approved.** Section 4 is the rule for the quick-glance cash statistics; it is no longer just a proposal. A chart package still needs its own ADR.
 - **Sign-off:** given, as is.

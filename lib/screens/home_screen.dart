@@ -3,25 +3,32 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 import 'package:permission_handler/permission_handler.dart';
-import '../models/expense.dart';
+import '../models/transaction.dart';
 import '../models/currency.dart';
 import '../models/category.dart';
 import '../models/account.dart';
-import '../services/expense_service.dart';
+import '../services/transaction_service.dart';
 import '../services/ledger_totals.dart';
 import '../services/theme_service.dart';
 import '../services/account_service.dart';
-import '../widgets/total_expense_card.dart';
+import '../widgets/balance_summary_card.dart';
 import '../widgets/category_breakdown.dart';
-import '../widgets/recent_expenses.dart';
+import '../widgets/recent_transactions.dart';
 import 'statistics_screen.dart';
 import '../widgets/correct_balance_dialog.dart';
-import 'add_expense_screen.dart';
-import 'expenses_list_screen.dart';
+import 'add_transaction_screen.dart';
+import 'transactions_list_screen.dart';
 import 'settings_screen.dart';
 import 'account_management_screen.dart';
 import 'currency_management_screen.dart';
 import 'category_management_screen.dart';
+
+/// File name of a CSV export: `transactions_<from>_<to>.csv` (ADR-0005).
+String csvExportFileName(DateTimeRange range) {
+  String ymd(DateTime d) =>
+      '${d.year}${d.month.toString().padLeft(2, '0')}${d.day.toString().padLeft(2, '0')}';
+  return 'transactions_${ymd(range.start)}_${ymd(range.end)}.csv';
+}
 
 class HomeScreen extends StatefulWidget {
   final Function(AppThemeMode)? onThemeModeChanged;
@@ -38,11 +45,11 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  final ExpenseService _expenseService = ExpenseService();
+  final TransactionService _transactionService = TransactionService();
   final AccountService _accountService = AccountService();
-  List<Expense> _recentExpenses = [];
-  List<Expense> _allExpenses = [];
-  List<Expense> _filteredExpenses = [];
+  List<Transaction> _recentTransactions = [];
+  List<Transaction> _allTransactions = [];
+  List<Transaction> _filteredTransactions = [];
   double _balance = 0.0;
   double _totalIncome = 0.0;
   double _totalExpenses = 0.0;
@@ -79,17 +86,17 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<void> _loadData() async {
-    final expenses = await _expenseService.getExpenses();
+    final transactions = await _transactionService.getTransactions();
 
-    List<Expense> filteredExpenses = expenses;
+    List<Transaction> filteredTransactions = transactions;
     if (_selectedAccount != null) {
-      filteredExpenses = filteredExpenses
+      filteredTransactions = filteredTransactions
           .where((e) => e.accountId == _selectedAccount!.id)
           .toList();
     }
-    filteredExpenses.sort((a, b) => b.date.compareTo(a.date));
+    filteredTransactions.sort((a, b) => b.date.compareTo(a.date));
 
-    final stats = LedgerTotals.statistics(filteredExpenses);
+    final stats = LedgerTotals.statistics(filteredTransactions);
     final totalIncome = stats.totalIncome;
     final totalExpenses = stats.totalExpenses;
     final categoryTotals = stats.categoryTotals;
@@ -98,10 +105,10 @@ class _HomeScreenState extends State<HomeScreen> {
     final currencyTotals = stats.currencyTotals;
 
     setState(() {
-      _allExpenses = expenses;
-      _filteredExpenses = filteredExpenses;
-      _recentExpenses = filteredExpenses.take(5).toList();
-      _balance = LedgerTotals.balance(filteredExpenses);
+      _allTransactions = transactions;
+      _filteredTransactions = filteredTransactions;
+      _recentTransactions = filteredTransactions.take(5).toList();
+      _balance = LedgerTotals.balance(filteredTransactions);
       _totalIncome = totalIncome;
       _totalExpenses = totalExpenses;
       _categoryTotals = categoryTotals;
@@ -112,18 +119,18 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void _applyFilter() {
-    List<Expense> filteredExpenses = _allExpenses;
+    List<Transaction> filteredTransactions = _allTransactions;
 
     // Filter by selected account
     if (_selectedAccount != null) {
-      filteredExpenses = filteredExpenses.where((expense) => expense.accountId == _selectedAccount!.id).toList();
+      filteredTransactions = filteredTransactions.where((transaction) => transaction.accountId == _selectedAccount!.id).toList();
     }
 
-    // Ensure expenses are sorted by newest date and time first (in case filtering changed the order)
-    filteredExpenses.sort((a, b) => b.date.compareTo(a.date));
+    // Ensure transactions are sorted by newest date and time first (in case filtering changed the order)
+    filteredTransactions.sort((a, b) => b.date.compareTo(a.date));
 
     // Calculate totals for filtered data
-    final stats = LedgerTotals.statistics(filteredExpenses);
+    final stats = LedgerTotals.statistics(filteredTransactions);
     final totalIncome = stats.totalIncome;
     final totalExpenses = stats.totalExpenses;
     final categoryTotals = stats.categoryTotals;
@@ -132,9 +139,9 @@ class _HomeScreenState extends State<HomeScreen> {
     final currencyTotals = stats.currencyTotals;
 
     setState(() {
-      _filteredExpenses = filteredExpenses;
-      _recentExpenses = filteredExpenses.take(5).toList();
-      _balance = LedgerTotals.balance(filteredExpenses);
+      _filteredTransactions = filteredTransactions;
+      _recentTransactions = filteredTransactions.take(5).toList();
+      _balance = LedgerTotals.balance(filteredTransactions);
       _totalIncome = totalIncome;
       _totalExpenses = totalExpenses;
       _categoryTotals = categoryTotals;
@@ -144,10 +151,10 @@ class _HomeScreenState extends State<HomeScreen> {
       });
   }
 
-  Future<void> _navigateToAddExpense() async {
+  Future<void> _navigateToAddTransaction() async {
     final result = await Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => const AddExpenseScreen()),
+      MaterialPageRoute(builder: (context) => const AddTransactionScreen()),
     );
 
     if (result == true) {
@@ -155,14 +162,14 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
-  Future<void> _deleteExpense(Expense expense) async {
+  Future<void> _deleteTransaction(Transaction transaction) async {
     try {
-      await _expenseService.deleteExpense(expense.id);
+      await _transactionService.deleteTransaction(transaction.id);
       await _loadData();
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('"${expense.title}" deleted'),
+            content: Text('"${transaction.title}" deleted'),
             backgroundColor: Colors.green,
           ),
         );
@@ -171,7 +178,7 @@ class _HomeScreenState extends State<HomeScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Error deleting expense: ${e.toString()}'),
+            content: Text('Error deleting transaction: ${e.toString()}'),
             backgroundColor: Colors.red,
           ),
         );
@@ -226,7 +233,7 @@ class _HomeScreenState extends State<HomeScreen> {
     if (!mounted || dateRange == null) return;
 
     // Build CSV content
-    final csvContent = await _expenseService.buildCSV(
+    final csvContent = await _transactionService.buildCSV(
       startDate: dateRange.start,
       endDate: dateRange.end,
       accountId: selectedAccount.id,
@@ -236,7 +243,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
     if (csvContent == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('No expenses found for the selected range')),
+        const SnackBar(content: Text('No transactions found for the selected range')),
       );
       return;
     }
@@ -262,9 +269,7 @@ class _HomeScreenState extends State<HomeScreen> {
       }
     }
 
-    final from = '${dateRange.start.year}${dateRange.start.month.toString().padLeft(2, '0')}${dateRange.start.day.toString().padLeft(2, '0')}';
-    final to = '${dateRange.end.year}${dateRange.end.month.toString().padLeft(2, '0')}${dateRange.end.day.toString().padLeft(2, '0')}';
-    final fileName = 'expenses_${from}_$to.csv';
+    final fileName = csvExportFileName(dateRange);
 
     try {
       final downloadsDir = Directory('/storage/emulated/0/Download');
@@ -377,7 +382,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 ],
               ),
               child: Icon(
-                Icons.account_balance_wallet,
+                Icons.account_balance,
                 size: 20,
                 color: Theme.of(context).colorScheme.primary,
               ),
@@ -418,11 +423,11 @@ class _HomeScreenState extends State<HomeScreen> {
                 children: [
                   _buildAccountSelector(),
                   const SizedBox(height: 16),
-                  _buildTotalExpenseCard(),
+                  _buildBalanceSummaryCard(),
                   const SizedBox(height: 24),
                   _buildCategoryBreakdown(),
                   const SizedBox(height: 16),
-                  _buildRecentExpenses(),
+                  _buildRecentTransactions(),
                 ],
               ),
             ),
@@ -430,15 +435,15 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
       ),
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: _navigateToAddExpense,
+        onPressed: _navigateToAddTransaction,
         icon: const Icon(Icons.add),
-        label: const Text('Add movement'),
+        label: const Text('Add transaction'),
       ),
     );
   }
 
-  Widget _buildTotalExpenseCard() {
-    return TotalExpenseCard(
+  Widget _buildBalanceSummaryCard() {
+    return BalanceSummaryCard(
       balance: _balance,
       totalIncome: _totalIncome,
       totalExpenses: _totalExpenses,
@@ -454,18 +459,18 @@ class _HomeScreenState extends State<HomeScreen> {
       categoryExpenseTotal: _categoryExpenseTotal,
       totalIncome: _totalIncome,
       totalExpenses: _totalExpenses,
-      allExpenses: _filteredExpenses,
+      allTransactions: _filteredTransactions,
     );
   }
 
-  Widget _buildRecentExpenses() {
-    return RecentExpenses(
-      expenses: _recentExpenses,
-      onDelete: _deleteExpense,
+  Widget _buildRecentTransactions() {
+    return RecentTransactions(
+      transactions: _recentTransactions,
+      onDelete: _deleteTransaction,
       onViewAll: () async {
                   await Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => const ExpensesListScreen()),
+                    MaterialPageRoute(builder: (context) => const TransactionsListScreen()),
                   );
                   await _loadData();
                 },
@@ -521,7 +526,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         ],
                       ),
                       child: Icon(
-                        Icons.account_balance_wallet,
+                        Icons.account_balance,
                         size: 32,
                         color: Theme.of(context).colorScheme.primary,
                       ),
@@ -555,19 +560,19 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
           ListTile(
             leading: const Icon(Icons.list),
-            title: const Text('All Expenses'),
+            title: const Text('All Transactions'),
             onTap: () async {
               Navigator.pop(context);
               await Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => const ExpensesListScreen()),
+                MaterialPageRoute(builder: (context) => const TransactionsListScreen()),
               );
               await _loadData();
             },
           ),
           const Divider(),
           ListTile(
-            leading: const Icon(Icons.account_balance_wallet),
+            leading: const Icon(Icons.account_balance),
             title: const Text('Accounts'),
             onTap: () async {
               Navigator.pop(context);
