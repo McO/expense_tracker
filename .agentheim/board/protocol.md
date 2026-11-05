@@ -5,6 +5,15 @@ Newest entries on top.
 
 ---
 
+## 2026-11-05 10:37 -- Modeling / Captured: cash-ledger-hzqaa - Import a CSV file the app exported into a chosen account, skipping exact duplicates
+
+**Type:** Modeling / Capture
+**BC:** cash-ledger
+**Filed to:** todo
+**Summary:** Import a CSV file the app exported into a chosen account, skipping exact duplicates
+
+---
+
 ## 2026-11-05 10:16 -- Work session ended
 
 **Type:** Work / Session end
