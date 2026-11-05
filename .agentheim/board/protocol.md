@@ -5,6 +5,19 @@ Newest entries on top.
 
 ---
 
+## 2026-11-05 21:44 -- Task verified and completed: cash-ledger-yc1h3 - Amount input follows the phone's number format and the currency's decimals, tolerating the other separator, symbols and spaces
+
+**Type:** Work / Task completion
+**Task:** cash-ledger-yc1h3 - Amount input follows the phone's number format and the currency's decimals, tolerating the other separator, symbols and spaces
+**Summary:** amount input follows the phone locale and the currency decimals in Add, Edit and Correct balance; tolerant of the other separator, symbols and spaces; normalized on leave
+**Duration:** 7m
+**Verification:** PASS (iteration 1)
+**Files changed:** 8
+**Tests added:** 12
+**ADRs written:** none
+
+---
+
 ## 2026-11-05 21:39 -- Batch started: [cash-ledger-yc1h3]
 
 **Type:** Work / Batch start

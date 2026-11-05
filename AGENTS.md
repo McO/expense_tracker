@@ -32,6 +32,7 @@ lib/
 │   ├── app_version_lookup.dart        # `AppVersionLookup` seam + default package_info_plus-backed installed-version lookup (drawer footer)
 │   ├── csv_file_picker.dart           # `CsvFilePicker` seam + default file_picker-backed picker
 │   ├── cash_statistics.dart           # Pure quick-glance statistics for one account
+│   ├── amount_format.dart             # Pure amount parse/format by phone locale + currency decimals; `LocaleLookup` seam (default: device locale)
 │   ├── ledger_totals.dart             # Pure aggregation: account balance and income/expense totals
 │   ├── account_service.dart           # CRUD for accounts; auto-creates default if list is empty
 │   ├── category_service.dart          # CRUD for categories; seeds defaults once (v2 migration flag)
@@ -54,6 +55,7 @@ lib/
     ├── category_breakdown.dart        # Auto-scrolling PageView of category spending cards
     ├── recent_transactions.dart       # Dismissible list of 5 most recent transactions
     ├── transaction_style.dart         # Direction colour, non-counting marker and chip for a transaction row
+    ├── amount_field.dart              # Amount TextFormField: locale/decimals-aware validation, normalizes text on focus loss
     ├── sign_toggle.dart               # Sign toggle for the amount (− = money out, + = money in)
     └── correct_balance_dialog.dart    # Correct balance dialog; records one correction transaction
 ```
@@ -99,6 +101,10 @@ All data is stored in **SharedPreferences as JSON strings**. No SQLite, Hive, or
 | `theme_mode` | `int` | Index of `AppThemeMode` enum |
 
 **Service pattern:** read full list → deserialize → mutate in-memory → serialize → write full list back. Every service follows this pattern.
+
+### Amount input
+
+`services/amount_format.dart` is the single parser/formatter (`parseAmount`, `formatAmount`, `formatAmountWithSymbol`, `amountHint`). Parsing accepts `.` or `,` as decimal point, ignores spaces and currency symbols/codes, rejects thousands separators, and allows at most the currency's `decimalPlaces`. Formatting uses the phone's decimal separator with exact decimals, no symbol. The phone's locale comes from the `LocaleLookup` seam (default `deviceLocale()`, i.e. `PlatformDispatcher.instance.locale`, because the app sets no `supportedLocales`); Add/Edit transaction and `correctBalance` take an optional `localeLookup` so tests can force de_DE/en_US. Reuse this formatter for on-screen display; CSV stays dot-decimal.
 
 ---
 

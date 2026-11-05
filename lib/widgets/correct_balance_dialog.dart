@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'amount_field.dart';
 import '../models/account.dart';
 import '../models/category.dart';
 import '../models/transaction.dart';
+import '../services/amount_format.dart';
 import '../services/category_service.dart';
 import '../services/transaction_service.dart';
 
@@ -17,10 +19,12 @@ Future<bool> correctBalance(
   required Account account,
   required double balance,
   TransactionService? transactionService,
+  LocaleLookup localeLookup = deviceLocale,
 }) async {
   final counted = await showDialog<double>(
     context: context,
-    builder: (_) => CorrectBalanceDialog(account: account, balance: balance),
+    builder: (_) => CorrectBalanceDialog(
+        account: account, balance: balance, localeLookup: localeLookup),
   );
   if (counted == null || !context.mounted) return false;
   final difference = balanceDifference(balance, counted);
@@ -49,11 +53,13 @@ Future<bool> correctBalance(
 class CorrectBalanceDialog extends StatefulWidget {
   final Account account;
   final double balance;
+  final LocaleLookup localeLookup;
 
   const CorrectBalanceDialog({
     super.key,
     required this.account,
     required this.balance,
+    this.localeLookup = deviceLocale,
   });
 
   @override
@@ -69,7 +75,9 @@ class _CorrectBalanceDialogState extends State<CorrectBalanceDialog> {
     super.dispose();
   }
 
-  double? get _counted => double.tryParse(_controller.text.replaceAll(',', '.'));
+  double? get _counted => parseAmount(
+      _controller.text, widget.account.currency, widget.localeLookup(),
+      allowNegative: true);
 
   @override
   Widget build(BuildContext context) {
@@ -90,11 +98,12 @@ class _CorrectBalanceDialogState extends State<CorrectBalanceDialog> {
         children: [
           Text('Current balance: $symbol${widget.balance.toStringAsFixed(2)}'),
           const SizedBox(height: 12),
-          TextField(
+          AmountField(
             controller: _controller,
+            currency: widget.account.currency,
+            locale: widget.localeLookup(),
             autofocus: true,
-            keyboardType:
-                const TextInputType.numberWithOptions(decimal: true, signed: true),
+            allowNegative: true,
             decoration: InputDecoration(
               labelText: 'Counted cash',
               prefixText: symbol,

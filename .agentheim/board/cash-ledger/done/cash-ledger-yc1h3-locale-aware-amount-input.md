@@ -1,7 +1,7 @@
 ---
 id: cash-ledger-yc1h3
 title: Amount input follows the phone's number format and the currency's decimals, tolerating the other separator, symbols and spaces
-status: doing
+status: done
 type: feature
 context: cash-ledger
 created: 2026-11-05
@@ -62,3 +62,31 @@ One shared, pure amount parser and formatter, used by all three amount inputs: A
   - Decimals per currency.
 - On-screen display of amounts elsewhere in the app is cash-ledger-my7ez. Reuse this task's formatter there; don't build a second one.
 - CSV export and import stay locale-independent (dot decimal) and are out of scope.
+
+## Outcome
+
+New pieces:
+- **`lib/services/amount_format.dart`** (pure):
+  - `parseAmount`: accepts the locale's decimal separator and the other one; ignores spaces, currency symbols and codes; rejects thousands separators, letters and more decimals than the currency allows.
+  - `formatAmount` and `formatAmountWithSymbol`: render an amount in the phone's format with the currency's decimals.
+  - `amountHint`: the placeholder, e.g. `0,00`, or `0` for JPY.
+  - `LocaleLookup`: the locale seam, defaulting to `PlatformDispatcher.instance.locale`.
+- **`lib/widgets/amount_field.dart`:** validates with the parser, shows a locale- and decimal-aware hint, and rewrites valid text in the phone's format when focus leaves.
+
+Wiring:
+- Add transaction, Edit transaction and Correct balance use the new field and take an optional `localeLookup`.
+- Saved values are rounded with `Currency.roundAmount`.
+- Transaction amounts stay positive; the sign toggle still sets the direction (ADR-0007).
+- Correct balance keeps its minus sign.
+- Edit opens amounts in the locale format.
+
+Tests: 12 new, in `test/amount_format_test.dart` and `test/amount_input_test.dart`. All 110 tests pass and analyze is clean. `AGENTS.md` is updated.
+
+Verification passed on iteration 1.
+
+Notes:
+- Too many decimals are rejected by validation, not blocked while typing. The task allowed either.
+- Correct balance has no visible validation message: invalid input only disables Save, as before. `autovalidateMode: AutovalidateMode.onUserInteraction` in AmountField would add one.
+- Correct balance's "Current balance" and "Difference" text still uses dot formatting and 2 decimals. That is display work for cash-ledger-my7ez.
+
+Pending: the owner's eye-check.

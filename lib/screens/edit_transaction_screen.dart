@@ -8,13 +8,22 @@ import '../models/transaction_type.dart';
 import '../services/transaction_service.dart';
 import '../services/category_service.dart';
 import '../services/account_service.dart';
+import '../services/amount_format.dart';
+import '../widgets/amount_field.dart';
 import '../widgets/sign_toggle.dart';
 import '../widgets/transaction_style.dart';
 
 class EditTransactionScreen extends StatefulWidget {
   final Transaction transaction;
 
-  const EditTransactionScreen({super.key, required this.transaction});
+  /// Seam for the phone's locale (amount decimal separator).
+  final LocaleLookup localeLookup;
+
+  const EditTransactionScreen({
+    super.key,
+    required this.transaction,
+    this.localeLookup = deviceLocale,
+  });
 
   @override
   State<EditTransactionScreen> createState() => _EditTransactionScreenState();
@@ -57,7 +66,8 @@ class _EditTransactionScreenState extends State<EditTransactionScreen> {
 
   void _initializeFields() {
     _titleController.text = widget.transaction.title;
-    _amountController.text = widget.transaction.amount.toString();
+    _amountController.text = formatAmount(
+        widget.transaction.amount, widget.transaction.currency, widget.localeLookup());
     _descriptionController.text = widget.transaction.description;
     _selectedCategory = widget.transaction.category;
     _selectedCurrency = widget.transaction.currency;
@@ -180,7 +190,8 @@ class _EditTransactionScreenState extends State<EditTransactionScreen> {
     try {
       final updatedTransaction = widget.transaction.copyWith(
         title: _titleController.text.trim(),
-        amount: double.parse(_amountController.text),
+        amount: _selectedAccount!.currency.roundAmount(parseAmount(
+            _amountController.text, _selectedAccount!.currency, widget.localeLookup())!),
         currency: _selectedAccount!.currency,
         category: _selectedCategory!,
         date: _combinedDateTime,
@@ -322,11 +333,12 @@ class _EditTransactionScreenState extends State<EditTransactionScreen> {
                           const SizedBox(width: 12),
                           Expanded(
                             flex: 2,
-                            child:                       TextFormField(
+                            child: AmountField(
                         controller: _amountController,
+                        currency: _selectedCurrency,
+                        locale: widget.localeLookup(),
                         decoration: InputDecoration(
                           labelText: 'Amount',
-                          hintText: 'Enter amount',
                           prefixIcon: Icon(
                             _transactionTypeIcon,
                             color: _transactionTypeColor,
@@ -338,19 +350,10 @@ class _EditTransactionScreenState extends State<EditTransactionScreen> {
                             borderSide: BorderSide(color: _transactionTypeColor, width: 2),
                           ),
                         ),
-                              keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                              validator: (value) {
-                                if (value == null || value.trim().isEmpty) {
-                                  return 'Please enter an amount';
-                                }
-                                final amount = double.tryParse(value);
-                                if (amount == null || amount <= 0) {
-                                  return 'Please enter a valid positive amount';
-                                }
-                                return null;
-                              },
-                            ),
-                          ),
+                        validateAmount: (amount) =>
+                            amount <= 0 ? 'Please enter a valid positive amount' : null,
+                      ),
+                    ),
                           const SizedBox(width: 12),
                           Expanded(
                             flex: 1,
