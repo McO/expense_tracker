@@ -1,7 +1,7 @@
 ---
 id: cash-ledger-p53v9
 title: Make the summary card's money colors work in dark mode
-status: backlog
+status: todo
 type: bug
 context: cash-ledger
 created: 2026-11-04

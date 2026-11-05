@@ -5,6 +5,14 @@ Newest entries on top.
 
 ---
 
+## 2026-11-05 09:29 -- Modeling / Promoted: cash-ledger-p53v9 - Make the summary card's money colors work in dark mode
+
+**Type:** Modeling / Promote
+**BC:** cash-ledger
+**From → To:** backlog → todo
+
+---
+
 ## 2026-11-05 09:29 -- Modeling / Refined: cash-ledger-p53v9 - Make the summary card's money colors work in dark mode
 
 **Type:** Modeling / Refine
