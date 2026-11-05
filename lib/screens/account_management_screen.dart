@@ -3,6 +3,7 @@ import '../models/account.dart';
 import '../models/currency.dart';
 import '../services/account_service.dart';
 import '../services/currency_service.dart';
+import '../services/expense_service.dart';
 
 class AccountManagementScreen extends StatefulWidget {
   const AccountManagementScreen({super.key});
@@ -200,11 +201,16 @@ class _AccountManagementScreenState extends State<AccountManagementScreen> {
   }
 
   Future<void> _deleteAccount(Account account) async {
+    final count = (await ExpenseService().getExpensesForAccount(account.id)).length;
+    if (!mounted) return;
+    final warning = count > 0
+        ? 'This also deletes $count ${count == 1 ? 'movement' : 'movements'}.'
+        : '';
     final confirm = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Delete Account'),
-        content: Text('Are you sure you want to delete "${account.name}"?\n\nAll expenses in this account will be moved to the default account.'),
+        content: Text('Are you sure you want to delete "${account.name}"?${warning.isEmpty ? '' : '\n\n$warning'}'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),

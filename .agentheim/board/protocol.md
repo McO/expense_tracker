@@ -5,6 +5,52 @@ Newest entries on top.
 
 ---
 
+## 2026-11-05 09:38 -- Task verified and completed: cash-ledger-apzzm - A movement's currency is always its wallet's; drop the global default currency; deleting a wallet deletes its movements after a confirm
+
+**Type:** Work / Task completion
+**Task:** cash-ledger-apzzm - A movement's currency is always its wallet's; drop the global default currency; deleting a wallet deletes its movements after a confirm
+**Summary:** A movement's currency is always its wallet's (load, display, CSV, form save); the unused default-currency setting is gone; deleting a wallet deletes its movements after a confirm naming the count
+**Duration:** 9m
+**Verification:** PASS (iteration 2)
+**Files changed:** 7
+**Tests added:** 7
+**ADRs written:** none
+
+---
+
+## 2026-11-05 09:38 -- Verification failed: cash-ledger-p53v9 - Make the summary card's money colors work in dark mode
+
+**Type:** Work / Verification failure
+**Task:** cash-ledger-p53v9
+**Iteration:** 2 of 3
+**Reasons:** styleguide edit dropped the forward-looking prefer-scheme-roles-or-alpha-tints rule along with the inconsistency note
+**Iteration hint:** likely-fixable
+**Next:** re-dispatched worker
+
+---
+
+## 2026-11-05 09:36 -- Verification failed: cash-ledger-p53v9 - Make the summary card's money colors work in dark mode
+
+**Type:** Work / Verification failure
+**Task:** cash-ledger-p53v9
+**Iteration:** 1 of 3
+**Reasons:** styleguide section 1 Color still documents the removed shadeNN tints and blue positive balance; change not recorded
+**Iteration hint:** likely-fixable
+**Next:** re-dispatched worker
+
+---
+
+## 2026-11-05 09:36 -- Verification failed: cash-ledger-apzzm - A movement's currency is always its wallet's; drop the global default currency; deleting a wallet deletes its movements after a confirm
+
+**Type:** Work / Verification failure
+**Task:** cash-ledger-apzzm
+**Iteration:** 1 of 3
+**Reasons:** edit form save untested, add-form test reads back through the overriding read path so cannot catch a wrong save, README_DELTA missing for two new domain rules
+**Iteration hint:** likely-fixable
+**Next:** re-dispatched worker
+
+---
+
 ## 2026-11-05 09:32 -- Batch started: [cash-ledger-apzzm, cash-ledger-p53v9]
 
 **Type:** Work / Batch start

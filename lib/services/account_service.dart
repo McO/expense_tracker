@@ -119,6 +119,16 @@ class AccountService {
     }
     
     await _saveAccounts(accounts);
+
+    // Deleting a wallet deletes its movements too
+    final prefs = await SharedPreferences.getInstance();
+    final stored = prefs.getStringList('expenses') ?? [];
+    final kept = stored
+        .where((j) => (jsonDecode(j) as Map<String, dynamic>)['accountId'] != accountId)
+        .toList();
+    if (kept.length != stored.length) {
+      await prefs.setStringList('expenses', kept);
+    }
     
     // If deleted account was selected, select the default or first account
     final selectedAccount = await getSelectedAccount();

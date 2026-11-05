@@ -23,7 +23,15 @@ class ExpenseService {
     final defaultAccount = await _accountService.getSelectedAccount();
     final defaultAccountId = defaultAccount?.id;
 
-    final expenses = expensesJson.map((json) => Expense.fromJson(jsonDecode(json), categories, customCurrencies: customCurrencies, defaultAccountId: defaultAccountId)).toList();
+    // A movement's currency is always its wallet's (display + export); the
+    // stored value is only a fallback when the wallet can't be resolved.
+    final wallets = {for (final a in await _accountService.getAccounts()) a.id: a};
+
+    final expenses = expensesJson.map((json) {
+      final e = Expense.fromJson(jsonDecode(json), categories, customCurrencies: customCurrencies, defaultAccountId: defaultAccountId);
+      final wallet = wallets[e.accountId];
+      return wallet == null ? e : e.copyWith(currency: wallet.currency);
+    }).toList();
     
     // Sort expenses by newest date and time first
     expenses.sort((a, b) => b.date.compareTo(a.date));

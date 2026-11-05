@@ -29,7 +29,6 @@ lib/
 │   ├── account_service.dart           # CRUD for accounts; auto-creates default if list is empty
 │   ├── category_service.dart          # CRUD for categories; seeds defaults once (v2 migration flag)
 │   ├── currency_service.dart          # CRUD for user-defined custom currencies
-│   ├── settings_service.dart          # Default currency preference
 │   └── theme_service.dart             # Theme mode preference (light/dark/system)
 ├── screens/
 │   ├── home_screen.dart               # Dashboard: account selector, totals, category breakdown, recents; also drives CSV export (account + date-range pickers, storage permission request, writes file to Downloads)
@@ -85,7 +84,6 @@ All data is stored in **SharedPreferences as JSON strings**. No SQLite, Hive, or
 | `categories` | `List<String>` | JSON-encoded `Category` objects |
 | `categories_defaults_initialized_v2` | `bool` | Migration flag to seed defaults once |
 | `custom_currencies` | `List<String>` | JSON-encoded custom `Currency` objects |
-| `default_currency` | `String` | Currency code string |
 | `theme_mode` | `int` | Index of `AppThemeMode` enum |
 
 **Service pattern:** read full list → deserialize → mutate in-memory → serialize → write full list back. Every service follows this pattern.

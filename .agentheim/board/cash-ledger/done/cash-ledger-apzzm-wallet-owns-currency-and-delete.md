@@ -1,7 +1,7 @@
 ---
 id: cash-ledger-apzzm
 title: A movement's currency is always its wallet's; drop the global default currency; deleting a wallet deletes its movements after a confirm
-status: doing
+status: done
 type: feature
 context: cash-ledger
 created: 2026-11-05
@@ -69,3 +69,20 @@ confirm that says how many.
   delete its movements after confirm; category deletion keeps the silent "Other" fallback.
 - Follows the signed-off styleguide (dialog pattern for the confirm, red destructive action).
 - `cash-ledger-f150f` (list-style unification) touches the same account screen and runs after this.
+
+## Verifier note (iteration 1)
+
+**REASONS:**
+- Criterion 1: the edit form has no test. `test/wallet_currency_test.dart` only drives `AddExpenseScreen`, so the edit form's `currency: _selectedAccount!.currency` (`edit_expense_screen.dart:184`) is uncovered.
+- Criterion 1: the add-form test reads back through `ExpenseService().getExpenses()`, which this diff changed to override every currency with the wallet's. The test would pass even if the form saved USD. It must check the raw stored JSON `currency` in SharedPreferences (`prefs.getStringList('expenses')`).
+- The "no picker existed" claim holds (HEAD~1 had no `DropdownButton<Currency>`). Hardening is fine, but the test must still catch a wrong save.
+- Check 5: `README_DELTA` is empty, but the diff adds two domain rules the README's `## Aggregates` doesn't record. The wallet's currency overrides a movement's stored currency for display and export (the stored value is only a fallback). Deleting a wallet deletes its movements. Report `README_DELTA` ops for the Wallet/Movement bullets.
+- Everything else holds: CSV and row tests, missing-field test, settings removal, wallet-delete service and widget tests. `flutter test` (40) and `flutter analyze` are clean.
+
+**SUGGESTED_FIX:** Add an edit-form widget test, and fix the add-form test, so both assert that the raw stored `currency` in SharedPreferences equals the wallet's code. For edit, use a movement stored as USD in a EUR wallet. Also report `README_DELTA` ops for the wallet-owns-currency override and the wallet-delete-deletes-movements rule.
+
+**ITERATION_HINT:** likely-fixable
+
+## Outcome
+
+`ExpenseService.getExpenses` now sets every movement's currency to its wallet's. The stored value is used only when the wallet can't be resolved, and a missing `currency` field is handled the same way. CSV export and the movement rows therefore use the wallet's currency. The add and edit forms save the wallet's currency; neither form had a currency picker before (only a read-only symbol). Tests check the raw stored JSON `currency` for both forms; for edit, a USD movement in a EUR wallet is stored as EUR. `settings_service.dart` held only the unreferenced default-currency setting, so it was deleted. `AccountService.deleteAccount` also removes the wallet's movements, and the account screen's confirm says "This also deletes N movement(s)." Tests are in `test/wallet_currency_test.dart` (41 passing); `flutter analyze` is clean. The cash-ledger README's Wallet and Movement aggregate bullets record both rules. ADR-0004's key table still lists `default_currency` as a historical key; the key is no longer written.

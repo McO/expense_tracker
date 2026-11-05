@@ -28,10 +28,8 @@ This is the whole reason the app exists (ADR-0001): MoneyMoney sees everything e
   statistics (see vision).
 
 ## Aggregates
-- **Wallet** — has exactly one currency; its balance is the sum of its movements.
-- **Movement** — amount is stored positive and its direction (in/out, from the entered sign)
-  decides the balance effect; its category decides whether it counts in statistics; belongs to
-  exactly one wallet (an exchange touches two).
+- **Wallet** — has exactly one currency; its balance is the sum of its movements. Deleting a wallet deletes its movements, after a confirm that names how many.
+- **Movement** — amount is stored positive and its direction (in/out, from the entered sign) decides the balance effect; its category decides whether it counts in statistics; belongs to exactly one wallet (an exchange touches two). Its currency is always its wallet's; a stored currency is only a fallback when the wallet can't be resolved.
 - **Category** — default categories are seeded once; a movement whose category no longer exists
   falls back to "other" (intentional, keep it).
 

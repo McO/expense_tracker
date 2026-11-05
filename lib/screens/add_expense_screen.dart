@@ -158,7 +158,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
         id: DateTime.now().millisecondsSinceEpoch.toString(),
         title: _titleController.text.trim(),
         amount: double.parse(_amountController.text),
-        currency: _selectedCurrency,
+        currency: _selectedAccount!.currency,
         category: _selectedCategory!,
         date: _combinedDateTime,
         description: _descriptionController.text.trim(),
