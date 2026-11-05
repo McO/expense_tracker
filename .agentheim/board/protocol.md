@@ -5,6 +5,30 @@ Newest entries on top.
 
 ---
 
+## 2026-11-05 10:48 -- Task verified and completed: cash-ledger-hzqaa - Import a CSV file the app exported into a chosen account, skipping exact duplicates
+
+**Type:** Work / Task completion
+**Task:** cash-ledger-hzqaa - Import a CSV file the app exported into a chosen account, skipping exact duplicates
+**Summary:** Import CSV (the app's own export) into a chosen account with a preview; exact duplicates skipped, unknown categories to Other, currency mismatch rejected
+**Duration:** 14m
+**Verification:** PASS (iteration 2)
+**Files changed:** 8
+**Tests added:** 14
+**ADRs written:** none
+
+---
+
+## 2026-11-05 10:46 -- Verification failed: cash-ledger-hzqaa - Import a CSV file the app exported into a chosen account
+
+**Type:** Work / Verification failure
+**Task:** cash-ledger-hzqaa
+**Iteration:** 1 of 3
+**Reasons:** README_DELTA puts the Import command rules under Ubiquitous language instead of Key commands; FILES_CHANGED miscount
+**Iteration hint:** likely-fixable
+**Next:** re-dispatched worker
+
+---
+
 ## 2026-11-05 10:37 -- Batch started: [cash-ledger-hzqaa]
 
 **Type:** Work / Batch start

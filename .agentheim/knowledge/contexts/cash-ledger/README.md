@@ -26,6 +26,7 @@ This is the whole reason the app exists (ADR-0001): MoneyMoney sees everything e
 - **Export** — a CSV of one account's transactions over a chosen date range.
 - **Account check / Burn rate / Spending mix / Leftover foreign cash** — the four quick-glance
   statistics (see vision).
+- **Import** — reading one of the app's own CSV exports back into a chosen account.
 
 ## Aggregates
 - **Account** — has exactly one currency; its balance is the sum of its transactions. Deleting an account deletes its transactions, after a confirm that names how many.
@@ -44,6 +45,7 @@ This is the whole reason the app exists (ADR-0001): MoneyMoney sees everything e
 - Correct balance — enter the counted cash for an account; records one Correction-category transaction signed by the difference (nothing when equal)
 - Enter transaction with a ± toggle beside the amount (default −); Top-up is just the Top-up category with +
 - **Statistics** — read-only screen (home drawer) for the selected account: balance with Correct balance, burn rate (daily average = counting spending / days elapsed, "lasts ~N days" = floor(balance / average), hidden when average is 0 or balance <= 0; last-7-days bars) and spending mix, over This month (default) or Last 7 days. Computed by the pure `CashStatistics`.
+- Import CSV — read one of the app's own exports (header `Date,Title,Category,Amount,Currency,Description`) into a chosen account; a currency different from the account's rejects the whole file; exact duplicates (same day, signed amount, title, category already in the account) are skipped; unknown categories map to Other; invalid rows are reported with line numbers; a preview is confirmed before one save through TransactionsStore
 
 ## Frontend rule — styleguide gate
 This BC has a UI. **Every frontend task in this BC must `depends_on: [design-system-001]`**

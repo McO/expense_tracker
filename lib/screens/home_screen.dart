@@ -8,6 +8,7 @@ import '../models/currency.dart';
 import '../models/category.dart';
 import '../models/account.dart';
 import '../services/transaction_service.dart';
+import '../services/csv_file_picker.dart';
 import '../services/ledger_totals.dart';
 import '../services/theme_service.dart';
 import '../services/account_service.dart';
@@ -34,8 +35,12 @@ class HomeScreen extends StatefulWidget {
   final Function(AppThemeMode)? onThemeModeChanged;
   final AppThemeMode currentThemeMode;
 
+  /// File-picking step of CSV import; replaced in tests.
+  final CsvFilePicker csvFilePicker;
+
   const HomeScreen({
     super.key,
+    this.csvFilePicker = pickCsvFileText,
     this.onThemeModeChanged,
     this.currentThemeMode = AppThemeMode.system,
   });
@@ -186,8 +191,8 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
-  Future<void> _exportToCSV() async {
-    final Account? selectedAccount = await showDialog<Account>(
+  Future<Account?> _selectAccount() {
+    return showDialog<Account>(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
@@ -217,6 +222,102 @@ class _HomeScreenState extends State<HomeScreen> {
         );
       },
     );
+  }
+
+  Future<void> _importFromCSV() async {
+    final Account? account = await _selectAccount();
+    if (!mounted || account == null) return;
+
+    final String? csv;
+    try {
+      csv = await widget.csvFilePicker();
+    } catch (e) {
+      if (mounted) _snack('Could not read the file: $e', Colors.red);
+      return;
+    }
+    if (!mounted || csv == null) return;
+
+    final preview = await _transactionService.previewImport(csv, account);
+    if (!mounted) return;
+
+    if (preview.fileError != null) {
+      await _showImportMessage('Cannot import', preview.fileError!);
+      return;
+    }
+
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Import preview'),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('Into account: ${account.name}'),
+              const SizedBox(height: 8),
+              Text('${preview.toImport.length} to import',
+                  key: const Key('import-count')),
+              Text('${preview.duplicates} duplicates skipped',
+                  key: const Key('import-duplicates')),
+              Text('${preview.mappedToOther} rows mapped to "Other"',
+                  key: const Key('import-other')),
+              Text('${preview.invalid.length} invalid rows',
+                  key: const Key('import-invalid')),
+              for (final e in preview.invalid) Text('  $e'),
+              if (preview.hasNothingToImport) ...[
+                const SizedBox(height: 8),
+                const Text('Nothing to import: every row is invalid or a duplicate.'),
+              ],
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancel'),
+          ),
+          if (!preview.hasNothingToImport)
+            FilledButton(
+              onPressed: () => Navigator.pop(context, true),
+              child: const Text('Import'),
+            ),
+        ],
+      ),
+    );
+    if (!mounted || confirmed != true) return;
+
+    await _transactionService.commitImport(preview);
+    await _loadData();
+    if (mounted) {
+      _snack('Imported ${preview.toImport.length} transactions', Colors.green);
+    }
+  }
+
+  Future<void> _showImportMessage(String title, String message) {
+    return showDialog<void>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(title),
+        content: Text(message),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('OK'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _snack(String text, Color color) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(text), backgroundColor: color),
+    );
+  }
+
+  Future<void> _exportToCSV() async {
+    final Account? selectedAccount = await _selectAccount();
 
     if (!mounted || selectedAccount == null) return;
 
@@ -638,6 +739,14 @@ class _HomeScreenState extends State<HomeScreen> {
             onTap: () async {
               Navigator.pop(context);
               await _exportToCSV();
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.file_upload),
+            title: const Text('Import CSV'),
+            onTap: () async {
+              Navigator.pop(context);
+              await _importFromCSV();
             },
           ),
           const Divider(),

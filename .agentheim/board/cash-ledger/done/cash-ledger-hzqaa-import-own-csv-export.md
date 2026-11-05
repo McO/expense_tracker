@@ -1,7 +1,7 @@
 ---
 id: cash-ledger-hzqaa
 title: Import a CSV file the app exported into a chosen account, skipping exact duplicates
-status: doing
+status: done
 type: feature
 context: cash-ledger
 created: 2026-11-05
@@ -93,3 +93,33 @@ sources (the old tracker app, MoneyMoney, a generic column mapper) are out of sc
 - The UI follows the signed-off styleguide (dialog pattern, management/drawer conventions).
 - Not covered: importing settings, accounts or categories themselves (full backup/restore). That
   would be a separate capture if wanted.
+
+## Verifier note (iteration 1)
+
+**REASONS:**
+- Check 5: README_DELTA appends the Import command's rules to `## Ubiquitous language`, which holds short term definitions only. This README keeps commands and their rules under `## Key commands`, which would still list Export without Import. Only the section is wrong; the body matches the diff.
+- Minor: FILES_CHANGED says 9, but FILE_LIST and the diff show 8.
+- Everything else passes: every criterion is covered, 71 tests pass, analyze is clean, and the single write goes through TransactionsStore.
+
+**SUGGESTED_FIX:**
+- Record the import command under "Key commands" (an append carrying the behaviour text).
+- Optionally add a short "Import" term in "Ubiquitous language", written like the existing Export bullet.
+- Report FILES_CHANGED: 8.
+- No code or test changes are needed.
+
+**ITERATION_HINT:** likely-fixable
+
+## Outcome
+
+"Import CSV" now sits in the home drawer next to Export. The flow is: choose the target account, choose a file, see a preview, then Import or Cancel. The file is chosen through the injectable `CsvFilePicker` seam, which by default uses `file_picker` ^13.3.2. The preview shows how many rows will be imported, how many duplicates are skipped, how many rows are mapped to "Other", and which rows are invalid, by line number.
+
+- A currency mismatch or a wrong header shows a message and writes nothing.
+- If every row is invalid or a duplicate, only Cancel is offered.
+
+Key files:
+- `lib/services/csv_import.dart`: pure functions `parseCsvRecords` (quoting, BOM, CRLF, line numbers), `buildImportPreview` and `matchCategory` (export name first, then name, case-insensitive), plus `commitImportPreview`, which does a single write through `TransactionsStore` (ADR-0008).
+- `lib/services/transaction_service.dart`: adds `previewImport` and `commitImport`.
+- `lib/services/csv_file_picker.dart`: the picker seam.
+- `lib/screens/home_screen.dart`: the drawer action and the flow. The account picker is now shared with Export (`_selectAccount`).
+
+Tests: `test/csv_import_test.dart` (service) and `test/csv_import_flow_test.dart` (widget flow with a stubbed picker), 14 new tests; 71 pass in total. `flutter analyze` is clean, and `flutter build apk --debug` builds. No Android permission changes were needed. The cash-ledger README now records Import under Key commands and Ubiquitous language. Verification passed on iteration 2; iteration 1 had put the README delta in the wrong section. Still open: the owner's own check of importing a real export on the device.

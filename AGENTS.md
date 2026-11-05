@@ -26,6 +26,8 @@ lib/
 │   └── transaction_type.dart          # Enum: expense | income
 ├── services/
 │   ├── transaction_service.dart       # CRUD + CSV building (`buildCSV`; export file is `transactions_<from>_<to>.csv`); all reads/writes via SharedPreferences
+│   ├── csv_import.dart                # Pure CSV import: parse own export, map rows, detect duplicates; `commitImportPreview` writes via TransactionsStore
+│   ├── csv_file_picker.dart           # `CsvFilePicker` seam + default file_picker-backed picker
 │   ├── cash_statistics.dart           # Pure quick-glance statistics for one account
 │   ├── ledger_totals.dart             # Pure aggregation: account balance and income/expense totals
 │   ├── account_service.dart           # CRUD for accounts; auto-creates default if list is empty
@@ -133,6 +135,7 @@ Enum: `expense | income`. Has a string extension for JSON serialization.
 | `flutter_staggered_animations` | ^1.1.1 | Staggered list animations |
 | `path_provider` | ^2.1.2 | File system paths (CSV export) |
 | `permission_handler` | ^12.0.0+1 | Storage permission for CSV export |
+| `file_picker` | ^13.3.2 | Pick a CSV file for import |
 | `cupertino_icons` | ^1.0.6 | iOS-style icons |
 
 ---

@@ -6,6 +6,8 @@ import 'category_service.dart';
 import 'currency_service.dart';
 import 'account_service.dart';
 import 'transactions_store.dart';
+import 'csv_import.dart';
+import '../models/account.dart';
 
 class TransactionService {
   final CategoryService _categoryService = CategoryService();
@@ -125,6 +127,19 @@ class TransactionService {
     }
     return buf.toString();
   }
+
+  /// Reads an exported CSV into [account] without writing anything.
+  Future<ImportPreview> previewImport(String csv, Account account) async {
+    return buildImportPreview(
+      csv: csv,
+      account: account,
+      categories: await _categoryService.getCategories(),
+      existing: await getTransactionsForAccount(account.id),
+    );
+  }
+
+  /// Writes the valid, non-duplicate rows of [preview] in one save.
+  Future<void> commitImport(ImportPreview preview) => commitImportPreview(preview);
 
   String _escapeCsvField(String field) {
     if (field.contains(',') || field.contains('"') || field.contains('\n')) {
