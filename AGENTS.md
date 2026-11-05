@@ -204,7 +204,7 @@ The app declares **no** permissions in `AndroidManifest.xml`. CSV export saves t
 - **`pubspec.lock` is committed** so every checkout, test run and release build uses the same tested dependency versions; refresh it deliberately with `flutter pub upgrade`.
 - **No CI/CD.** Releases are cut locally by `tool/release.sh` (see Releasing); never tag, push or publish a release by hand.
 - **Release builds need `android/key.properties`.** Run `tool/create-release-key.sh` once; it creates the release keystore at `~/.android-keys/expense-tracker-release.jks` (outside the repo) and writes the gitignored `android/key.properties`. `flutter build apk --release` fails without it and never falls back to the debug key. Back up the keystore and its password. Changing the key or app ID forces a reinstall (export, reinstall, import).
-- **The README is outdated** — it documents the original simpler version. The codebase has since added accounts, income/expense types, custom categories, custom currencies, and CSV export.
+- **The README is user-facing** (what the app is, install, build, release). Keep it in step when a user-visible feature lands; this file stays the detailed code guide.
 - **SharedPreferences has no schema migration.** Adding or renaming fields in a model requires careful `fromJson` defaults to avoid crashes on existing installs.
 - **Theme is propagated via callbacks,** not `InheritedWidget`. If you add a screen deep in the tree that needs theme control, wire the callback through all intermediate screens.
 - **Category fallback:** `Transaction.fromJson` falls back to the "other" category when a stored `categoryId` is not found. This is intentional — do not remove it.
