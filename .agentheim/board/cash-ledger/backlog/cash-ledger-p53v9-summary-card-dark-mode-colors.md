@@ -22,14 +22,22 @@ it.
 
 ## What
 
-Raw capture, needs refinement. Move the net-balance, income and expense cards in
+Move the net-balance, income and expense cards in
 `total_expense_card.dart` to scheme-aware colors (color-scheme roles or alpha tints of the semantic
 colors, as the category and movement widgets already do), keeping green = income, red = expense and
 the positive/negative net-balance distinction.
 
 ## Acceptance criteria
 
-To be refined.
+- [ ] `lib/widgets/total_expense_card.dart` uses no `Colors.<x>.shadeNN` tints; its fills and text
+      colours derive from the theme's colour scheme or from alpha tints of the semantic colours, so
+      they adapt to dark mode. Covered by a widget test that pumps the card under a dark theme and
+      asserts no shade constant is used (e.g. the card's container colours differ between light and
+      dark themes).
+- [ ] Income stays green, expense stays red, and the net-balance card still distinguishes positive
+      from negative, covered by a widget test.
+- [ ] `flutter test` and `flutter analyze` pass.
+- [ ] The summary card reads well in both light and dark mode. [human-eye]
 
 ## Notes
 

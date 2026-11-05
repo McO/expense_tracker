@@ -5,6 +5,16 @@ Newest entries on top.
 
 ---
 
+## 2026-11-05 09:29 -- Modeling / Refined: cash-ledger-p53v9 - Make the summary card's money colors work in dark mode
+
+**Type:** Modeling / Refine
+**BC:** cash-ledger
+**Status after:** todo
+**Summary:** Acceptance criteria written: no shadeNN tints in total_expense_card.dart, scheme-aware/alpha colours that adapt to dark mode, semantic green/red and the net-balance distinction kept, tests and an owner eye-check.
+**ADRs written:** none
+
+---
+
 ## 2026-11-05 09:29 -- Modeling / Captured: cash-ledger-f150f - Account and currency management screens use the category list style (popup menu per item, extended add button)
 
 **Type:** Modeling / Capture
