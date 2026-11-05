@@ -1,7 +1,7 @@
 ---
 id: cash-ledger-m47az
 title: Export saves the CSV through Android's save dialog, so the app needs no storage permissions
-status: todo
+status: doing
 type: refactor
 context: cash-ledger
 created: 2026-11-05
