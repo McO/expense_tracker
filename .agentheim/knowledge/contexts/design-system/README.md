@@ -16,7 +16,7 @@ supporting
 ## Ubiquitous language
 - **Token** — a named design value (color, spacing, radius, type style).
 - **Component** — a reusable widget with a defined look and behaviour (e.g. summary card, category
-  card, movement row).
+  card, transaction row).
 - **Pattern** — a recurring arrangement of components (e.g. dashboard section, form, picker).
 - **Styleguide gate** — no frontend task may be promoted until `design-system-001` (styleguide) is
   done and signed off.

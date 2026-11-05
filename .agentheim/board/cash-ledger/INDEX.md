@@ -11,13 +11,15 @@ Catalog of this bounded context's tasks by status.
 
 <!-- task-counts:start -->
 - **Backlog:** 0
-- **Todo:** 0
+- **Todo:** 2
 - **Doing:** 0
 - **Done:** 8
 <!-- task-counts:end -->
 
 ### Todo
 <!-- todo-list:start -->
+- **cash-ledger-k6d4w** — Store transactions under the `transactions` key, migrating the old `expenses` key once (feature) — `todo/cash-ledger-k6d4w-migrate-expenses-key-to-transactions.md`
+- **cash-ledger-ydqbw** — Use Account and Transaction consistently in code and on screen (no Wallet, Movement or Expense-for-record) (refactor) — `todo/cash-ledger-ydqbw-account-and-transaction-naming.md`
 <!-- todo-list:end -->
 
 ### Doing

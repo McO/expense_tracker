@@ -5,6 +5,32 @@ Newest entries on top.
 
 ---
 
+## 2026-11-05 10:00 -- Modeling / Captured: cash-ledger-k6d4w - Store transactions under the `transactions` key, migrating the old `expenses` key once
+
+**Type:** Modeling / Capture
+**BC:** cash-ledger
+**Filed to:** todo
+**Summary:** Store transactions under the transactions key, migrating the old expenses key once (ADR amending ADR-0004)
+
+---
+
+## 2026-11-05 10:00 -- Modeling / Captured: cash-ledger-ydqbw - Use Account and Transaction consistently in code and on screen (no Wallet, Movement or Expense-for-record)
+
+**Type:** Modeling / Capture
+**BC:** cash-ledger
+**Filed to:** todo
+**Summary:** Use Account and Transaction consistently in code, on screen and in the CSV file name
+
+---
+
+## 2026-11-05 09:59 -- Modeling: ubiquitous language is Account and Transaction
+
+**Type:** Modeling / Language decision
+**Decision:** the owner chose Account and Transaction as the ubiquitous language (not Wallet, not Movement). Vision, cash-ledger README, design-system README, styleguide and the knowledge index switched in this commit; ADRs, research and done tasks keep their historical wording.
+**Tasks:** cash-ledger-ydqbw (code + on-screen naming, CSV file name transactions_…), cash-ledger-k6d4w (migrate the expenses key to transactions, ADR amending ADR-0004)
+
+---
+
 ## 2026-11-05 09:43 -- Work session ended
 
 **Type:** Work / Session end
