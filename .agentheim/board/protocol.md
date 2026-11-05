@@ -5,6 +5,24 @@ Newest entries on top.
 
 ---
 
+## 2026-11-05 21:53 -- Work session ended
+
+**Type:** Work / Session end
+**Duration:** ~40m
+**Completed:** 3 (first-try PASS: 2, re-dispatched: 1, skipped: 0)
+**Bounced:** 0
+**Failed:** 0
+**Escalated after verification:** 0
+**Lost-result re-dispatches:** 0
+**Lost-result escalations:** 0
+**Dispatches:** cash-ledger-ajxaq: 1, cash-ledger-yc1h3: 1, cash-ledger-my7ez: 2
+**Commits:** 7
+**Vision-conformance:** none — batch aligns with vision (amounts stay per-currency; no conversion)
+**Batch mix:** 100% product-facing (3 tasks)
+**Carry-over:** none — working tree clean
+
+---
+
 ## 2026-11-05 21:53 -- Task verified and completed: cash-ledger-my7ez - Every amount on screen follows the phone's number format and the currency's decimals
 
 **Type:** Work / Task completion
