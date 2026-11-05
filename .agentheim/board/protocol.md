@@ -5,6 +5,24 @@ Newest entries on top.
 
 ---
 
+## 2026-11-05 10:16 -- Work session ended
+
+**Type:** Work / Session end
+**Duration:** ~35m
+**Completed:** 2 (first-try PASS: 0, re-dispatched: 2, skipped: 0)
+**Bounced:** 0
+**Failed:** 0
+**Escalated after verification:** 0
+**Lost-result re-dispatches:** 0
+**Lost-result escalations:** 0
+**Dispatches:** cash-ledger-ydqbw: 3, cash-ledger-k6d4w: 2
+**Commits:** 5
+**Vision-conformance:** none — batch aligns with vision
+**Batch mix:** 100% product-facing (2 tasks)
+**Carry-over:** none — working tree clean
+
+---
+
 ## 2026-11-05 10:16 -- Task verified and completed: cash-ledger-k6d4w - Store transactions under the `transactions` key, migrating the old `expenses` key once
 
 **Type:** Work / Task completion
