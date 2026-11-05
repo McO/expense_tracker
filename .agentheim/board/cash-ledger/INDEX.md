@@ -11,13 +11,14 @@ Catalog of this bounded context's tasks by status.
 
 <!-- task-counts:start -->
 - **Backlog:** 1
-- **Todo:** 0
+- **Todo:** 1
 - **Doing:** 0
 - **Done:** 5
 <!-- task-counts:end -->
 
 ### Todo
 <!-- todo-list:start -->
+- **cash-ledger-apzzm** — A movement's currency is always its wallet's; drop the global default currency; deleting a wallet deletes its movements after a confirm (feature) — `todo/cash-ledger-apzzm-wallet-owns-currency-and-delete.md`
 <!-- todo-list:end -->
 
 ### Doing

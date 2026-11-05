@@ -5,6 +5,15 @@ Newest entries on top.
 
 ---
 
+## 2026-11-05 09:29 -- Modeling / Captured: cash-ledger-apzzm - A movement's currency is always its wallet's; drop the global default currency; deleting a wallet deletes its movements after a confirm
+
+**Type:** Modeling / Capture
+**BC:** cash-ledger
+**Filed to:** todo
+**Summary:** Currency and category cleanup (cash-ledger-apzzm), owner decisions 2026-11-05.
+
+---
+
 ## 2026-11-05 09:20 -- Work session ended
 
 **Type:** Work / Session end
