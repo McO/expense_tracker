@@ -5,6 +5,14 @@ Newest entries on top.
 
 ---
 
+## 2026-11-05 10:00 -- Batch started: [cash-ledger-ydqbw]
+
+**Type:** Work / Batch start
+**Tasks:** cash-ledger-ydqbw - Use Account and Transaction consistently in code and on screen (no Wallet, Movement or Expense-for-record)
+**Parallel:** no (1 worker — cash-ledger-k6d4w blocked on cash-ledger-ydqbw)
+
+---
+
 ## 2026-11-05 10:00 -- Modeling / Captured: cash-ledger-k6d4w - Store transactions under the `transactions` key, migrating the old `expenses` key once
 
 **Type:** Modeling / Capture

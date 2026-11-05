@@ -1,7 +1,7 @@
 ---
 id: cash-ledger-ydqbw
 title: Use Account and Transaction consistently in code and on screen (no Wallet, Movement or Expense-for-record)
-status: todo
+status: doing
 type: refactor
 context: cash-ledger
 created: 2026-11-05
