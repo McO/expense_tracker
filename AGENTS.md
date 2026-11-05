@@ -95,7 +95,7 @@ All data is stored in **SharedPreferences as JSON strings**. No SQLite, Hive, or
 | `categories` | `List<String>` | JSON-encoded `Category` objects |
 | `categories_defaults_initialized_v2` | `bool` | Migration flag to seed defaults once |
 | `categories_ledger_ensured_v1` | `bool` | Flag: the built-in Top-up and Correction categories have been added (non-destructively, also on existing installs) |
-| `custom_currencies` | `List<String>` | JSON-encoded custom `Currency` objects |
+| `custom_currencies` | `List<String>` | JSON-encoded custom `Currency` objects (including `decimalPlaces`) |
 | `theme_mode` | `int` | Index of `AppThemeMode` enum |
 
 **Service pattern:** read full list → deserialize → mutate in-memory → serialize → write full list back. Every service follows this pattern.
@@ -118,7 +118,10 @@ A transaction is a **signed amount plus a category** (ADR-0007):
 
 ### Currency
 
-Plain Dart class (not an enum). 15 predefined static constants. Users can add custom currencies stored separately under `custom_currencies`.
+Plain Dart class (not an enum). 15 predefined static constants. Users can add custom currencies stored separately under `custom_currencies`, and can edit a custom currency's symbol, name and decimal places (never its code) from the Currencies screen.
+- **`decimalPlaces` (0-3):** built-ins use ISO 4217 (JPY and KRW are 0, the rest 2); custom currencies choose it (default 2). Stored JSON without the field loads with 2; `Currency.fromJson` and `fromCode` always give built-ins their ISO value.
+- **Rounding:** `currency.roundAmount(x)` rounds half away from zero to the currency's decimals, safe against binary-float half-way errors (12.345 EUR gives 12.35). Use it when saving amounts.
+- Editing a custom currency (`CurrencyService.updateCustomCurrency`) also rewrites the embedded currency of accounts using it; transactions are untouched.
 
 ### Category
 

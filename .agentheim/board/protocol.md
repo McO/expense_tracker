@@ -5,6 +5,19 @@ Newest entries on top.
 
 ---
 
+## 2026-11-05 21:39 -- Task verified and completed: cash-ledger-ajxaq - Each currency has its own number of decimal places (ISO for built-ins, editable for custom currencies)
+
+**Type:** Work / Task completion
+**Task:** cash-ledger-ajxaq - Each currency has its own number of decimal places (ISO for built-ins, editable for custom currencies)
+**Summary:** currencies carry decimal places (ISO for built-ins, editable for custom ones) with a shared rounding helper; custom currencies can be edited
+**Duration:** 5m
+**Verification:** PASS (iteration 1)
+**Files changed:** 5
+**Tests added:** 6
+**ADRs written:** none
+
+---
+
 ## 2026-11-05 21:34 -- Batch started: [cash-ledger-ajxaq]
 
 **Type:** Work / Batch start

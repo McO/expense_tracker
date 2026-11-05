@@ -27,6 +27,7 @@ This is the whole reason the app exists (ADR-0001): MoneyMoney sees everything e
 - **Account check / Burn rate / Spending mix / Leftover foreign cash** — the four quick-glance
   statistics (see vision).
 - **Import** — reading one of the app's own CSV exports back into a chosen account.
+- **Decimal places** — the number of minor-unit digits (0-3) of a currency. Built-ins use ISO 4217 (JPY, KRW = 0, others 2); custom currencies choose it (default 2) and can edit it later. `Currency.roundAmount` rounds an amount to it.
 
 ## Aggregates
 - **Account** — has exactly one currency; its balance is the sum of its transactions. Deleting an account deletes its transactions, after a confirm that names how many.

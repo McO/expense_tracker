@@ -12,8 +12,8 @@ Catalog of this bounded context's tasks by status.
 <!-- task-counts:start -->
 - **Backlog:** 0
 - **Todo:** 2
-- **Doing:** 1
-- **Done:** 13
+- **Doing:** 0
+- **Done:** 14
 <!-- task-counts:end -->
 
 ### Todo
@@ -24,11 +24,11 @@ Catalog of this bounded context's tasks by status.
 
 ### Doing
 <!-- doing-list:start -->
-- **cash-ledger-ajxaq** — Each currency has its own number of decimal places (ISO for built-ins, editable for custom currencies) (feature) — `doing/cash-ledger-ajxaq-currency-decimal-places.md`
 <!-- doing-list:end -->
 
 ### Done (most recent first; older entries kept for prior-art search)
 <!-- done-list:start -->
+- **cash-ledger-ajxaq** — Each currency has its own number of decimal places (ISO for built-ins, editable for custom currencies) (feature) — `done/cash-ledger-ajxaq-currency-decimal-places.md`
 - **cash-ledger-ssybq** — Show the app version and build number at the bottom of the home drawer (feature) — `done/cash-ledger-ssybq-show-version-in-drawer.md`
 - **cash-ledger-m47az** — Export saves the CSV through Android's save dialog, so the app needs no storage permissions (refactor) — `done/cash-ledger-m47az-export-via-system-save-dialog.md`
 - **cash-ledger-hzqaa** — Import a CSV file the app exported into a chosen account, skipping exact duplicates (feature) — `done/cash-ledger-hzqaa-import-own-csv-export.md`

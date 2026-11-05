@@ -103,23 +103,29 @@ class _CurrencyManagementScreenState extends State<CurrencyManagementScreen> {
     });
   }
 
-  Future<void> _showAddCurrencyDialog() async {
-    final codeController = TextEditingController();
-    final symbolController = TextEditingController();
-    final nameController = TextEditingController();
+  Future<void> _showAddCurrencyDialog() => _showCurrencyDialog();
+
+  Future<void> _showCurrencyDialog({Currency? existing}) async {
+    final isEdit = existing != null;
+    final codeController = TextEditingController(text: existing?.code ?? '');
+    final symbolController =
+        TextEditingController(text: existing?.symbol ?? '');
+    final nameController = TextEditingController(text: existing?.name ?? '');
+    int decimalPlaces = existing?.decimalPlaces ?? 2;
     bool lookupFound = false;
 
     final result = await showDialog<bool>(
       context: context,
       builder: (dialogContext) => StatefulBuilder(
         builder: (context, setDialogState) => AlertDialog(
-          title: const Text('Add Custom Currency'),
+          title: Text(isEdit ? 'Edit Custom Currency' : 'Add Custom Currency'),
           content: SingleChildScrollView(
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
                 TextField(
                   controller: codeController,
+                  enabled: !isEdit,
                   decoration: InputDecoration(
                     labelText: 'Currency Code',
                     hintText: 'e.g., EUR',
@@ -162,6 +168,29 @@ class _CurrencyManagementScreenState extends State<CurrencyManagementScreen> {
                     border: OutlineInputBorder(),
                   ),
                 ),
+                const SizedBox(height: 16),
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text('Decimal places',
+                      style: Theme.of(context).textTheme.labelLarge),
+                ),
+                const SizedBox(height: 8),
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: Wrap(
+                    spacing: 8,
+                    children: [
+                      for (final n in const [0, 1, 2, 3])
+                        ChoiceChip(
+                          key: Key('decimal-places-$n'),
+                          label: Text('$n'),
+                          selected: decimalPlaces == n,
+                          onSelected: (_) =>
+                              setDialogState(() => decimalPlaces = n),
+                        ),
+                    ],
+                  ),
+                ),
               ],
             ),
           ),
@@ -185,7 +214,7 @@ class _CurrencyManagementScreenState extends State<CurrencyManagementScreen> {
                 }
                 Navigator.pop(dialogContext, true);
               },
-              child: const Text('Add'),
+              child: Text(isEdit ? 'Save' : 'Add'),
             ),
           ],
         ),
@@ -196,18 +225,25 @@ class _CurrencyManagementScreenState extends State<CurrencyManagementScreen> {
     final symbol = symbolController.text.trim();
     final name = nameController.text.trim();
 
-    codeController.dispose();
-    symbolController.dispose();
-    nameController.dispose();
+    // Controllers are not disposed here: the dialog is still animating out and
+    // would rebuild with a disposed controller. They hold no resources.
 
     if (result == true && mounted) {
       try {
-        await _currencyService.addCustomCurrency(code, symbol, name);
+        if (isEdit) {
+          await _currencyService.updateCustomCurrency(existing.code,
+              symbol: symbol, name: name, decimalPlaces: decimalPlaces);
+        } else {
+          await _currencyService.addCustomCurrency(code, symbol, name,
+              decimalPlaces: decimalPlaces);
+        }
         await _load();
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('Currency ${code.toUpperCase()} added successfully'),
+              content: Text(isEdit
+                  ? 'Currency ${existing.code} updated'
+                  : 'Currency ${code.toUpperCase()} added successfully'),
               backgroundColor: Colors.green,
             ),
           );
@@ -216,7 +252,7 @@ class _CurrencyManagementScreenState extends State<CurrencyManagementScreen> {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('Error adding currency: ${e.toString()}'),
+              content: Text('Error saving currency: ${e.toString()}'),
               backgroundColor: Colors.red,
             ),
           );
@@ -336,12 +372,26 @@ class _CurrencyManagementScreenState extends State<CurrencyManagementScreen> {
                           currency.name,
                           style: const TextStyle(fontWeight: FontWeight.bold),
                         ),
-                        subtitle: Text('${currency.code} • ${currency.symbol}'),
+                        subtitle: Text(
+                            '${currency.code} • ${currency.symbol} • ${currency.decimalPlaces} decimals'),
                         trailing: PopupMenuButton<String>(
                           onSelected: (value) {
+                            if (value == 'edit') {
+                              _showCurrencyDialog(existing: currency);
+                            }
                             if (value == 'delete') _deleteCurrency(currency);
                           },
                           itemBuilder: (context) => const [
+                            PopupMenuItem(
+                              value: 'edit',
+                              child: Row(
+                                children: [
+                                  Icon(Icons.edit),
+                                  SizedBox(width: 8),
+                                  Text('Edit'),
+                                ],
+                              ),
+                            ),
                             PopupMenuItem(
                               value: 'delete',
                               child: Row(

@@ -11,16 +11,19 @@ class CurrencyService {
     
     return customCurrenciesJson.map((json) {
       final Map<String, dynamic> decoded = jsonDecode(json);
+      final c = Currency.fromJson(decoded);
       return Currency(
-        code: decoded['code'] as String,
-        symbol: decoded['symbol'] as String,
-        name: decoded['name'] as String,
+        code: c.code,
+        symbol: c.symbol,
+        name: c.name,
         isCustom: true,
+        decimalPlaces: c.decimalPlaces,
       );
     }).toList();
   }
 
-  Future<void> addCustomCurrency(String code, String symbol, String name) async {
+  Future<void> addCustomCurrency(String code, String symbol, String name,
+      {int decimalPlaces = 2}) async {
     final customCurrencies = await getCustomCurrencies();
     
     // Check if currency code already exists in custom or predefined
@@ -37,10 +40,46 @@ class CurrencyService {
       symbol: symbol,
       name: name,
       isCustom: true,
+      decimalPlaces: decimalPlaces,
     );
     
     customCurrencies.add(newCurrency);
     await _saveCustomCurrencies(customCurrencies);
+  }
+
+  /// Edits symbol, name and decimal places of a custom currency. The code is
+  /// fixed (transactions reference it). Accounts holding the currency are
+  /// updated so they stay consistent; transactions are not touched.
+  Future<void> updateCustomCurrency(String code,
+      {required String symbol,
+      required String name,
+      required int decimalPlaces}) async {
+    final customCurrencies = await getCustomCurrencies();
+    final index = customCurrencies.indexWhere((c) => c.code == code);
+    if (index < 0) throw Exception('Currency not found');
+    final updated = Currency(
+      code: code,
+      symbol: symbol,
+      name: name,
+      isCustom: true,
+      decimalPlaces: decimalPlaces,
+    );
+    customCurrencies[index] = updated;
+    await _saveCustomCurrencies(customCurrencies);
+
+    final prefs = await SharedPreferences.getInstance();
+    final accounts = prefs.getStringList('accounts');
+    if (accounts != null) {
+      final rewritten = accounts.map((raw) {
+        final json = jsonDecode(raw) as Map<String, dynamic>;
+        final cur = json['currency'];
+        if (cur is Map<String, dynamic> && cur['code'] == code) {
+          json['currency'] = updated.toJson();
+        }
+        return jsonEncode(json);
+      }).toList();
+      await prefs.setStringList('accounts', rewritten);
+    }
   }
 
   Future<void> removeCustomCurrency(String code) async {
