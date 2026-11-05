@@ -5,6 +5,24 @@ Newest entries on top.
 
 ---
 
+## 2026-11-05 09:20 -- Work session ended
+
+**Type:** Work / Session end
+**Duration:** about 15m of work (09:09 batch start to merge, plus the owner eye-check)
+**Completed:** 1 (first-try PASS: 0, re-dispatched: 1, skipped: 0)
+**Bounced:** 0
+**Failed:** 0
+**Escalated after verification:** 0
+**Lost-result re-dispatches:** 0
+**Lost-result escalations:** 0
+**Dispatches:** cash-ledger-bktw5: 2
+**Commits:** 3 (batch start, task integration, this bookkeeping commit)
+**Vision-conformance:** none — batch aligns with vision
+**Batch mix:** 100% product-facing / 0% harness / 0% bookkeeping (1 task)
+**Carry-over:** none — working tree clean
+
+---
+
 ## 2026-11-05 09:19 -- Task verified and completed: cash-ledger-bktw5 - Add a Statistics screen with the four quick-glance cash statistics for the selected wallet
 
 **Type:** Work / Task completion
