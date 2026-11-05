@@ -11,13 +11,14 @@ Catalog of this bounded context's tasks by status.
 
 <!-- task-counts:start -->
 - **Backlog:** 0
-- **Todo:** 0
+- **Todo:** 1
 - **Doing:** 0
 - **Done:** 6
 <!-- task-counts:end -->
 
 ### Todo
 <!-- todo-list:start -->
+- **infrastructure-tf3qk** — Migrate the Android app module from the Kotlin Gradle Plugin to Flutter's Built-in Kotlin (chore) — `todo/infrastructure-tf3qk-migrate-to-built-in-kotlin.md`
 <!-- todo-list:end -->
 
 ### Doing

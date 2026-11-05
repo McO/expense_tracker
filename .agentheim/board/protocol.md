@@ -5,6 +5,15 @@ Newest entries on top.
 
 ---
 
+## 2026-11-05 19:08 -- Modeling / Captured: infrastructure-tf3qk - Migrate the Android app module from the Kotlin Gradle Plugin to Flutter's Built-in Kotlin
+
+**Type:** Modeling / Capture
+**BC:** infrastructure
+**Filed to:** todo
+**Summary:** Migrate android/ from the Kotlin Gradle Plugin to Flutter Built-in Kotlin so future Flutter versions keep building; signing, app ID and release script unchanged
+
+---
+
 ## 2026-11-05 19:05 -- Modeling / Decision: Agentheim is the single planning system
 
 **Type:** Modeling / Decision
