@@ -5,6 +5,19 @@ Newest entries on top.
 
 ---
 
+## 2026-11-05 19:40 -- Task verified and completed: cash-ledger-ssybq - Show the app version and build number at the bottom of the home drawer
+
+**Type:** Work / Task completion
+**Task:** cash-ledger-ssybq - Show the app version and build number at the bottom of the home drawer
+**Summary:** Home drawer shows Version X.Y.Z (N) from the installed package, hidden on lookup failure
+**Duration:** 9m
+**Verification:** PASS (iteration 1)
+**Files changed:** 5
+**Tests added:** 3
+**ADRs written:** none
+
+---
+
 ## 2026-11-05 19:35 -- Batch started: [cash-ledger-ssybq]
 
 **Type:** Work / Batch start

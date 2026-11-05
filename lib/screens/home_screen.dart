@@ -8,6 +8,7 @@ import '../models/account.dart';
 import '../services/transaction_service.dart';
 import '../services/csv_file_picker.dart';
 import '../services/csv_file_saver.dart';
+import '../services/app_version_lookup.dart';
 import '../services/ledger_totals.dart';
 import '../services/theme_service.dart';
 import '../services/account_service.dart';
@@ -40,10 +41,14 @@ class HomeScreen extends StatefulWidget {
   /// Save-dialog step of CSV export; replaced in tests.
   final CsvFileSaver csvFileSaver;
 
+  /// Installed-version lookup for the drawer footer; replaced in tests.
+  final AppVersionLookup appVersionLookup;
+
   const HomeScreen({
     super.key,
     this.csvFilePicker = pickCsvFileText,
     this.csvFileSaver = saveCsvFile,
+    this.appVersionLookup = lookupAppVersion,
     this.onThemeModeChanged,
     this.currentThemeMode = AppThemeMode.system,
   });
@@ -73,6 +78,19 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     super.initState();
     _initData();
+    _loadVersion();
+  }
+
+  String? _versionLabel;
+
+  Future<void> _loadVersion() async {
+    try {
+      final version = await widget.appVersionLookup();
+      if (!mounted || version == null) return;
+      setState(() => _versionLabel = version.label);
+    } catch (_) {
+      // Lookup failed: show no version line.
+    }
   }
 
   Future<void> _initData() async {
@@ -558,7 +576,29 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget _buildDrawer() {
     return Drawer(
-      child: ListView(
+      child: Column(
+        children: [
+          Expanded(child: _buildDrawerItems()),
+          if (_versionLabel != null)
+            SafeArea(
+              top: false,
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Text(
+                  _versionLabel!,
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDrawerItems() {
+    return ListView(
         padding: EdgeInsets.zero,
         children: [
           DrawerHeader(
@@ -756,7 +796,6 @@ class _HomeScreenState extends State<HomeScreen> {
             },
           ),
         ],
-      ),
     );
   }
 }

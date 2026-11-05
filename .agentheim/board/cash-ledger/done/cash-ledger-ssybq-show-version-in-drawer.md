@@ -1,7 +1,7 @@
 ---
 id: cash-ledger-ssybq
 title: Show the app version and build number at the bottom of the home drawer
-status: doing
+status: done
 type: feature
 context: cash-ledger
 created: 2026-11-05
@@ -47,3 +47,19 @@ this on 2026-11-05.
 
 - Owner request 2026-11-05: "show version on the sidebar".
 - Frontend task, so it depends on the styleguide (design-system-001, done).
+
+## Outcome
+
+The home drawer (`_buildDrawer()` in `lib/screens/home_screen.dart`) now ends with a muted `Version X.Y.Z (N)` footer.
+- **Layout:** the drawer is a Column of an Expanded item list, which still scrolls, plus the footer.
+- **Style:** the footer uses `bodySmall` with `onSurfaceVariant`, per the styleguide's secondary text.
+- **Version lookup:** the value comes from the new `AppVersionLookup` seam (`lib/services/app_version_lookup.dart`). The default implementation uses `package_info_plus` ^10.2.2 and is injected through `HomeScreen(appVersionLookup: ...)`, like the CsvFileSaver and CsvFilePicker seams.
+- **Failure:** if the lookup returns null or throws, no line is shown.
+- **No hard-coded version:** none in `lib/`. The value is pubspec `X.Y.Z+N` (ADR-0011).
+
+Checks:
+- 3 widget tests (`test/drawer_version_test.dart`) cover the shown, null and throw cases.
+- 92 tests pass, analyze is clean, and the debug APK builds.
+- `AGENTS.md` lists the new dependency and the new file.
+
+Verification passed on iteration 1. Minor: `_buildDrawerItems()` keeps its old indentation; `dart format` would fix it.

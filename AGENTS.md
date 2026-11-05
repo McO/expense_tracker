@@ -28,6 +28,7 @@ lib/
 │   ├── transaction_service.dart       # CRUD + CSV building (`buildCSV`; export file is `transactions_<from>_<to>.csv`); all reads/writes via SharedPreferences
 │   ├── csv_import.dart                # Pure CSV import: parse own export, map rows, detect duplicates; `commitImportPreview` writes via TransactionsStore
 │   ├── csv_file_saver.dart            # `CsvFileSaver` seam + default file_picker-backed system save dialog (export)
+│   ├── app_version_lookup.dart        # `AppVersionLookup` seam + default package_info_plus-backed installed-version lookup (drawer footer)
 │   ├── csv_file_picker.dart           # `CsvFilePicker` seam + default file_picker-backed picker
 │   ├── cash_statistics.dart           # Pure quick-glance statistics for one account
 │   ├── ledger_totals.dart             # Pure aggregation: account balance and income/expense totals
@@ -135,6 +136,7 @@ Enum: `expense | income`. Has a string extension for JSON serialization.
 | `intl` | ^0.20.2 | Date formatting |
 | `flutter_staggered_animations` | ^1.1.1 | Staggered list animations |
 | `file_picker` | ^13.3.2 | Pick a CSV file for import; save the CSV export via the system dialog |
+| `package_info_plus` | ^10.2.2 | Read the installed version and build number for the drawer footer |
 | `cupertino_icons` | ^2.0.0 | iOS-style icons |
 
 ---
