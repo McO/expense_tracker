@@ -11,13 +11,16 @@ Catalog of this bounded context's tasks by status.
 
 <!-- task-counts:start -->
 - **Backlog:** 0
-- **Todo:** 0
+- **Todo:** 3
 - **Doing:** 0
 - **Done:** 13
 <!-- task-counts:end -->
 
 ### Todo
 <!-- todo-list:start -->
+- **cash-ledger-my7ez** — Every amount on screen follows the phone's number format and the currency's decimals (feature) — `todo/cash-ledger-my7ez-locale-aware-amount-display.md`
+- **cash-ledger-yc1h3** — Amount input follows the phone's number format and the currency's decimals, tolerating the other separator, symbols and spaces (feature) — `todo/cash-ledger-yc1h3-locale-aware-amount-input.md`
+- **cash-ledger-ajxaq** — Each currency has its own number of decimal places (ISO for built-ins, editable for custom currencies) (feature) — `todo/cash-ledger-ajxaq-currency-decimal-places.md`
 <!-- todo-list:end -->
 
 ### Doing
