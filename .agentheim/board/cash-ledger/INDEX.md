@@ -11,13 +11,14 @@ Catalog of this bounded context's tasks by status.
 
 <!-- task-counts:start -->
 - **Backlog:** 1
-- **Todo:** 1
+- **Todo:** 2
 - **Doing:** 0
 - **Done:** 5
 <!-- task-counts:end -->
 
 ### Todo
 <!-- todo-list:start -->
+- **cash-ledger-f150f** — Account and currency management screens use the category list style (popup menu per item, extended add button) (refactor) — `todo/cash-ledger-f150f-management-lists-category-style.md`
 - **cash-ledger-apzzm** — A movement's currency is always its wallet's; drop the global default currency; deleting a wallet deletes its movements after a confirm (feature) — `todo/cash-ledger-apzzm-wallet-owns-currency-and-delete.md`
 <!-- todo-list:end -->
 
