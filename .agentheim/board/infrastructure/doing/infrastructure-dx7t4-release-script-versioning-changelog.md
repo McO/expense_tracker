@@ -1,7 +1,7 @@
 ---
 id: infrastructure-dx7t4
 title: One local release script that bumps the SemVer version and build number, writes the changelog from done tasks, tags, and publishes a GitHub Release with the signed APK
-status: todo
+status: doing
 type: feature
 context: infrastructure
 created: 2026-11-05
