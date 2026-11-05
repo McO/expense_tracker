@@ -19,6 +19,7 @@ For BC-scoped artifacts, see each BC's `INDEX.md`.
 ## Global ADRs (scope: global)
 
 <!-- adr-global:start -->
+- **0011** — Release process: SemVer + auto build number, vX.Y.Z tags, changelog from task trailers, GitHub Release, one local script (tool/release.sh) — 2026-11-05 — `knowledge/decisions/0011-release-process-semver-task-trailer-changelog-github-release.md`
 - **0010** — Releases are signed with one dedicated key (outside the repo); app ID is permanently io.github.mco.expensetracker (amends 0002) — 2026-11-05 — `knowledge/decisions/0010-release-signing-key-and-permanent-app-id.md`
 - **0004** — All data in SharedPreferences as JSON lists, without schema migration — 2026-11-04 — `knowledge/decisions/0004-all-data-in-sharedpreferences-json-lists-without-schema-migration.md`
 - **0003** — Plain setState, screen-owned services and imperative navigation — 2026-11-04 — `knowledge/decisions/0003-plain-setstate-screen-owned-services-imperative-navigation.md`

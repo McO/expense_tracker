@@ -12,8 +12,8 @@ Catalog of this bounded context's tasks by status.
 <!-- task-counts:start -->
 - **Backlog:** 0
 - **Todo:** 0
-- **Doing:** 1
-- **Done:** 5
+- **Doing:** 0
+- **Done:** 6
 <!-- task-counts:end -->
 
 ### Todo
@@ -22,11 +22,11 @@ Catalog of this bounded context's tasks by status.
 
 ### Doing
 <!-- doing-list:start -->
-- **infrastructure-dx7t4** — One local release script that bumps the SemVer version and build number, writes the changelog from done tasks, tags, and publishes a GitHub Release with the signed APK (feature) — `doing/infrastructure-dx7t4-release-script-versioning-changelog.md`
 <!-- doing-list:end -->
 
 ### Done (most recent first; older entries kept for prior-art search)
 <!-- done-list:start -->
+- **infrastructure-dx7t4** — One local release script that bumps the SemVer version and build number, writes the changelog from done tasks, tags, and publishes a GitHub Release with the signed APK (feature) — `done/infrastructure-dx7t4-release-script-versioning-changelog.md`
 - **infrastructure-c5nkp** — Sign release builds with a dedicated release key and change the app ID to io.github.mco.expensetracker (chore) — `done/infrastructure-c5nkp-release-signing-and-app-id.md`
 - **infrastructure-pn83e** — Upgrade all dependencies to their latest versions and raise the Dart SDK lower bound to the installed toolchain (chore) — `done/infrastructure-pn83e-upgrade-flutter-dependencies.md`
 - **infrastructure-r5v4d** — Record the existing persistence as an ADR (SharedPreferences JSON lists, no schema migration) (decision) — `done/infrastructure-r5v4d-record-persistence.md`

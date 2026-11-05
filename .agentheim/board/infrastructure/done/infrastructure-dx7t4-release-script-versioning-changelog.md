@@ -1,7 +1,7 @@
 ---
 id: infrastructure-dx7t4
 title: One local release script that bumps the SemVer version and build number, writes the changelog from done tasks, tags, and publishes a GitHub Release with the signed APK
-status: doing
+status: done
 type: feature
 context: infrastructure
 created: 2026-11-05
@@ -9,7 +9,7 @@ completed:
 depends_on: [infrastructure-c5nkp]
 blocks: []
 tags: [release, versioning, changelog, github, toolchain]
-related_adrs: [ADR-0002]
+related_adrs: [ADR-0002, ADR-0010, ADR-0011]
 related_research: []
 prior_art: [infrastructure-pn83e]
 ---
@@ -97,3 +97,43 @@ Owner decisions (modeling, 2026-11-05):
 - Convention check: the release script itself enforces the process (version format, tag, the
   changelog source), so there is no separate lint. Running releases through the script rather than
   by hand is prose-only, unenforced.
+
+## Verifier note (iteration 1)
+
+**REASONS:**
+- Checks 4/5: README_DELTA is empty, but the infrastructure BC README (which owns "build and release") lacks these new terms:
+  - Release (SemVer plus build number, a `vX.Y.Z` tag, a GitHub Release with the APK attached);
+  - Changelog (built from task-commit trailers);
+  - build number;
+  - the key command "Cut a release" (`tool/release.sh`);
+  - the key event "Release published".
+- Existing README wording is now stale: "Release build — … installed by hand" and the Owner line "builds and releases manually".
+- Everything else passes: 89 tests, a clean analyze, the dry run has no side effects, the test switch is ignored on real runs, the EXIT trap restores files, and the ADR and AGENTS.md match.
+- Minor gaps (not counted as failures): a failed `git commit` leaves files staged; a failed push after commit and tag gives no recovery hint.
+
+**SUGGESTED_FIX:** Report a README_DELTA for the infrastructure README covering the new terms, the replaced bullets, the key command and the key event. Optionally fix the two gaps.
+
+**ITERATION_HINT:** likely-fixable
+
+## Outcome
+
+`tool/release.sh <major|minor|patch|X.Y.Z> [--dry-run]` cuts a release in seven steps:
+
+1. Preconditions: on `main`, clean tree, in sync with `origin/main`, `gh` authenticated, `android/key.properties` present.
+2. SemVer bump, with the build number +1.
+3. `flutter analyze` and `flutter test`.
+4. A `CHANGELOG.md` section from the task-completion commit trailers since the last `v*` tag, grouped into Features, Fixes, Changes and Chores.
+5. Signed release build, copied to `build/release/expense-tracker-X.Y.Z.apk`.
+6. Commit `chore(release): vX.Y.Z`, annotated tag `vX.Y.Z`, push.
+7. `gh release create` with the notes and the APK.
+
+Failure handling:
+- If a step fails before the commit, an EXIT trap restores `pubspec.yaml` and `CHANGELOG.md`.
+- A failed commit unstages them.
+- A failed push prints retry and abort hints.
+
+`--dry-run` has no side effects. The `RELEASE_DRY_RUN_SKIP_CHECKS` seam is honoured only together with `--dry-run`.
+
+Version arithmetic and changelog generation live in `tool/release_notes.dart`, covered by 15 unit tests in `test/release_notes_test.dart`. `flutter test` (89) and `flutter analyze` are green. `AGENTS.md` has a "Releasing" section, the infrastructure README records Release, Changelog, Build number, "Cut a release" and "Release published", and ADR-0011 records the process. No real release was run.
+
+Verification passed on iteration 2; iteration 1 was missing the README delta. Still open for the owner: run the first real release (`tool/release.sh minor` → v1.1.0) and install its APK.

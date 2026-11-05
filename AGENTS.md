@@ -139,6 +139,22 @@ Enum: `expense | income`. Has a string extension for JSON serialization.
 
 ---
 
+## Releasing
+
+One local command cuts a release (ADR-0011, complements ADR-0002; the signing key never leaves the Mac):
+
+```bash
+tool/release.sh <major|minor|patch|X.Y.Z> [--dry-run]
+```
+
+Preconditions (each refused with a clear message): on `main`, clean working tree, in sync with `origin/main`, `gh auth status` OK, `android/key.properties` present (`tool/create-release-key.sh`, see ADR-0010).
+
+Steps, stopping at the first failure: compute the new SemVer (`X.Y.Z`, an explicit one must be higher) and build number (+1 every release) and write `version: X.Y.Z+N` to `pubspec.yaml`; `flutter analyze` and `flutter test`; prepend `## X.Y.Z (date)` to `CHANGELOG.md`, built from task-completion commits (`<type>(<bc>): ... [<task-id>]`) since the previous `v*` tag, grouped Features / Fixes / Changes / Chores (batch-start, bookkeeping, capture, modeling and release commits left out); `flutter build apk --release`, copied to `build/release/expense-tracker-X.Y.Z.apk`; commit `chore(release): vX.Y.Z`, annotated tag `vX.Y.Z`, push; `gh release create` on McO/expense_tracker with the changelog section as notes and the APK attached.
+
+`--dry-run` prints every step and the changelog section and changes nothing. Version and changelog logic lives in `tool/release_notes.dart` (tests: `test/release_notes_test.dart`).
+
+---
+
 ## Common Commands
 
 ```bash
@@ -183,7 +199,7 @@ The app declares **no** permissions in `AndroidManifest.xml`. CSV export saves t
 
 ## Known Gotchas
 
-- **No CI/CD.** Builds and releases are done manually.
+- **No CI/CD.** Releases are cut locally by `tool/release.sh` (see Releasing); never tag, push or publish a release by hand.
 - **Release builds need `android/key.properties`.** Run `tool/create-release-key.sh` once; it creates the release keystore at `~/.android-keys/expense-tracker-release.jks` (outside the repo) and writes the gitignored `android/key.properties`. `flutter build apk --release` fails without it and never falls back to the debug key. Back up the keystore and its password. Changing the key or app ID forces a reinstall (export, reinstall, import).
 - **The README is outdated** — it documents the original simpler version. The codebase has since added accounts, income/expense types, custom categories, custom currencies, and CSV export.
 - **SharedPreferences has no schema migration.** Adding or renaming fields in a model requires careful `fromJson` defaults to avoid crashes on existing installs.

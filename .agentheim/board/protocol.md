@@ -5,6 +5,30 @@ Newest entries on top.
 
 ---
 
+## 2026-11-05 18:35 -- Task verified and completed: infrastructure-dx7t4 - One local release script that bumps the SemVer version and build number, writes the changelog from done tasks, tags, and publishes a GitHub Release with the signed APK
+
+**Type:** Work / Task completion
+**Task:** infrastructure-dx7t4 - One local release script that bumps the SemVer version and build number, writes the changelog from done tasks, tags, and publishes a GitHub Release with the signed APK
+**Summary:** tool/release.sh cuts releases: SemVer + auto build number, changelog from task trailers, signed APK, vX.Y.Z tag, GitHub Release; side-effect-free --dry-run (ADR-0011)
+**Duration:** 22m
+**Verification:** PASS (iteration 2)
+**Files changed:** 4
+**Tests added:** 15
+**ADRs written:** ADR-0011
+
+---
+
+## 2026-11-05 18:31 -- Verification failed: infrastructure-dx7t4 - Release script
+
+**Type:** Work / Verification failure
+**Task:** infrastructure-dx7t4
+**Iteration:** 1 of 3
+**Reasons:** README_DELTA missing for the infrastructure BC README (Release, Changelog, build number, Cut a release command; stale manual-release wording)
+**Iteration hint:** likely-fixable
+**Next:** re-dispatched worker
+
+---
+
 ## 2026-11-05 18:20 -- Batch started: [infrastructure-dx7t4]
 
 **Type:** Work / Batch start
