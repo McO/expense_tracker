@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.1.2 (2026-11-05)
+
+_No task changes._
+
 ## 1.1.1 (2026-11-05)
 
 ### Features
