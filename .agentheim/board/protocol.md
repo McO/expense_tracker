@@ -5,6 +5,14 @@ Newest entries on top.
 
 ---
 
+## 2026-11-05 18:07 -- Batch started: [infrastructure-c5nkp]
+
+**Type:** Work / Batch start
+**Tasks:** infrastructure-c5nkp - Sign release builds with a dedicated release key and change the app ID to io.github.mco.expensetracker
+**Parallel:** no (1 worker — infrastructure-dx7t4 blocked on infrastructure-c5nkp)
+
+---
+
 ## 2026-11-05 18:06 -- Modeling / Captured: infrastructure-dx7t4 - One local release script that bumps the SemVer version and build number, writes the changelog from done tasks, tags, and publishes a GitHub Release with the signed APK
 
 **Type:** Modeling / Capture

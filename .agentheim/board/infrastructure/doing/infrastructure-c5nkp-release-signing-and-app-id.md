@@ -1,7 +1,7 @@
 ---
 id: infrastructure-c5nkp
 title: Sign release builds with a dedicated release key and change the app ID to io.github.mco.expensetracker
-status: todo
+status: doing
 type: chore
 context: infrastructure
 created: 2026-11-05
