@@ -25,7 +25,8 @@ lib/
 │   ├── account.dart                   # Account: name, currency, emoji, ARGB hex, isDefault
 │   └── transaction_type.dart          # Enum: expense | income
 ├── services/
-│   ├── transaction_service.dart       # CRUD + CSV building (`buildCSV`; export file is `transactions_<from>_<to>.csv`); all reads/writes via SharedPreferences
+│   ├── transactions_store.dart        # Owns the `transactions` key: raw read/write plus the one-time `expenses` → `transactions` migration
+│   ├── transaction_service.dart       # CRUD + CSV building (`buildCSV`; export file is `transactions_<from>_<to>.csv`); reads/writes through `TransactionsStore`; loaded transactions take their account's currency
 │   ├── csv_import.dart                # Pure CSV import: parse own export, map rows, detect duplicates; `commitImportPreview` writes via TransactionsStore
 │   ├── csv_file_saver.dart            # `CsvFileSaver` seam + default file_picker-backed system save dialog (export)
 │   ├── app_version_lookup.dart        # `AppVersionLookup` seam + default package_info_plus-backed installed-version lookup (drawer footer)
@@ -93,6 +94,7 @@ All data is stored in **SharedPreferences as JSON strings**. No SQLite, Hive, or
 | `selected_account_id` | `String` | Currently selected account ID |
 | `categories` | `List<String>` | JSON-encoded `Category` objects |
 | `categories_defaults_initialized_v2` | `bool` | Migration flag to seed defaults once |
+| `categories_ledger_ensured_v1` | `bool` | Flag: the built-in Top-up and Correction categories have been added (non-destructively, also on existing installs) |
 | `custom_currencies` | `List<String>` | JSON-encoded custom `Currency` objects |
 | `theme_mode` | `int` | Index of `AppThemeMode` enum |
 
@@ -106,9 +108,13 @@ All data is stored in **SharedPreferences as JSON strings**. No SQLite, Hive, or
 
 Fields: `id`, `title`, `amount` (double), `currency` (Currency), `category` (Category), `date`, `description`, `type` (TransactionType), `accountId`.
 
-- `amount` is always stored as a positive number; `type` determines whether it is income or expense
-- Gracefully falls back to "other" category if a stored category ID is not found in the current category list
-- `toJson` / `fromJson` for SharedPreferences serialization; `copyWith` for immutable-style updates
+A transaction is a **signed amount plus a category** (ADR-0007):
+- **Direction:** the UI's sign toggle (`−` = money out, `+` = money in). It is stored as a positive `amount` plus `type` (`expense` = out, `income` = in). Use `signedAmount` and `increasesBalance` rather than re-deriving the sign.
+- **Kind:** the category decides it. Spending and income use ordinary categories. Top-ups and corrections use the built-in Top-up and Correction categories, which move the balance but stay out of statistics (`Category.countsInStatistics`).
+- **Correction:** `Transaction.correction(difference: …)` builds one from the signed difference between counted cash and the recorded balance.
+- **Currency:** a transaction's currency is always its account's. `TransactionService` applies it on load, and CSV import rejects a currency mismatch. Never let a transaction carry a currency different from its account's.
+- **Category fallback:** loading falls back to the "other" category if a stored category ID is not found in the current category list.
+- **Serialization:** `toJson` / `fromJson` for SharedPreferences; `copyWith` for immutable-style updates.
 
 ### Currency
 
@@ -116,7 +122,9 @@ Plain Dart class (not an enum). 15 predefined static constants. Users can add cu
 
 ### Category
 
-Has a hex color string (e.g. `#FF6366F1`), an emoji icon, `isDefault` bool, and optional `exportName` for CSV export. Default categories are seeded on first launch via the `categories_defaults_initialized_v2` flag.
+Has a hex color string (e.g. `#FF6366F1`), an emoji icon, `isDefault` bool, optional `exportName` for CSV export (`effectiveExportName` falls back to the name), and `countsInStatistics` (default `true`).
+- **Defaults:** seeded on first launch via the `categories_defaults_initialized_v2` flag.
+- **Ledger categories:** `Category.topUp` (🏧) and `Category.correction` (⚖️) are built in, with `countsInStatistics: false`. They count in the account balance but never in spending, income or the statistics. `CategoryService` adds them once via `categories_ledger_ensured_v1`, without touching existing categories.
 
 ### Account
 
@@ -124,7 +132,7 @@ Has `name`, `currency` (Currency), emoji `icon`, ARGB hex `color` string, and `i
 
 ### TransactionType
 
-Enum: `expense | income`. Has a string extension for JSON serialization.
+Enum: `expense | income`. It is the **direction only** (money out / money in), not the kind of transaction; the category decides the kind. Has a string extension for JSON serialization (`code`, `fromCode`). Interim codes from an earlier model still load: `topup` and `correction_in` load as income, `correction_out` as expense. Unknown codes load as expense.
 
 ---
 
@@ -166,6 +174,9 @@ flutter pub get
 # Run on connected Android device / emulator
 flutter run
 
+# Tests
+flutter test
+
 # Static analysis
 flutter analyze
 
@@ -184,12 +195,22 @@ dart run flutter_native_splash:create
 
 ## Testing
 
-The test suite is effectively empty — `test/widget_test.dart` contains broken Flutter boilerplate that references `MyApp` (which does not exist). There are no unit tests for services, models, or screens.
+`flutter test` runs about 90 unit and widget tests in `test/`, covering:
+- models and transaction kinds;
+- storage-key migration;
+- balance and statistics math;
+- CSV export and import (pure logic and the UI flow);
+- screens and styling;
+- the drawer version footer;
+- the release-notes logic.
+
+Keep `flutter test` and `flutter analyze` green; `tool/release.sh` refuses to release otherwise.
 
 When writing tests:
-- The root widget is `ExpenseTrackerApp`, not `MyApp`
-- Services depend on SharedPreferences; use `SharedPreferences.setMockInitialValues({})` in tests
-- No test helpers or fixtures exist yet
+- The root widget is `ExpenseTrackerApp`.
+- Services depend on SharedPreferences; call `SharedPreferences.setMockInitialValues({...})` with the state you need.
+- Platform dialogs and plugins sit behind injectable seams passed into `HomeScreen(...)`: `CsvFilePicker`, `CsvFileSaver` and `AppVersionLookup`. Pass a fake in widget tests instead of touching the platform. Follow the same pattern for any new platform dependency.
+- Pure logic lives in plain-Dart services (`cash_statistics.dart`, `ledger_totals.dart`, `csv_import.dart`, `tool/release_notes.dart`); test it without widgets.
 
 ---
 
@@ -208,4 +229,20 @@ The app declares **no** permissions in `AndroidManifest.xml`. CSV export saves t
 - **SharedPreferences has no schema migration.** Adding or renaming fields in a model requires careful `fromJson` defaults to avoid crashes on existing installs.
 - **Theme is propagated via callbacks,** not `InheritedWidget`. If you add a screen deep in the tree that needs theme control, wire the callback through all intermediate screens.
 - **Category fallback:** `Transaction.fromJson` falls back to the "other" category when a stored `categoryId` is not found. This is intentional — do not remove it.
-- **`categories_defaults_initialized_v2` flag:** The `_v2` suffix exists because the original `_v1` flag was used for a smaller set of defaults. If you add more default categories, bump to `_v3` and seed accordingly.
+- **`categories_defaults_initialized_v2` flag:** The `_v2` suffix exists because the original `_v1` flag was used for a smaller set of defaults. If you add more default categories, bump to `_v3` and seed accordingly. The built-in Top-up and Correction categories are separate (`categories_ledger_ensured_v1`); a new built-in category of that kind needs its own flag bump and a non-destructive add.
+
+---
+
+## Planning & Decisions
+
+Planning lives in `.agentheim/` (the Agentheim workflow), not in issues:
+- `knowledge/vision.md`: purpose, success criteria, non-goals, ubiquitous language (Account, Transaction, Top-up, Correction, …), and open questions. Read it before proposing features. Its non-goals (no trips, budgets, currency conversion, sync or deep analysis) are deliberate.
+- `knowledge/decisions/`: the ADRs. Check the relevant ones before changing persistence, export, signing or release behaviour. Notable ones:
+  - ADR-0004 / 0008: storage and key migration;
+  - ADR-0007: signed amount plus category;
+  - ADR-0009: export via the system save dialog;
+  - ADR-0010: signing key and app ID;
+  - ADR-0011: the release process.
+- `board/<context>/{backlog,todo,doing,done}/`: task files, one per change.
+
+Commit subjects for task work use `<type>(<context>): <summary> [<task-id>]`. `tool/release.sh` builds `CHANGELOG.md` from exactly these subjects, so a change committed without that shape is left out of the release notes.
