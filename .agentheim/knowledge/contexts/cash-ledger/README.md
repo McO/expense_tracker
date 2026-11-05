@@ -63,4 +63,4 @@ and may not be promoted until the owner has signed off on the styleguide.
   transfer (open since 2026-11-04).~~ — resolved 2026-11-04 by cash-ledger-s2v1q (ADR-0006): top-ups export like income, corrections signed under their own configurable category; old records are not migrated.
 - ~~How existing income records that are really top-ups or corrections migrate, given no schema
   migration (open since 2026-11-04).~~ — resolved 2026-11-04 by cash-ledger-s2v1q (ADR-0006): top-ups export like income, corrections signed under their own configurable category; old records are not migrated.
-- Default burn-rate period (open since 2026-11-04).
+- ~~Default burn-rate period (open since 2026-11-04).~~ — resolved 2026-11-05: this month (see cash-ledger-bktw5).

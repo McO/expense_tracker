@@ -11,13 +11,14 @@ Catalog of this bounded context's tasks by status.
 
 <!-- task-counts:start -->
 - **Backlog:** 1
-- **Todo:** 0
+- **Todo:** 1
 - **Doing:** 0
 - **Done:** 4
 <!-- task-counts:end -->
 
 ### Todo
 <!-- todo-list:start -->
+- **cash-ledger-bktw5** — Add a Statistics screen with the four quick-glance cash statistics for the selected wallet (feature) — `todo/cash-ledger-bktw5-quick-glance-statistics-screen.md`
 <!-- todo-list:end -->
 
 ### Doing

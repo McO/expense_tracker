@@ -5,6 +5,15 @@ Newest entries on top.
 
 ---
 
+## 2026-11-05 09:09 -- Modeling / Captured: cash-ledger-bktw5 - Add a Statistics screen with the four quick-glance cash statistics for the selected wallet
+
+**Type:** Modeling / Capture
+**BC:** cash-ledger
+**Filed to:** todo
+**Summary:** Statistics screen for the selected wallet: balance with Correct balance, burn rate (this month by default, daily average plus lasts ~N days, last-7-days bars) and spending mix, period switch This month / Last 7 days. Resolves the burn-rate-period open question.
+
+---
+
 ## 2026-11-04 23:17 -- Work session ended
 
 **Type:** Work / Session end
