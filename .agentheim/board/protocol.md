@@ -5,6 +5,14 @@ Newest entries on top.
 
 ---
 
+## 2026-11-05 21:39 -- Batch started: [cash-ledger-yc1h3]
+
+**Type:** Work / Batch start
+**Tasks:** cash-ledger-yc1h3 - Amount input follows the phone's number format and the currency's decimals, tolerating the other separator, symbols and spaces
+**Parallel:** no (1 worker — my7ez waits on yc1h3)
+
+---
+
 ## 2026-11-05 21:39 -- Task verified and completed: cash-ledger-ajxaq - Each currency has its own number of decimal places (ISO for built-ins, editable for custom currencies)
 
 **Type:** Work / Task completion

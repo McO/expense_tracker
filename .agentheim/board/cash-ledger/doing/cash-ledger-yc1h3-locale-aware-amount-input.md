@@ -1,7 +1,7 @@
 ---
 id: cash-ledger-yc1h3
 title: Amount input follows the phone's number format and the currency's decimals, tolerating the other separator, symbols and spaces
-status: todo
+status: doing
 type: feature
 context: cash-ledger
 created: 2026-11-05
