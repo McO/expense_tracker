@@ -11,18 +11,18 @@ Catalog of this bounded context's tasks by status.
 
 <!-- task-counts:start -->
 - **Backlog:** 0
-- **Todo:** 1
-- **Doing:** 0
+- **Todo:** 0
+- **Doing:** 1
 - **Done:** 9
 <!-- task-counts:end -->
 
 ### Todo
 <!-- todo-list:start -->
-- **cash-ledger-k6d4w** — Store transactions under the `transactions` key, migrating the old `expenses` key once (feature) — `todo/cash-ledger-k6d4w-migrate-expenses-key-to-transactions.md`
 <!-- todo-list:end -->
 
 ### Doing
 <!-- doing-list:start -->
+- **cash-ledger-k6d4w** — Store transactions under the `transactions` key, migrating the old `expenses` key once (feature) — `doing/cash-ledger-k6d4w-migrate-expenses-key-to-transactions.md`
 <!-- doing-list:end -->
 
 ### Done (most recent first; older entries kept for prior-art search)

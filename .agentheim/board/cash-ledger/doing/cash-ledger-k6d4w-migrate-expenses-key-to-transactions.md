@@ -1,7 +1,7 @@
 ---
 id: cash-ledger-k6d4w
 title: Store transactions under the `transactions` key, migrating the old `expenses` key once
-status: todo
+status: doing
 type: feature
 context: cash-ledger
 created: 2026-11-05
