@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.1.1 (2026-11-05)
+
+### Features
+- home drawer shows Version X.Y.Z (N) from the installed package, hidden on lookup failure (cash-ledger-ssybq)
+
+### Chores
+- pubspec.lock committed and freshly resolved; checkouts, verifiers and release builds use the same tested versions (infrastructure-es0rg)
+- Android app module migrated to Flutter Built-in Kotlin; KGP warning gone, signing/app ID/release script unchanged (infrastructure-tf3qk)
+
 ## 1.1.0 (2026-11-05)
 
 ### Features
