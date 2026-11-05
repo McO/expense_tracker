@@ -1,7 +1,7 @@
 ---
 id: infrastructure-es0rg
 title: Commit pubspec.lock so every checkout and release builds the tested dependency versions
-status: todo
+status: doing
 type: chore
 context: infrastructure
 created: 2026-11-05
