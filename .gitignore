@@ -122,3 +122,4 @@ app.*.symbols
 .agentheim/salvage/
 .agentheim/.dashboard/
 .worktrees/
+.DS_Store
