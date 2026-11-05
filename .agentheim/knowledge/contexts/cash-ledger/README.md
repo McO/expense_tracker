@@ -45,6 +45,7 @@ This is the whole reason the app exists (ADR-0001): MoneyMoney sees everything e
 - Export wallet movements for a date range
 - Correct balance — enter the counted cash for a wallet; records one Correction-category movement signed by the difference (nothing when equal)
 - Enter movement with a ± toggle beside the amount (default −); Top-up is just the Top-up category with +
+- **Statistics** — read-only screen (home drawer) for the selected wallet: balance with Correct balance, burn rate (daily average = counting spending / days elapsed, "lasts ~N days" = floor(balance / average), hidden when average is 0 or balance <= 0; last-7-days bars) and spending mix, over This month (default) or Last 7 days. Computed by the pure `CashStatistics`.
 
 ## Frontend rule — styleguide gate
 This BC has a UI. **Every frontend task in this BC must `depends_on: [design-system-001]`**

@@ -5,6 +5,30 @@ Newest entries on top.
 
 ---
 
+## 2026-11-05 09:19 -- Task verified and completed: cash-ledger-bktw5 - Add a Statistics screen with the four quick-glance cash statistics for the selected wallet
+
+**Type:** Work / Task completion
+**Task:** cash-ledger-bktw5 - Add a Statistics screen with the four quick-glance cash statistics for the selected wallet
+**Summary:** Added a Statistics screen (home drawer entry) with the wallet balance and Correct balance, burn rate (daily average, lasts ~N days, 7-day bars) and spending mix over This month or Last 7 days; iteration 2 hardens the unit tests for mix ordering and floor/zero-balance cases.
+**Duration:** 9m
+**Verification:** PASS (iteration 2); human-eye criterion checked by the owner
+**Files changed:** 5
+**Tests added:** 14
+**ADRs written:** none
+
+---
+
+## 2026-11-05 09:14 -- Verification failed: cash-ledger-bktw5 - Add a Statistics screen with the four quick-glance cash statistics for the selected wallet
+
+**Type:** Work / Verification failure
+**Task:** cash-ledger-bktw5 - Add a Statistics screen with the four quick-glance cash statistics for the selected wallet
+**Iteration:** 1 of 3
+**Reasons:** spending-mix test data already in size order so the largest-first sort is untested, lasts-N-days unit tests cannot tell floor from round and miss the balance == 0 boundary
+**Iteration hint:** likely-fixable
+**Next:** re-dispatched worker
+
+---
+
 ## 2026-11-05 09:09 -- Batch started: [cash-ledger-bktw5]
 
 **Type:** Work / Batch start

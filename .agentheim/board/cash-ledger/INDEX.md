@@ -12,8 +12,8 @@ Catalog of this bounded context's tasks by status.
 <!-- task-counts:start -->
 - **Backlog:** 1
 - **Todo:** 0
-- **Doing:** 1
-- **Done:** 4
+- **Doing:** 0
+- **Done:** 5
 <!-- task-counts:end -->
 
 ### Todo
@@ -22,11 +22,11 @@ Catalog of this bounded context's tasks by status.
 
 ### Doing
 <!-- doing-list:start -->
-- **cash-ledger-bktw5** — Add a Statistics screen with the four quick-glance cash statistics for the selected wallet (feature) — `doing/cash-ledger-bktw5-quick-glance-statistics-screen.md`
 <!-- doing-list:end -->
 
 ### Done (most recent first; older entries kept for prior-art search)
 <!-- done-list:start -->
+- **cash-ledger-bktw5** — Add a Statistics screen with the four quick-glance cash statistics for the selected wallet (feature) — `done/cash-ledger-bktw5-quick-glance-statistics-screen.md`
 - **cash-ledger-vsszp** — Enter movements as a signed amount with a ± toggle, correct a wallet's balance from the counted cash, and flag categories that don't count in statistics (feature) — `done/cash-ledger-vsszp-movement-kinds-ui.md`
 - **cash-ledger-qjysm** — Replace the top-up/correction kinds with signed amounts plus a per-category "count in statistics" flag (feature) — `done/cash-ledger-qjysm-signed-amount-and-category-flag.md`
 - **cash-ledger-s2v1q** — Add top-up and correction movement kinds to the model, totals and CSV export (no UI) (feature) — `done/cash-ledger-s2v1q-movement-kinds-model-totals-export.md`
