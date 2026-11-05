@@ -5,6 +5,19 @@ Newest entries on top.
 
 ---
 
+## 2026-11-05 19:24 -- Task verified and completed: infrastructure-tf3qk - Migrate the Android app module from the Kotlin Gradle Plugin to Flutter's Built-in Kotlin
+
+**Type:** Work / Task completion
+**Task:** infrastructure-tf3qk - Migrate the Android app module from the Kotlin Gradle Plugin to Flutter's Built-in Kotlin
+**Summary:** Android app module migrated to Flutter Built-in Kotlin; KGP warning gone, signing/app ID/release script unchanged
+**Duration:** 12m
+**Verification:** PASS (iteration 1)
+**Files changed:** 2
+**Tests added:** 0
+**ADRs written:** none
+
+---
+
 ## 2026-11-05 19:09 -- Batch started: [infrastructure-tf3qk]
 
 **Type:** Work / Batch start

@@ -1,7 +1,7 @@
 ---
 id: infrastructure-tf3qk
 title: Migrate the Android app module from the Kotlin Gradle Plugin to Flutter's Built-in Kotlin
-status: doing
+status: done
 type: chore
 context: infrastructure
 created: 2026-11-05
@@ -65,3 +65,25 @@ asked to capture it on 2026-11-05.
 - Never use the owner's real `~/.android-keys` or `android/key.properties` in a worktree; use only
   throwaway keys.
 - Manual builds, no CI (ADR-0002).
+
+## Outcome
+
+`android/` now builds with Built-in Kotlin. Two changes:
+- `id("kotlin-android")` is removed from the plugins block in `android/app/build.gradle.kts`.
+- `android.builtInKotlin=true` is set in `android/gradle.properties` (it was `false`). Deleting the line instead doesn't work, because Flutter's migrator re-adds it as `false`.
+
+Two pieces stay, matching the Flutter 3.47 app templates. Flutter only warns when a module itself applies KGP.
+- The `kotlin { compilerOptions { jvmTarget = JVM_11 } }` block.
+- The root `org.jetbrains.kotlin.android … apply false` declaration in `settings.gradle.kts`.
+
+Results:
+- **Warnings:** the debug build no longer prints the "applies the Kotlin Gradle Plugin" warning. No plugin-side KGP warning appears either: `shared_preferences_android` 2.5.4 isn't flagged on Flutter 3.47.2.
+- **Release builds:** they still sign with the release key (checked with a throwaway key, `CN=Test`) and still fail without `key.properties`, with the expected message.
+- **Package:** still `io.github.mco.expensetracker` (1.1.0, build 2).
+- **Checks:** analyze is clean, 89 tests pass, and the `tool/release.sh` dry run passes.
+
+Verification passed on iteration 1. The first worker run died on an API 529 before changing anything and was resumed once.
+
+Minor: the comment above the flag in `gradle.properties` still says "added automatically by Flutter migrator".
+
+Pending: the owner's emulator eye-check.

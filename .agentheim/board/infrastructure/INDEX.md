@@ -12,8 +12,8 @@ Catalog of this bounded context's tasks by status.
 <!-- task-counts:start -->
 - **Backlog:** 0
 - **Todo:** 0
-- **Doing:** 1
-- **Done:** 6
+- **Doing:** 0
+- **Done:** 7
 <!-- task-counts:end -->
 
 ### Todo
@@ -22,11 +22,11 @@ Catalog of this bounded context's tasks by status.
 
 ### Doing
 <!-- doing-list:start -->
-- **infrastructure-tf3qk** — Migrate the Android app module from the Kotlin Gradle Plugin to Flutter's Built-in Kotlin (chore) — `doing/infrastructure-tf3qk-migrate-to-built-in-kotlin.md`
 <!-- doing-list:end -->
 
 ### Done (most recent first; older entries kept for prior-art search)
 <!-- done-list:start -->
+- **infrastructure-tf3qk** — Migrate the Android app module from the Kotlin Gradle Plugin to Flutter's Built-in Kotlin (chore) — `done/infrastructure-tf3qk-migrate-to-built-in-kotlin.md`
 - **infrastructure-dx7t4** — One local release script that bumps the SemVer version and build number, writes the changelog from done tasks, tags, and publishes a GitHub Release with the signed APK (feature) — `done/infrastructure-dx7t4-release-script-versioning-changelog.md`
 - **infrastructure-c5nkp** — Sign release builds with a dedicated release key and change the app ID to io.github.mco.expensetracker (chore) — `done/infrastructure-c5nkp-release-signing-and-app-id.md`
 - **infrastructure-pn83e** — Upgrade all dependencies to their latest versions and raise the Dart SDK lower bound to the installed toolchain (chore) — `done/infrastructure-pn83e-upgrade-flutter-dependencies.md`
