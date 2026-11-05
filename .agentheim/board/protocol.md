@@ -5,6 +5,13 @@ Newest entries on top.
 
 ---
 
+## 2026-11-05 19:05 -- Modeling / Decision: Agentheim is the single planning system
+
+**Type:** Modeling / Decision
+**Decision:** Owner chose to remove OpenSpec. The unused `openspec/` scaffolding (config + empty specs/archive), the six `openspec-*` skills and the `opsx` commands under `.claude/` are deleted. Resolves the vision open question "Overlap with OpenSpec" (open since 2026-11-04).
+
+---
+
 ## 2026-11-05 18:35 -- Work session ended
 
 **Type:** Work / Session end
