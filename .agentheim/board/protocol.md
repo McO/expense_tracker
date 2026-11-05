@@ -5,6 +5,14 @@ Newest entries on top.
 
 ---
 
+## 2026-11-05 14:02 -- Batch started: [infrastructure-pn83e]
+
+**Type:** Work / Batch start
+**Tasks:** infrastructure-pn83e - Upgrade all dependencies to their latest versions and raise the Dart SDK lower bound to the installed toolchain
+**Parallel:** no (1 worker — unblocked by cash-ledger-m47az)
+
+---
+
 ## 2026-11-05 11:07 -- Task verified and completed: cash-ledger-m47az - Export saves the CSV through Android's save dialog, so the app needs no storage permissions
 
 **Type:** Work / Task completion

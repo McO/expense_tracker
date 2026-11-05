@@ -1,7 +1,7 @@
 ---
 id: infrastructure-pn83e
 title: Upgrade all dependencies to their latest versions and raise the Dart SDK lower bound to the installed toolchain
-status: todo
+status: doing
 type: chore
 context: infrastructure
 created: 2026-11-05

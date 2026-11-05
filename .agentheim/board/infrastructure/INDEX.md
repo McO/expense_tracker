@@ -11,18 +11,18 @@ Catalog of this bounded context's tasks by status.
 
 <!-- task-counts:start -->
 - **Backlog:** 0
-- **Todo:** 1
-- **Doing:** 0
+- **Todo:** 0
+- **Doing:** 1
 - **Done:** 3
 <!-- task-counts:end -->
 
 ### Todo
 <!-- todo-list:start -->
-- **infrastructure-pn83e** — Upgrade all dependencies to their latest versions and raise the Dart SDK lower bound to the installed toolchain (chore) — `todo/infrastructure-pn83e-upgrade-flutter-dependencies.md`
 <!-- todo-list:end -->
 
 ### Doing
 <!-- doing-list:start -->
+- **infrastructure-pn83e** — Upgrade all dependencies to their latest versions and raise the Dart SDK lower bound to the installed toolchain (chore) — `doing/infrastructure-pn83e-upgrade-flutter-dependencies.md`
 <!-- doing-list:end -->
 
 ### Done (most recent first; older entries kept for prior-art search)
