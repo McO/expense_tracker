@@ -5,6 +5,15 @@ Newest entries on top.
 
 ---
 
+## 2026-11-05 19:47 -- Modeling / Captured: infrastructure-es0rg - Commit pubspec.lock so every checkout and release builds the tested dependency versions
+
+**Type:** Modeling / Capture
+**BC:** infrastructure
+**Filed to:** todo
+**Summary:** Commit pubspec.lock so every checkout and release builds the tested dependency versions
+
+---
+
 ## 2026-11-05 19:40 -- Work session ended
 
 **Type:** Work / Session end

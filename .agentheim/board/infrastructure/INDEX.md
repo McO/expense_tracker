@@ -11,13 +11,14 @@ Catalog of this bounded context's tasks by status.
 
 <!-- task-counts:start -->
 - **Backlog:** 0
-- **Todo:** 0
+- **Todo:** 1
 - **Doing:** 0
 - **Done:** 7
 <!-- task-counts:end -->
 
 ### Todo
 <!-- todo-list:start -->
+- **infrastructure-es0rg** — Commit pubspec.lock so every checkout and release builds the tested dependency versions (chore) — `todo/infrastructure-es0rg-commit-pubspec-lock.md`
 <!-- todo-list:end -->
 
 ### Doing
