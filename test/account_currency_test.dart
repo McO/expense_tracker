@@ -15,7 +15,7 @@ Map<String, dynamic> _mv(String id, String acc, {String? currency}) => {
       'id': id,
       'title': 'Mv$id',
       'amount': 5.0,
-      if (currency != null) 'currency': currency,
+      'currency': ?currency,
       'categoryId': 'other',
       'date': DateTime(2026, 11, 4).toIso8601String(),
       'description': '',

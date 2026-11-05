@@ -8,7 +8,7 @@ Personal finance Android app built with Flutter. Single developer, no CI/CD pipe
 
 - **Platform:** Android only (no iOS/web/desktop platform folders)
 - **App ID:** `com.example.expense_tracker`
-- **Flutter/Dart:** Dart SDK `>=3.4.3 <4.0.0`, Flutter stable
+- **Flutter/Dart:** Dart SDK `>=3.13.0 <4.0.0`, Flutter stable
 - **Theme seed:** `Color(0xFF6366F1)` (indigo), Material Design 3
 
 ---
@@ -134,9 +134,8 @@ Enum: `expense | income`. Has a string extension for JSON serialization.
 | `shared_preferences` | ^2.2.2 | All local persistence |
 | `intl` | ^0.20.2 | Date formatting |
 | `flutter_staggered_animations` | ^1.1.1 | Staggered list animations |
-| `path_provider` | ^2.1.2 | File system paths |
 | `file_picker` | ^13.3.2 | Pick a CSV file for import; save the CSV export via the system dialog |
-| `cupertino_icons` | ^1.0.6 | iOS-style icons |
+| `cupertino_icons` | ^2.0.0 | iOS-style icons |
 
 ---
 

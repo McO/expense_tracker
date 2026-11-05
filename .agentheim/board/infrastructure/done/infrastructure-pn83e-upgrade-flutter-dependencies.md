@@ -1,7 +1,7 @@
 ---
 id: infrastructure-pn83e
 title: Upgrade all dependencies to their latest versions and raise the Dart SDK lower bound to the installed toolchain
-status: doing
+status: done
 type: chore
 context: infrastructure
 created: 2026-11-05
@@ -61,3 +61,20 @@ move everything to latest, majors included, and raise the SDK lower bound.
   change the toolchain choice.
 - `pubspec.lock` is not tracked in this repo, so only `pubspec.yaml` records the new version
   constraints.
+
+## Outcome
+
+Dependencies are upgraded. `flutter pub outdated` (Flutter 3.47.2) reports every direct and dev dependency up to date.
+
+- SDK constraint: `>=3.4.3 <4.0.0` → `>=3.13.0 <4.0.0`.
+- `cupertino_icons`: ^1.0.6 → ^2.0.0.
+- `path_provider` removed. Nothing used it once export moved to the save dialog (ADR-0009).
+- Already at their latest, constraints unchanged: `shared_preferences` (resolves 2.5.6), `intl` (0.20.3), `flutter_staggered_animations`, `file_picker`, `flutter_launcher_icons`, `flutter_native_splash`, `flutter_lints`.
+- Still outdated, transitive only and held back by upstream packages: `cross_file`, `material_color_utilities`, `objective_c`, `cli_util`, `test_api`.
+- Lint fallout fixed:
+  - `(_, __)` → `(_, _)` in `currency_management_screen.dart`.
+  - A null-aware map element in `account_currency_test.dart`.
+- No Gradle, AGP or Kotlin changes. The build warns that a future Flutter will expect a move to Built-in Kotlin; nothing was done about it.
+- `AGENTS.md` (SDK line, dependency table) updated.
+
+`flutter analyze` is clean and `flutter test` passes (74). `flutter build apk --debug` and `--release` both succeed. Verification passed on iteration 1; this run resumed an earlier worker that the owner had stopped. Still pending: the owner's check that the app starts on the emulator and existing data loads.

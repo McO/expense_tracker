@@ -313,7 +313,7 @@ class _CurrencyManagementScreenState extends State<CurrencyManagementScreen> {
               : ListView.separated(
                   padding: const EdgeInsets.all(16),
                   itemCount: _customCurrencies.length,
-                  separatorBuilder: (_, __) => const SizedBox(height: 8),
+                  separatorBuilder: (_, _) => const SizedBox(height: 8),
                   itemBuilder: (context, index) {
                     final currency = _customCurrencies[index];
                     return Card(
