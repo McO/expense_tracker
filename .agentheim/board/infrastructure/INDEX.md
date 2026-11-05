@@ -12,8 +12,8 @@ Catalog of this bounded context's tasks by status.
 <!-- task-counts:start -->
 - **Backlog:** 0
 - **Todo:** 1
-- **Doing:** 1
-- **Done:** 4
+- **Doing:** 0
+- **Done:** 5
 <!-- task-counts:end -->
 
 ### Todo
@@ -23,11 +23,11 @@ Catalog of this bounded context's tasks by status.
 
 ### Doing
 <!-- doing-list:start -->
-- **infrastructure-c5nkp** — Sign release builds with a dedicated release key and change the app ID to io.github.mco.expensetracker (chore) — `doing/infrastructure-c5nkp-release-signing-and-app-id.md`
 <!-- doing-list:end -->
 
 ### Done (most recent first; older entries kept for prior-art search)
 <!-- done-list:start -->
+- **infrastructure-c5nkp** — Sign release builds with a dedicated release key and change the app ID to io.github.mco.expensetracker (chore) — `done/infrastructure-c5nkp-release-signing-and-app-id.md`
 - **infrastructure-pn83e** — Upgrade all dependencies to their latest versions and raise the Dart SDK lower bound to the installed toolchain (chore) — `done/infrastructure-pn83e-upgrade-flutter-dependencies.md`
 - **infrastructure-r5v4d** — Record the existing persistence as an ADR (SharedPreferences JSON lists, no schema migration) (decision) — `done/infrastructure-r5v4d-record-persistence.md`
 - **infrastructure-bza94** — Record the existing app architecture as an ADR (setState, screen-owned services, imperative navigation) (decision) — `done/infrastructure-bza94-record-app-architecture.md`

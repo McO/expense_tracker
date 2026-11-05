@@ -1,7 +1,7 @@
 ---
 id: infrastructure-c5nkp
 title: Sign release builds with a dedicated release key and change the app ID to io.github.mco.expensetracker
-status: doing
+status: done
 type: chore
 context: infrastructure
 created: 2026-11-05
@@ -9,7 +9,7 @@ completed:
 depends_on: []
 blocks: [infrastructure-dx7t4]
 tags: [release, signing, android, app-id, toolchain]
-related_adrs: [ADR-0002]
+related_adrs: [ADR-0002, ADR-0010]
 related_research: []
 prior_art: [infrastructure-pn83e]
 ---
@@ -87,3 +87,53 @@ Owner decisions (modeling, 2026-11-05):
   script on top of this.
 - Convention check: the signing/app-ID rule is enforced by the build itself (a release build fails
   without the release key). The "never change the ID again" part is prose-only, unenforced.
+
+## Verifier note (iteration 1)
+
+**REASONS:**
+- Check 6b: ADR-0002's Decision still names the placeholder app ID `com.example.expense_tracker` and debug-key release signing. ADR-0010 overrides both but lists ADR-0002 only in `related_adrs`, with no `amends:`/`supersedes:`. Project convention: ADR-0007 `supersedes: [ADR-0006]`; ADR-0008/0009 `amends: [...]`.
+- Everything else passes:
+  - no old ID left;
+  - the APK package is `io.github.mco.expensetracker`;
+  - a release build without `key.properties` fails with no debug fallback;
+  - the key script creates the keystore with dir 700 / files 600 and refuses to overwrite;
+  - the signed build shows the release certificate;
+  - analyze, 74 tests and the debug build pass;
+  - nothing secret is tracked, and `AGENTS.md` matches.
+- Optional hardening:
+  - the password is passed as a keytool argument, so it is visible in `ps`; `-storepass:env` would avoid that;
+  - the password is not confirmed by asking twice;
+  - `-dname "CN=${OWNER_NAME}"` breaks if the name contains a comma;
+  - an existing `key.properties` keeps its old permissions.
+
+**SUGGESTED_FIX:** Add `amends: [ADR-0002]` to ADR-0010, plus a sentence saying it replaces ADR-0002's placeholder-ID and debug-signing points. Optionally apply the hardening.
+
+**ITERATION_HINT:** likely-fixable
+
+## Outcome
+
+Release builds now sign only with a dedicated release key, and the app ID is `io.github.mco.expensetracker`. ADR-0010 records this and amends ADR-0002, replacing its placeholder ID and its debug-key signing.
+
+- **`android/app/build.gradle.kts`.** The app ID and namespace are changed. The `release` signing config reads `android/key.properties`. Any release build without that file fails with a message naming `tool/create-release-key.sh`; there is no debug-key fallback.
+- **`MainActivity.kt`.** Moved to `io/github/mco/expensetracker/`.
+- **`tool/create-release-key.sh`** (new). It:
+  - asks for the certificate name, and asks for the password twice (at least 6 characters);
+  - passes the password to keytool through `-storepass:env` / `-keypass:env`, never on the command line, and unsets it afterwards;
+  - escapes the name for the certificate DN, so "Doe, Jane" works;
+  - creates an RSA 4096 key with alias `release`, in `~/.android-keys/expense-tracker-release.jks`;
+  - refuses to overwrite an existing keystore;
+  - writes `android/key.properties` with mode 600.
+- **`AGENTS.md`.** The app ID line is updated, and the release-key gotcha replaces the placeholder-ID gotcha.
+
+Checks, run with throwaway keys only (since deleted):
+- The signed release APK carries the release certificate, not Android Debug.
+- A release build without `key.properties` fails with the expected message.
+- `flutter analyze` is clean, `flutter test` passes 74, and the debug build works.
+- No keystore or `key.properties` is tracked in git.
+
+Verification passed on iteration 2. Iteration 1 was missing the ADR-0002 amendment, and the script was hardened at the same time.
+
+Owner follow-up:
+1. Run `tool/create-release-key.sh` once.
+2. Back up the keystore and its password.
+3. On the phone: export, uninstall the old `com.example.expense_tracker` app, install the first release, and import.

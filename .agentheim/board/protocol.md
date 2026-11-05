@@ -5,6 +5,30 @@ Newest entries on top.
 
 ---
 
+## 2026-11-05 18:20 -- Task verified and completed: infrastructure-c5nkp - Sign release builds with a dedicated release key and change the app ID to io.github.mco.expensetracker
+
+**Type:** Work / Task completion
+**Task:** infrastructure-c5nkp - Sign release builds with a dedicated release key and change the app ID to io.github.mco.expensetracker
+**Summary:** Release builds signed only with a dedicated release key (tool/create-release-key.sh); app ID now io.github.mco.expensetracker (ADR-0010)
+**Duration:** 17m
+**Verification:** PASS (iteration 2)
+**Files changed:** 5
+**Tests added:** 0
+**ADRs written:** ADR-0010
+
+---
+
+## 2026-11-05 18:15 -- Verification failed: infrastructure-c5nkp - Release signing key and app ID
+
+**Type:** Work / Verification failure
+**Task:** infrastructure-c5nkp
+**Iteration:** 1 of 3
+**Reasons:** ADR-0010 does not declare that it amends ADR-0002 (placeholder app ID, debug-key release signing)
+**Iteration hint:** likely-fixable
+**Next:** re-dispatched worker
+
+---
+
 ## 2026-11-05 18:07 -- Batch started: [infrastructure-c5nkp]
 
 **Type:** Work / Batch start

@@ -7,7 +7,7 @@ Personal finance Android app built with Flutter. Single developer, no CI/CD pipe
 ## Project Overview
 
 - **Platform:** Android only (no iOS/web/desktop platform folders)
-- **App ID:** `com.example.expense_tracker`
+- **App ID:** `io.github.mco.expensetracker` (never changes again, ADR-0010)
 - **Flutter/Dart:** Dart SDK `>=3.13.0 <4.0.0`, Flutter stable
 - **Theme seed:** `Color(0xFF6366F1)` (indigo), Material Design 3
 
@@ -184,7 +184,7 @@ The app declares **no** permissions in `AndroidManifest.xml`. CSV export saves t
 ## Known Gotchas
 
 - **No CI/CD.** Builds and releases are done manually.
-- **App ID is still the default placeholder** (`com.example.expense_tracker`).
+- **Release builds need `android/key.properties`.** Run `tool/create-release-key.sh` once; it creates the release keystore at `~/.android-keys/expense-tracker-release.jks` (outside the repo) and writes the gitignored `android/key.properties`. `flutter build apk --release` fails without it and never falls back to the debug key. Back up the keystore and its password. Changing the key or app ID forces a reinstall (export, reinstall, import).
 - **The README is outdated** — it documents the original simpler version. The codebase has since added accounts, income/expense types, custom categories, custom currencies, and CSV export.
 - **SharedPreferences has no schema migration.** Adding or renaming fields in a model requires careful `fromJson` defaults to avoid crashes on existing installs.
 - **Theme is propagated via callbacks,** not `InheritedWidget`. If you add a screen deep in the tree that needs theme control, wire the callback through all intermediate screens.
