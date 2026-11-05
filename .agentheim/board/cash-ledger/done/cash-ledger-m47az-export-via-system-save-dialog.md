@@ -1,7 +1,7 @@
 ---
 id: cash-ledger-m47az
 title: Export saves the CSV through Android's save dialog, so the app needs no storage permissions
-status: doing
+status: done
 type: refactor
 context: cash-ledger
 created: 2026-11-05
@@ -9,7 +9,7 @@ completed:
 depends_on: [design-system-001]
 blocks: [infrastructure-pn83e]
 tags: [export, csv, permissions, android, cleanup]
-related_adrs: [ADR-0002, ADR-0005]
+related_adrs: [ADR-0002, ADR-0005, ADR-0009]
 related_research: []
 prior_art: [cash-ledger-hzqaa]
 ---
@@ -77,3 +77,9 @@ one major-version bump from the dependency upgrade (infrastructure-pn83e).
 - Runs before infrastructure-pn83e, the dependency upgrade, so that task no longer has to bump
   `permission_handler` 12→13.
 - The export's MoneyMoney shape (ADR-0005) is untouched; only where the file goes changes.
+
+## Outcome
+
+Export now opens Android's system save dialog, pre-filled with `transactions_<from>_<to>.csv`, and writes exactly the `buildCSV` content. The save call goes through the injectable `CsvFileSaver` seam (`lib/services/csv_file_saver.dart`), which by default is backed by `FilePicker.saveFile` and mirrors `CsvFilePicker`; `HomeScreen(csvFileSaver: ...)` takes it. Cancelling the dialog writes nothing and shows no message. A successful save shows "Saved <name>", and a failure shows "Export failed: ...".
+
+`permission_handler` is removed. `AndroidManifest.xml` now declares no permissions: all seven storage, media and network permissions are gone. `AGENTS.md` (permissions, dependencies, directory tree, home_screen description) and the cash-ledger README's Export term are updated. ADR-0009 amends ADR-0005. Three widget tests in `test/csv_export_flow_test.dart` cover the seam call, cancel and failure. `flutter test` (74 tests), `flutter analyze` and `flutter build apk --debug` pass. Verification passed on iteration 1. Still open: the owner's own check of exporting and re-importing on a real device.

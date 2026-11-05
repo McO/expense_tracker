@@ -12,8 +12,8 @@ Catalog of this bounded context's tasks by status.
 <!-- task-counts:start -->
 - **Backlog:** 0
 - **Todo:** 0
-- **Doing:** 1
-- **Done:** 11
+- **Doing:** 0
+- **Done:** 12
 <!-- task-counts:end -->
 
 ### Todo
@@ -22,11 +22,11 @@ Catalog of this bounded context's tasks by status.
 
 ### Doing
 <!-- doing-list:start -->
-- **cash-ledger-m47az** — Export saves the CSV through Android's save dialog, so the app needs no storage permissions (refactor) — `doing/cash-ledger-m47az-export-via-system-save-dialog.md`
 <!-- doing-list:end -->
 
 ### Done (most recent first; older entries kept for prior-art search)
 <!-- done-list:start -->
+- **cash-ledger-m47az** — Export saves the CSV through Android's save dialog, so the app needs no storage permissions (refactor) — `done/cash-ledger-m47az-export-via-system-save-dialog.md`
 - **cash-ledger-hzqaa** — Import a CSV file the app exported into a chosen account, skipping exact duplicates (feature) — `done/cash-ledger-hzqaa-import-own-csv-export.md`
 - **cash-ledger-k6d4w** — Store transactions under the `transactions` key, migrating the old `expenses` key once (feature) — `done/cash-ledger-k6d4w-migrate-expenses-key-to-transactions.md`
 - **cash-ledger-ydqbw** — Use Account and Transaction consistently in code and on screen (no Wallet, Movement or Expense-for-record) (refactor) — `done/cash-ledger-ydqbw-account-and-transaction-naming.md`

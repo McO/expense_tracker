@@ -23,7 +23,7 @@ This is the whole reason the app exists (ADR-0001): MoneyMoney sees everything e
 - **Category** — what a transaction was for. Carries a `countsInStatistics` flag (default true); the seeded Top-up (`Category.topUpId`) and Correction (`Category.correctionId`) categories have it false. They are ensured non-destructively by `CategoryService` under their own flag (`categories_ledger_ensured_v1`).
 - **Export name** — the MoneyMoney category a category maps to on export (`Category.exportName`); the CSV Category column always uses it, corrections included (the former correction export category setting is removed).
 - **Currency** — an account's currency; predefined or user-defined custom.
-- **Export** — a CSV of one account's transactions over a chosen date range.
+- **Export** — a CSV of one account's transactions over a chosen date range, saved to a location the owner picks in Android's system save dialog (ADR-0009); the app holds no storage permissions.
 - **Account check / Burn rate / Spending mix / Leftover foreign cash** — the four quick-glance
   statistics (see vision).
 - **Import** — reading one of the app's own CSV exports back into a chosen account.

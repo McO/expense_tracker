@@ -1,14 +1,13 @@
 import 'dart:async';
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
-import 'package:permission_handler/permission_handler.dart';
 import '../models/transaction.dart';
 import '../models/currency.dart';
 import '../models/category.dart';
 import '../models/account.dart';
 import '../services/transaction_service.dart';
 import '../services/csv_file_picker.dart';
+import '../services/csv_file_saver.dart';
 import '../services/ledger_totals.dart';
 import '../services/theme_service.dart';
 import '../services/account_service.dart';
@@ -38,9 +37,13 @@ class HomeScreen extends StatefulWidget {
   /// File-picking step of CSV import; replaced in tests.
   final CsvFilePicker csvFilePicker;
 
+  /// Save-dialog step of CSV export; replaced in tests.
+  final CsvFileSaver csvFileSaver;
+
   const HomeScreen({
     super.key,
     this.csvFilePicker = pickCsvFileText,
+    this.csvFileSaver = saveCsvFile,
     this.onThemeModeChanged,
     this.currentThemeMode = AppThemeMode.system,
   });
@@ -349,52 +352,14 @@ class _HomeScreenState extends State<HomeScreen> {
       return;
     }
 
-    // Request storage permission
-    var status = await Permission.manageExternalStorage.status;
-    if (!status.isGranted) {
-      status = await Permission.manageExternalStorage.request();
-    }
-    if (!status.isGranted) {
-      var fallback = await Permission.storage.status;
-      if (!fallback.isGranted) fallback = await Permission.storage.request();
-      if (!fallback.isGranted) {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Storage permission required to export'),
-              backgroundColor: Colors.red,
-            ),
-          );
-        }
-        return;
-      }
-    }
-
     final fileName = csvExportFileName(dateRange);
 
     try {
-      final downloadsDir = Directory('/storage/emulated/0/Download');
-      final dir = await downloadsDir.exists() ? downloadsDir : Directory('/storage/emulated/0/Downloads');
-      final file = File('${dir.path}/$fileName');
-      await file.writeAsString(csvContent);
-
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Saved to Downloads/$fileName'),
-            backgroundColor: Colors.green,
-          ),
-        );
-      }
+      final saved = await widget.csvFileSaver(fileName, csvContent);
+      if (!saved) return; // cancelled: nothing written, no message
+      if (mounted) _snack('Saved $fileName', Colors.green);
     } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Export failed: $e'),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
+      if (mounted) _snack('Export failed: $e', Colors.red);
     }
   }
 

@@ -5,6 +5,19 @@ Newest entries on top.
 
 ---
 
+## 2026-11-05 11:07 -- Task verified and completed: cash-ledger-m47az - Export saves the CSV through Android's save dialog, so the app needs no storage permissions
+
+**Type:** Work / Task completion
+**Task:** cash-ledger-m47az - Export saves the CSV through Android's save dialog, so the app needs no storage permissions
+**Summary:** Export saves via the system save dialog; permission_handler and all storage/media/network permissions removed (ADR-0009)
+**Duration:** 8m
+**Verification:** PASS (iteration 1)
+**Files changed:** 6
+**Tests added:** 3
+**ADRs written:** ADR-0009
+
+---
+
 ## 2026-11-05 11:01 -- Batch started: [cash-ledger-m47az]
 
 **Type:** Work / Batch start

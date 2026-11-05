@@ -27,6 +27,7 @@ lib/
 ├── services/
 │   ├── transaction_service.dart       # CRUD + CSV building (`buildCSV`; export file is `transactions_<from>_<to>.csv`); all reads/writes via SharedPreferences
 │   ├── csv_import.dart                # Pure CSV import: parse own export, map rows, detect duplicates; `commitImportPreview` writes via TransactionsStore
+│   ├── csv_file_saver.dart            # `CsvFileSaver` seam + default file_picker-backed system save dialog (export)
 │   ├── csv_file_picker.dart           # `CsvFilePicker` seam + default file_picker-backed picker
 │   ├── cash_statistics.dart           # Pure quick-glance statistics for one account
 │   ├── ledger_totals.dart             # Pure aggregation: account balance and income/expense totals
@@ -35,7 +36,7 @@ lib/
 │   ├── currency_service.dart          # CRUD for user-defined custom currencies
 │   └── theme_service.dart             # Theme mode preference (light/dark/system)
 ├── screens/
-│   ├── home_screen.dart               # Dashboard: account selector, totals, category breakdown, recents; also drives CSV export (account + date-range pickers, storage permission request, writes file to Downloads)
+│   ├── home_screen.dart               # Dashboard: account selector, totals, category breakdown, recents; also drives CSV export (account + date-range pickers, then saves through the system save dialog via the `CsvFileSaver` seam)
 │   ├── add_transaction_screen.dart    # Add transaction form
 │   ├── edit_transaction_screen.dart   # Edit transaction form (pre-populated)
 │   ├── transactions_list_screen.dart  # Full list with search & category filter
@@ -133,9 +134,8 @@ Enum: `expense | income`. Has a string extension for JSON serialization.
 | `shared_preferences` | ^2.2.2 | All local persistence |
 | `intl` | ^0.20.2 | Date formatting |
 | `flutter_staggered_animations` | ^1.1.1 | Staggered list animations |
-| `path_provider` | ^2.1.2 | File system paths (CSV export) |
-| `permission_handler` | ^12.0.0+1 | Storage permission for CSV export |
-| `file_picker` | ^13.3.2 | Pick a CSV file for import |
+| `path_provider` | ^2.1.2 | File system paths |
+| `file_picker` | ^13.3.2 | Pick a CSV file for import; save the CSV export via the system dialog |
 | `cupertino_icons` | ^1.0.6 | iOS-style icons |
 
 ---
@@ -178,13 +178,7 @@ When writing tests:
 
 ## Android Permissions
 
-Declared in `AndroidManifest.xml`:
-- `INTERNET`
-- `WRITE_EXTERNAL_STORAGE`, `READ_EXTERNAL_STORAGE`
-- `READ_MEDIA_IMAGES`, `READ_MEDIA_VIDEO`, `READ_MEDIA_AUDIO`
-- `MANAGE_EXTERNAL_STORAGE`
-
-These are required for the CSV export feature, which writes to the device's Downloads folder.
+The app declares **no** permissions in `AndroidManifest.xml`. CSV export saves through Android's system save dialog and import uses the system file picker (both via `file_picker`), so no storage, media or network permission is needed (ADR-0009). Flutter's debug/profile manifests add `INTERNET` themselves for hot reload.
 
 ---
 
