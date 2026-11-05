@@ -1,5 +1,5 @@
 ---
-id: infrastructure-c5nip
+id: infrastructure-c5nkp
 title: Sign release builds with a dedicated release key and change the app ID to io.github.mco.expensetracker
 status: todo
 type: chore
@@ -7,7 +7,7 @@ context: infrastructure
 created: 2026-11-05
 completed:
 depends_on: []
-blocks: [infrastructure-dxit4]
+blocks: [infrastructure-dx7t4]
 tags: [release, signing, android, app-id, toolchain]
 related_adrs: [ADR-0002]
 related_research: []
@@ -83,7 +83,7 @@ Owner decisions (modeling, 2026-11-05):
   2. back up the keystore and password;
   3. on the phone: export every account, uninstall the old `com.example.expense_tracker` app,
      install the first release, and import again. The new ID makes this a different app.
-- Builds stay manual on the Mac (ADR-0002); there is no CI. infrastructure-dxit4 adds the release
+- Builds stay manual on the Mac (ADR-0002); there is no CI. infrastructure-dx7t4 adds the release
   script on top of this.
 - Convention check: the signing/app-ID rule is enforced by the build itself (a release build fails
   without the release key). The "never change the ID again" part is prose-only, unenforced.

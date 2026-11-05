@@ -1,12 +1,12 @@
 ---
-id: infrastructure-dxit4
+id: infrastructure-dx7t4
 title: One local release script that bumps the SemVer version and build number, writes the changelog from done tasks, tags, and publishes a GitHub Release with the signed APK
 status: todo
 type: feature
 context: infrastructure
 created: 2026-11-05
 completed:
-depends_on: [infrastructure-c5nip]
+depends_on: [infrastructure-c5nkp]
 blocks: []
 tags: [release, versioning, changelog, github, toolchain]
 related_adrs: [ADR-0002]
@@ -33,7 +33,7 @@ Owner decisions (modeling, 2026-11-05):
 - **`tool/release.sh <major|minor|patch|X.Y.Z>`.** One command that runs these steps in order and
   stops at the first failure, changing nothing remote unless every earlier step passed:
   1. **Preconditions.** On `main`, working tree clean, in sync with `origin/main`. `gh auth
-     status` OK. `android/key.properties` present (infrastructure-c5nip).
+     status` OK. `android/key.properties` present (infrastructure-c5nkp).
   2. **Version.** Compute the new `X.Y.Z` from the current `pubspec.yaml` version and the argument.
      Set the build number to the current build number + 1, so every release installs over the
      previous one. Write `version: X.Y.Z+N` to `pubspec.yaml`.
@@ -89,7 +89,7 @@ Owner decisions (modeling, 2026-11-05):
 
 - Owner decisions 2026-11-05: GitHub Release, one local script, SemVer with automatic build
   number, changelog from done tasks.
-- Depends on infrastructure-c5nip, which provides the release signing key and the new app ID.
+- Depends on infrastructure-c5nkp, which provides the release signing key and the new app ID.
 - A worker must not run a real release (push, tag or publish) while working this task. Only the
   dry run and the unit tests are in scope. The first real release is the owner's
   `[human-eye]` step.

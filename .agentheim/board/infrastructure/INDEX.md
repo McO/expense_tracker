@@ -11,13 +11,15 @@ Catalog of this bounded context's tasks by status.
 
 <!-- task-counts:start -->
 - **Backlog:** 0
-- **Todo:** 0
+- **Todo:** 2
 - **Doing:** 0
 - **Done:** 4
 <!-- task-counts:end -->
 
 ### Todo
 <!-- todo-list:start -->
+- **infrastructure-dx7t4** — One local release script that bumps the SemVer version and build number, writes the changelog from done tasks, tags, and publishes a GitHub Release with the signed APK (feature) — `todo/infrastructure-dx7t4-release-script-versioning-changelog.md`
+- **infrastructure-c5nkp** — Sign release builds with a dedicated release key and change the app ID to io.github.mco.expensetracker (chore) — `todo/infrastructure-c5nkp-release-signing-and-app-id.md`
 <!-- todo-list:end -->
 
 ### Doing

@@ -5,6 +5,24 @@ Newest entries on top.
 
 ---
 
+## 2026-11-05 18:06 -- Modeling / Captured: infrastructure-dx7t4 - One local release script that bumps the SemVer version and build number, writes the changelog from done tasks, tags, and publishes a GitHub Release with the signed APK
+
+**Type:** Modeling / Capture
+**BC:** infrastructure
+**Filed to:** todo
+**Summary:** tool/release.sh: SemVer + auto build number, changelog from done tasks, tag vX.Y.Z, GitHub Release with the signed APK; dry-run and unit tests
+
+---
+
+## 2026-11-05 18:06 -- Modeling / Captured: infrastructure-c5nkp - Sign release builds with a dedicated release key and change the app ID to io.github.mco.expensetracker
+
+**Type:** Modeling / Capture
+**BC:** infrastructure
+**Filed to:** todo
+**Summary:** Dedicated release signing key (owner-run script, key outside the repo) and app ID changed to io.github.mco.expensetracker; release builds fail without the key
+
+---
+
 ## 2026-11-05 14:14 -- Work session ended
 
 **Type:** Work / Session end
