@@ -1,7 +1,7 @@
 ---
 id: cash-ledger-f150f
 title: Account and currency management screens use the category list style (popup menu per item, extended add button)
-status: doing
+status: done
 type: refactor
 context: cash-ledger
 created: 2026-11-05
@@ -55,3 +55,7 @@ bar, with no FAB.
 - Depends on `cash-ledger-apzzm`, which changes wallet deletion on the same screen.
 - Styleguide section 5 records the owner's decision; section 2's "Management lists" row describes
   today's inconsistency.
+
+## Outcome
+
+The wallet and currency management screens now use the category list style. Each item has a trailing `PopupMenuButton`, with Delete shown in red. Adding uses `FloatingActionButton.extended` ("Add wallet" / "Add currency"), the currency screen's app-bar add button is gone, and cards have elevation 2. Dialogs, the wallet-deletion confirm naming N movements, and the existing rules are unchanged. The last wallet's menu leaves out Delete, the same condition that used to disable the button; this mirrors how the category screen hides Delete for default categories. Custom currencies never had an edit dialog, so their menu holds Delete only, and no edit feature was invented. Built-in currencies are not listed on this screen. The styleguide's section 2 "Management lists" row and section 5 now describe the single unified pattern. Tests: `test/management_lists_style_test.dart` (7), plus the wallet-delete test in `wallet_currency_test.dart` adapted to the popup menu. 48 tests pass and `flutter analyze` is clean. The light/dark eye-check of the three management screens is pending with the owner.

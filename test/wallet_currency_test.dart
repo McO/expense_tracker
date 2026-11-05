@@ -100,16 +100,19 @@ void main() {
     await _seed([_mv('1', 'w1'), _mv('2', 'w2'), _mv('3', 'w2')]);
     await tester.pumpWidget(const MaterialApp(home: AccountManagementScreen()));
     await tester.pumpAndSettle();
-    final del = find.widgetWithIcon(IconButton, Icons.delete);
-    await tester.tap(del.last);
-    await tester.pumpAndSettle();
+    Future<void> pickDelete() async {
+      await tester.tap(find.byType(PopupMenuButton<String>).last);
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Delete'));
+      await tester.pumpAndSettle();
+    }
+    await pickDelete();
     expect(find.textContaining('This also deletes 2 movements'), findsOneWidget);
     await tester.tap(find.text('Cancel'));
     await tester.pumpAndSettle();
     expect((await ExpenseService().getExpenses()).length, 3);
 
-    await tester.tap(del.last);
-    await tester.pumpAndSettle();
+    await pickDelete();
     await tester.tap(find.widgetWithText(TextButton, 'Delete'));
     await tester.pumpAndSettle();
     expect((await ExpenseService().getExpenses()).map((e) => e.id), ['1']);

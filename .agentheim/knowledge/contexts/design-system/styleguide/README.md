@@ -64,7 +64,7 @@ Multiples of 4, with 16 dominant.
 | Forms (full screen) | `lib/screens/add_expense_screen.dart`, `edit_expense_screen.dart`, `add_edit_category_screen.dart` | `TextFormField` with `OutlineInputBorder`, 16 px vertical gaps, `DropdownButton` for category and currency, save action with validation. |
 | Forms (dialog) | `lib/screens/account_management_screen.dart`, `lib/screens/currency_management_screen.dart` | Accounts and currencies are added/edited in an `AlertDialog` (via `showDialog`, stateful builder) holding `TextField`s with `OutlineInputBorder` (accounts also `DropdownButtonFormField`s), with dialog actions. Categories use a full screen instead. |
 | List with search/filter | `lib/screens/expenses_list_screen.dart` | Full movement list reusing the row style. |
-| Management lists | `lib/screens/category_management_screen.dart`, `account_management_screen.dart`, `currency_management_screen.dart` | Card lists with delete confirmed by `AlertDialog`, but the controls differ per screen. Category: per-item `PopupMenuButton` and `FloatingActionButton.extended` to add (cards elevation 2). Account: two trailing `IconButton`s per item and a plain `FloatingActionButton`. Currency: one trailing `IconButton` per item and an `IconButton` in the app bar, no FAB. This is an inconsistency; new management screens should pick one pattern deliberately. |
+| Management lists | `lib/screens/category_management_screen.dart`, `account_management_screen.dart`, `currency_management_screen.dart` | Card lists (elevation 2) with delete confirmed by `AlertDialog`. One unified pattern on all three screens: a trailing per-item `PopupMenuButton` (Edit, and Delete in the destructive colour where deletion is allowed) and a `FloatingActionButton.extended` to add ("Add category" / "Add wallet" / "Add currency"); no trailing icon buttons and no app-bar add button. Custom currencies have no edit dialog, so their menu holds Delete only. New management screens follow this pattern. |
 
 ## 3. Patterns
 
@@ -92,7 +92,7 @@ Proposed rules:
 8. **Empty state.** Use the existing empty-state pattern when there is no data for the period.
 
 ## 5. Owner decisions (2026-11-04)
-- **Management lists — unify on the category style.** New and cleaned-up management screens use a per-item `PopupMenuButton` and a `FloatingActionButton.extended` to add, as `category_management_screen.dart` does. Account and currency screens move to this pattern when they are next touched.
+- **Management lists — unify on the category style.** New and cleaned-up management screens use a per-item `PopupMenuButton` and a `FloatingActionButton.extended` to add, as `category_management_screen.dart` does. Account and currency screens now follow it (cash-ledger-f150f).
 - **Light-only shade colors — fix.** `total_expense_card.dart` should move to scheme-aware colors; captured as a backlog task in cash-ledger.
 - **Chart style — approved.** Section 4 is the rule for the quick-glance cash statistics; it is no longer just a proposal. A chart package still needs its own ADR.
 - **Sign-off:** given, as is.

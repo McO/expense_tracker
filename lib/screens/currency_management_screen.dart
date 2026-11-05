@@ -278,13 +278,11 @@ class _CurrencyManagementScreenState extends State<CurrencyManagementScreen> {
           'Currencies',
           style: TextStyle(fontWeight: FontWeight.bold),
         ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.add),
-            onPressed: _showAddCurrencyDialog,
-            tooltip: 'Add Currency',
-          ),
-        ],
+      ),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: _showAddCurrencyDialog,
+        icon: const Icon(Icons.add),
+        label: const Text('Add currency'),
       ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
@@ -304,7 +302,7 @@ class _CurrencyManagementScreenState extends State<CurrencyManagementScreen> {
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        'Tap + to add a custom currency',
+                        'Tap "Add currency" to add a custom currency',
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                               color: Colors.grey[400],
                             ),
@@ -319,6 +317,7 @@ class _CurrencyManagementScreenState extends State<CurrencyManagementScreen> {
                   itemBuilder: (context, index) {
                     final currency = _customCurrencies[index];
                     return Card(
+                      elevation: 2,
                       child: ListTile(
                         leading: CircleAvatar(
                           backgroundColor:
@@ -338,9 +337,23 @@ class _CurrencyManagementScreenState extends State<CurrencyManagementScreen> {
                           style: const TextStyle(fontWeight: FontWeight.bold),
                         ),
                         subtitle: Text('${currency.code} • ${currency.symbol}'),
-                        trailing: IconButton(
-                          icon: const Icon(Icons.delete, color: Colors.red),
-                          onPressed: () => _deleteCurrency(currency),
+                        trailing: PopupMenuButton<String>(
+                          onSelected: (value) {
+                            if (value == 'delete') _deleteCurrency(currency);
+                          },
+                          itemBuilder: (context) => const [
+                            PopupMenuItem(
+                              value: 'delete',
+                              child: Row(
+                                children: [
+                                  Icon(Icons.delete, color: Colors.red),
+                                  SizedBox(width: 8),
+                                  Text('Delete'),
+                                ],
+                              ),
+                            ),
+                          ],
+                          child: const Icon(Icons.more_vert),
                         ),
                       ),
                     );

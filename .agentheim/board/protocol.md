@@ -5,6 +5,19 @@ Newest entries on top.
 
 ---
 
+## 2026-11-05 09:43 -- Task verified and completed: cash-ledger-f150f - Account and currency management screens use the category list style (popup menu per item, extended add button)
+
+**Type:** Work / Task completion
+**Task:** cash-ledger-f150f - Account and currency management screens use the category list style (popup menu per item, extended add button)
+**Summary:** Wallet and currency management lists use the category style (popup menu per item, extended add button); styleguide Management lists row unified
+**Duration:** 6m
+**Verification:** PASS (iteration 1)
+**Files changed:** 5
+**Tests added:** 7
+**ADRs written:** none
+
+---
+
 ## 2026-11-05 09:40 -- Task verified and completed: cash-ledger-p53v9 - Make the summary card's money colors work in dark mode
 
 **Type:** Work / Task completion

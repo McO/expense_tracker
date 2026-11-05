@@ -276,6 +276,7 @@ class _AccountManagementScreenState extends State<AccountManagementScreen> {
                   itemBuilder: (context, index) {
                     final account = _accounts[index];
                     return Card(
+                      elevation: 2,
                       margin: const EdgeInsets.only(bottom: 12),
                       child: ListTile(
                         leading: CircleAvatar(
@@ -308,26 +309,50 @@ class _AccountManagementScreenState extends State<AccountManagementScreen> {
                           ],
                         ),
                         subtitle: Text('${account.currency.displayName} (${account.currency.symbol})'),
-                        trailing: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            IconButton(
-                              icon: const Icon(Icons.edit),
-                              onPressed: () => _showAddEditDialog(account: account),
+                        trailing: PopupMenuButton<String>(
+                          onSelected: (value) {
+                            switch (value) {
+                              case 'edit':
+                                _showAddEditDialog(account: account);
+                                break;
+                              case 'delete':
+                                _deleteAccount(account);
+                                break;
+                            }
+                          },
+                          itemBuilder: (context) => [
+                            const PopupMenuItem(
+                              value: 'edit',
+                              child: Row(
+                                children: [
+                                  Icon(Icons.edit, color: Colors.blue),
+                                  SizedBox(width: 8),
+                                  Text('Edit'),
+                                ],
+                              ),
                             ),
-                            IconButton(
-                              icon: const Icon(Icons.delete, color: Colors.red),
-                              onPressed: _accounts.length > 1 ? () => _deleteAccount(account) : null,
-                            ),
+                            if (_accounts.length > 1)
+                              const PopupMenuItem(
+                                value: 'delete',
+                                child: Row(
+                                  children: [
+                                    Icon(Icons.delete, color: Colors.red),
+                                    SizedBox(width: 8),
+                                    Text('Delete'),
+                                  ],
+                                ),
+                              ),
                           ],
+                          child: const Icon(Icons.more_vert),
                         ),
                       ),
                     );
                   },
                 ),
-      floatingActionButton: FloatingActionButton(
+      floatingActionButton: FloatingActionButton.extended(
         onPressed: () => _showAddEditDialog(),
-        child: const Icon(Icons.add),
+        icon: const Icon(Icons.add),
+        label: const Text('Add wallet'),
       ),
     );
   }
