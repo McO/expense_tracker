@@ -5,6 +5,14 @@ Newest entries on top.
 
 ---
 
+## 2026-11-05 09:39 -- Batch started: [cash-ledger-f150f]
+
+**Type:** Work / Batch start
+**Tasks:** cash-ledger-f150f - Account and currency management screens use the category list style (popup menu per item, extended add button)
+**Parallel:** yes (joins in-flight cash-ledger-p53v9 iteration 3; unblocked by cash-ledger-apzzm)
+
+---
+
 ## 2026-11-05 09:38 -- Task verified and completed: cash-ledger-apzzm - A movement's currency is always its wallet's; drop the global default currency; deleting a wallet deletes its movements after a confirm
 
 **Type:** Work / Task completion

@@ -1,7 +1,7 @@
 ---
 id: cash-ledger-f150f
 title: Account and currency management screens use the category list style (popup menu per item, extended add button)
-status: todo
+status: doing
 type: refactor
 context: cash-ledger
 created: 2026-11-05
