@@ -5,6 +5,24 @@ Newest entries on top.
 
 ---
 
+## 2026-11-05 10:59 -- Modeling / Captured: infrastructure-pn83e - Upgrade all dependencies to their latest versions and raise the Dart SDK lower bound to the installed toolchain
+
+**Type:** Modeling / Capture
+**BC:** infrastructure
+**Filed to:** todo
+**Summary:** Upgrade every dependency to latest (majors included) and raise the Dart SDK lower bound to 3.13; fix fallout
+
+---
+
+## 2026-11-05 10:59 -- Modeling / Captured: cash-ledger-m47az - Export saves the CSV through Android's save dialog, so the app needs no storage permissions
+
+**Type:** Modeling / Capture
+**BC:** cash-ledger
+**Filed to:** todo
+**Summary:** Export saves via the system save dialog; drop permission_handler and all storage/media/network permissions; ADR amending ADR-0005
+
+---
+
 ## 2026-11-05 10:48 -- Work session ended
 
 **Type:** Work / Session end
