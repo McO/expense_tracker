@@ -5,6 +5,14 @@ Newest entries on top.
 
 ---
 
+## 2026-11-05 19:09 -- Batch started: [infrastructure-tf3qk]
+
+**Type:** Work / Batch start
+**Tasks:** infrastructure-tf3qk - Migrate the Android app module from the Kotlin Gradle Plugin to Flutter's Built-in Kotlin
+**Parallel:** no (1 worker — only ready task)
+
+---
+
 ## 2026-11-05 19:08 -- Modeling / Captured: infrastructure-tf3qk - Migrate the Android app module from the Kotlin Gradle Plugin to Flutter's Built-in Kotlin
 
 **Type:** Modeling / Capture

@@ -1,7 +1,7 @@
 ---
 id: infrastructure-tf3qk
 title: Migrate the Android app module from the Kotlin Gradle Plugin to Flutter's Built-in Kotlin
-status: todo
+status: doing
 type: chore
 context: infrastructure
 created: 2026-11-05
