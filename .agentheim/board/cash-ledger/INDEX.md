@@ -12,8 +12,8 @@ Catalog of this bounded context's tasks by status.
 <!-- task-counts:start -->
 - **Backlog:** 0
 - **Todo:** 0
-- **Doing:** 1
-- **Done:** 15
+- **Doing:** 0
+- **Done:** 16
 <!-- task-counts:end -->
 
 ### Todo
@@ -22,11 +22,11 @@ Catalog of this bounded context's tasks by status.
 
 ### Doing
 <!-- doing-list:start -->
-- **cash-ledger-my7ez** — Every amount on screen follows the phone's number format and the currency's decimals (feature) — `doing/cash-ledger-my7ez-locale-aware-amount-display.md`
 <!-- doing-list:end -->
 
 ### Done (most recent first; older entries kept for prior-art search)
 <!-- done-list:start -->
+- **cash-ledger-my7ez** — Every amount on screen follows the phone's number format and the currency's decimals (feature) — `done/cash-ledger-my7ez-locale-aware-amount-display.md`
 - **cash-ledger-yc1h3** — Amount input follows the phone's number format and the currency's decimals, tolerating the other separator, symbols and spaces (feature) — `done/cash-ledger-yc1h3-locale-aware-amount-input.md`
 - **cash-ledger-ajxaq** — Each currency has its own number of decimal places (ISO for built-ins, editable for custom currencies) (feature) — `done/cash-ledger-ajxaq-currency-decimal-places.md`
 - **cash-ledger-ssybq** — Show the app version and build number at the bottom of the home drawer (feature) — `done/cash-ledger-ssybq-show-version-in-drawer.md`

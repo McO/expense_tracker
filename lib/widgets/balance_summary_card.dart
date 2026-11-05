@@ -1,3 +1,4 @@
+import '../services/amount_format.dart';
 import 'package:flutter/material.dart';
 import '../models/currency.dart';
 
@@ -9,6 +10,7 @@ class BalanceSummaryCard extends StatelessWidget {
   final double? balance;
   final Map<Currency, double> currencyTotals;
   final Currency defaultCurrency;
+  final LocaleLookup localeLookup;
 
   const BalanceSummaryCard({
     super.key,
@@ -17,11 +19,13 @@ class BalanceSummaryCard extends StatelessWidget {
     this.balance,
     required this.currencyTotals,
     required this.defaultCurrency,
+    this.localeLookup = deviceLocale,
   });
 
   @override
   Widget build(BuildContext context) {
     // Calculate net balance
+    final locale = localeLookup();
     final netBalance = balance ?? (totalIncome - totalExpenses);
     
     // Determine currency to display
@@ -70,7 +74,7 @@ class BalanceSummaryCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 12),
                 Text(
-                  '${netBalance >= 0 ? '+' : ''}${displayCurrency.symbol}${netBalance.toStringAsFixed(2)}',
+                  '${netBalance >= 0 ? '+' : ''}${formatAmountWithSymbol(netBalance, displayCurrency, locale)}',
                   style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                         fontWeight: FontWeight.bold,
                         color: net.fg,
@@ -79,7 +83,7 @@ class BalanceSummaryCard extends StatelessWidget {
                 if (totalIncome > 0 && currencyTotals.length <= 1) ...[
                   const SizedBox(height: 8),
                   Text(
-                    'Savings Rate: ${((totalIncome - totalExpenses) / totalIncome * 100).toStringAsFixed(1)}%',
+                    'Savings Rate: ${formatPercent((totalIncome - totalExpenses) / totalIncome * 100, locale)}',
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
                       color: net.fg.withValues(alpha: 0.7),
                     ),
@@ -131,7 +135,7 @@ class BalanceSummaryCard extends StatelessWidget {
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        '+${displayCurrency.symbol}${totalIncome.toStringAsFixed(2)}',
+                        '+${formatAmountWithSymbol(totalIncome, displayCurrency, locale)}',
                         style: Theme.of(context).textTheme.titleLarge?.copyWith(
                               fontWeight: FontWeight.bold,
                               color: income.fg,
@@ -172,7 +176,7 @@ class BalanceSummaryCard extends StatelessWidget {
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        '-${displayCurrency.symbol}${totalExpenses.toStringAsFixed(2)}',
+                        '-${formatAmountWithSymbol(totalExpenses, displayCurrency, locale)}',
                         style: Theme.of(context).textTheme.titleLarge?.copyWith(
                               fontWeight: FontWeight.bold,
                               color: expense.fg,

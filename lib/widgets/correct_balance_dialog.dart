@@ -1,3 +1,4 @@
+import '../models/currency.dart';
 import 'package:flutter/material.dart';
 import 'amount_field.dart';
 import '../models/account.dart';
@@ -7,9 +8,10 @@ import '../services/amount_format.dart';
 import '../services/category_service.dart';
 import '../services/transaction_service.dart';
 
-/// Difference between counted cash and the current balance, rounded to cents.
-double balanceDifference(double balance, double counted) =>
-    ((counted - balance) * 100).round() / 100;
+/// Difference between counted cash and the current balance, rounded to the
+/// currency's decimals (cents when no [currency] is given).
+double balanceDifference(double balance, double counted, [Currency? currency]) =>
+    (currency ?? Currency.eur).roundAmount(counted - balance);
 
 /// Opens the Correct balance dialog; on confirm records one transaction in the
 /// Correction category signed by the difference (or nothing, with a message,
@@ -27,7 +29,7 @@ Future<bool> correctBalance(
         account: account, balance: balance, localeLookup: localeLookup),
   );
   if (counted == null || !context.mounted) return false;
-  final difference = balanceDifference(balance, counted);
+  final difference = balanceDifference(balance, counted, account.currency);
   final messenger = ScaffoldMessenger.of(context);
   if (difference == 0) {
     messenger.showSnackBar(const SnackBar(
@@ -83,12 +85,12 @@ class _CorrectBalanceDialogState extends State<CorrectBalanceDialog> {
   Widget build(BuildContext context) {
     final symbol = widget.account.currency.symbol;
     final counted = _counted;
-    final diff = counted == null ? null : balanceDifference(widget.balance, counted);
+    final diff = counted == null ? null : balanceDifference(widget.balance, counted, widget.account.currency);
     var diffText = '';
     if (diff != null) {
       diffText = diff == 0
           ? 'No difference'
-          : 'Difference: ${diff > 0 ? '+' : '-'}$symbol${diff.abs().toStringAsFixed(2)}';
+          : 'Difference: ${diff > 0 ? '+' : '-'}${formatAmountWithSymbol(diff.abs(), widget.account.currency, widget.localeLookup())}';
     }
     return AlertDialog(
       title: const Text('Correct balance'),
@@ -96,7 +98,7 @@ class _CorrectBalanceDialogState extends State<CorrectBalanceDialog> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Current balance: $symbol${widget.balance.toStringAsFixed(2)}'),
+          Text('Current balance: ${formatAmountWithSymbol(widget.balance, widget.account.currency, widget.localeLookup())}'),
           const SizedBox(height: 12),
           AmountField(
             controller: _controller,

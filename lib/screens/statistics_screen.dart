@@ -1,3 +1,4 @@
+import '../services/amount_format.dart';
 import 'package:flutter/material.dart';
 import '../models/account.dart';
 import '../models/category.dart';
@@ -12,7 +13,14 @@ class StatisticsScreen extends StatefulWidget {
   /// Injectable for tests; defaults to now.
   final DateTime? today;
 
-  const StatisticsScreen({super.key, required this.account, this.today});
+  final LocaleLookup localeLookup;
+
+  const StatisticsScreen({
+    super.key,
+    required this.account,
+    this.today,
+    this.localeLookup = deviceLocale,
+  });
 
   @override
   State<StatisticsScreen> createState() => _StatisticsScreenState();
@@ -44,8 +52,8 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
     });
   }
 
-  String _money(double v) =>
-      '${widget.account.currency.symbol}${v.toStringAsFixed(2)}';
+  String _money(double v) => formatAmountWithSymbol(
+      v, widget.account.currency, widget.localeLookup());
 
   @override
   Widget build(BuildContext context) {
@@ -112,6 +120,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
         label: const Text('Correct balance'),
         onPressed: () async {
           await correctBalance(context,
+          localeLookup: widget.localeLookup,
               account: widget.account, balance: stats.balance);
           await _load();
         },

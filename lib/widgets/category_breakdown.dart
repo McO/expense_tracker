@@ -1,3 +1,4 @@
+import '../services/amount_format.dart';
 import 'dart:async';
 import 'package:flutter/material.dart';
 import '../models/category.dart';
@@ -10,6 +11,7 @@ class CategoryBreakdown extends StatefulWidget {
   final double totalIncome;
   final double totalExpenses;
   final List<Transaction> allTransactions;
+  final LocaleLookup localeLookup;
 
   const CategoryBreakdown({
     super.key,
@@ -18,6 +20,7 @@ class CategoryBreakdown extends StatefulWidget {
     required this.categoryExpenseTotal,
     required this.totalIncome,
     required this.totalExpenses,
+    this.localeLookup = deviceLocale,
     required this.allTransactions,
   });
 
@@ -82,7 +85,7 @@ class _CategoryBreakdownState extends State<CategoryBreakdown> {
     
     if (categoryCurrencies.length == 1) {
       final currency = categoryCurrencies.first;
-      return '${currency.symbol}${amount.toStringAsFixed(2)}';
+      return formatAmountWithSymbol(amount, currency, widget.localeLookup());
     } else {
       return 'Mixed currencies';
     }
@@ -163,7 +166,7 @@ class _CategoryBreakdownState extends State<CategoryBreakdown> {
           ),
           const SizedBox(width: 8),
           Text(
-            '${percentage.toStringAsFixed(1)}%',
+            formatPercent(percentage, widget.localeLookup()),
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
               fontWeight: FontWeight.w600,
               color: isIncome ? Colors.green : Colors.red,

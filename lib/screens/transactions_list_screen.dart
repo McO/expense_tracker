@@ -1,3 +1,4 @@
+import '../services/amount_format.dart';
 import 'package:flutter/material.dart';
 import '../widgets/transaction_style.dart';
 import 'package:intl/intl.dart';
@@ -12,8 +13,13 @@ import 'edit_transaction_screen.dart';
 
 class TransactionsListScreen extends StatefulWidget {
   final Category? initialCategoryFilter;
+  final LocaleLookup localeLookup;
   
-  const TransactionsListScreen({super.key, this.initialCategoryFilter});
+  const TransactionsListScreen({
+    super.key,
+    this.initialCategoryFilter,
+    this.localeLookup = deviceLocale,
+  });
 
   @override
   State<TransactionsListScreen> createState() => _TransactionsListScreenState();
@@ -123,7 +129,7 @@ class _TransactionsListScreenState extends State<TransactionsListScreen> {
     final result = await Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => EditTransactionScreen(transaction: transaction),
+        builder: (context) => EditTransactionScreen(transaction: transaction, localeLookup: widget.localeLookup),
       ),
     );
 
@@ -505,7 +511,7 @@ class _TransactionsListScreenState extends State<TransactionsListScreen> {
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               Text(
-                transaction.formattedAmountWithSign,
+                transaction.formattedAmountWithSign(widget.localeLookup()),
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
                   fontWeight: FontWeight.bold,
                   color: transactionColor(transaction),
@@ -549,7 +555,7 @@ class _TransactionsListScreenState extends State<TransactionsListScreen> {
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => TransactionDetailScreen(transaction: transaction),
+                builder: (context) => TransactionDetailScreen(transaction: transaction, localeLookup: widget.localeLookup),
               ),
             );
           },

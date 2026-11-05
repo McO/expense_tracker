@@ -1,3 +1,4 @@
+import '../services/amount_format.dart';
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
@@ -44,11 +45,15 @@ class HomeScreen extends StatefulWidget {
   /// Installed-version lookup for the drawer footer; replaced in tests.
   final AppVersionLookup appVersionLookup;
 
+  /// The phone's locale for amount display and input; replaced in tests.
+  final LocaleLookup localeLookup;
+
   const HomeScreen({
     super.key,
     this.csvFilePicker = pickCsvFileText,
     this.csvFileSaver = saveCsvFile,
     this.appVersionLookup = lookupAppVersion,
+    this.localeLookup = deviceLocale,
     this.onThemeModeChanged,
     this.currentThemeMode = AppThemeMode.system,
   });
@@ -180,7 +185,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Future<void> _navigateToAddTransaction() async {
     final result = await Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => const AddTransactionScreen()),
+      MaterialPageRoute(builder: (context) => AddTransactionScreen(localeLookup: widget.localeLookup)),
     );
 
     if (result == true) {
@@ -533,6 +538,7 @@ class _HomeScreenState extends State<HomeScreen> {
       totalExpenses: _totalExpenses,
       currencyTotals: _currencyTotals,
       defaultCurrency: _defaultCurrency,
+      localeLookup: widget.localeLookup,
     );
   }
 
@@ -544,17 +550,19 @@ class _HomeScreenState extends State<HomeScreen> {
       totalIncome: _totalIncome,
       totalExpenses: _totalExpenses,
       allTransactions: _filteredTransactions,
+      localeLookup: widget.localeLookup,
     );
   }
 
   Widget _buildRecentTransactions() {
     return RecentTransactions(
+      localeLookup: widget.localeLookup,
       transactions: _recentTransactions,
       onDelete: _deleteTransaction,
       onViewAll: () async {
                   await Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => const TransactionsListScreen()),
+                    MaterialPageRoute(builder: (context) => TransactionsListScreen(localeLookup: widget.localeLookup)),
                   );
                   await _loadData();
                 },
@@ -671,7 +679,7 @@ class _HomeScreenState extends State<HomeScreen> {
               Navigator.pop(context);
               await Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => const TransactionsListScreen()),
+                MaterialPageRoute(builder: (context) => TransactionsListScreen(localeLookup: widget.localeLookup)),
               );
               await _loadData();
             },
@@ -719,7 +727,10 @@ class _HomeScreenState extends State<HomeScreen> {
               Navigator.pop(context);
               final account = _selectedAccount;
               if (account == null) return;
-              await correctBalance(context, account: account, balance: _balance);
+              await correctBalance(context,
+                  account: account,
+                  balance: _balance,
+                  localeLookup: widget.localeLookup);
               await _loadData();
             },
           ),
@@ -733,7 +744,8 @@ class _HomeScreenState extends State<HomeScreen> {
               await Navigator.push(
                 context,
                 MaterialPageRoute(
-                    builder: (context) => StatisticsScreen(account: account)),
+                    builder: (context) => StatisticsScreen(
+                        account: account, localeLookup: widget.localeLookup)),
               );
               await _loadData();
             },

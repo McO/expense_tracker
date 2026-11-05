@@ -5,6 +5,30 @@ Newest entries on top.
 
 ---
 
+## 2026-11-05 21:53 -- Task verified and completed: cash-ledger-my7ez - Every amount on screen follows the phone's number format and the currency's decimals
+
+**Type:** Work / Task completion
+**Task:** cash-ledger-my7ez - Every amount on screen follows the phone's number format and the currency's decimals
+**Summary:** every on-screen amount follows the phone locale (grouping and decimal separator) and the currency decimals through the shared formatter; CSV unchanged
+**Duration:** 17m
+**Verification:** PASS (iteration 2)
+**Files changed:** 14
+**Tests added:** 8
+**ADRs written:** none
+
+---
+
+## 2026-11-05 21:51 -- Verification failed: cash-ledger-my7ez - Every amount on screen follows the phone's number format and the currency's decimals
+
+**Type:** Work / Verification failure
+**Task:** cash-ledger-my7ez
+**Iteration:** 1 of 3
+**Reasons:** flutter analyze reports unnecessary_import of dart:ui in test/amount_display_test.dart (exit 1); all other criteria met
+**Iteration hint:** likely-fixable
+**Next:** re-dispatched worker
+
+---
+
 ## 2026-11-05 21:44 -- Batch started: [cash-ledger-my7ez]
 
 **Type:** Work / Batch start

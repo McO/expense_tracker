@@ -281,7 +281,7 @@ class _EditTransactionScreenState extends State<EditTransactionScreen> {
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        'Original: ${widget.transaction.formattedAmount} • ${DateFormat('MMM d, yyyy').format(widget.transaction.date)}',
+                        'Original: ${widget.transaction.formattedAmount(widget.localeLookup())} • ${DateFormat('MMM d, yyyy').format(widget.transaction.date)}',
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                           color: Theme.of(context).colorScheme.onSurfaceVariant,
                         ),

@@ -1,3 +1,4 @@
+import '../services/amount_format.dart';
 import 'package:flutter/material.dart';
 import '../widgets/transaction_style.dart';
 import 'package:intl/intl.dart';
@@ -10,6 +11,7 @@ class RecentTransactions extends StatelessWidget {
   final Function(Transaction) onDelete;
   final Function() onViewAll;
   final Function() onRefresh;
+  final LocaleLookup localeLookup;
 
   const RecentTransactions({
     super.key,
@@ -17,6 +19,7 @@ class RecentTransactions extends StatelessWidget {
     required this.onDelete,
     required this.onViewAll,
     required this.onRefresh,
+    this.localeLookup = deviceLocale,
   });
 
   @override
@@ -38,7 +41,7 @@ class RecentTransactions extends StatelessWidget {
                 onPressed: () async {
                   await Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => const TransactionsListScreen()),
+                    MaterialPageRoute(builder: (context) => TransactionsListScreen(localeLookup: localeLookup)),
                   );
                   onRefresh();
                 },
@@ -172,7 +175,7 @@ class RecentTransactions extends StatelessWidget {
                           ],
                         ),
                         trailing: Text(
-                          transaction.formattedAmountWithSign,
+                          transaction.formattedAmountWithSign(localeLookup()),
                           style: Theme.of(context).textTheme.titleMedium?.copyWith(
                                 fontWeight: FontWeight.bold,
                                 color: transactionColor(transaction),
@@ -182,7 +185,7 @@ class RecentTransactions extends StatelessWidget {
                           final result = await Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => TransactionDetailScreen(transaction: transaction),
+                              builder: (context) => TransactionDetailScreen(transaction: transaction, localeLookup: localeLookup),
                             ),
                           );
 

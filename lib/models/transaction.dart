@@ -1,3 +1,5 @@
+import 'dart:ui' show Locale;
+import '../services/amount_format.dart';
 import 'currency.dart';
 import 'category.dart';
 import 'transaction_type.dart';
@@ -41,9 +43,9 @@ class Transaction {
   double get signedAmount => increasesBalance ? amount : -amount;
 
   // Formatted amount with sign
-  String get formattedAmountWithSign {
+  String formattedAmountWithSign([Locale? locale]) {
     final sign = increasesBalance ? '+' : '-';
-    return '$sign${currency.symbol}${amount.toStringAsFixed(2)}';
+    return '$sign${formatAmountWithSymbol(amount, currency, locale ?? deviceLocale())}';
   }
 
   /// Builds a correction transaction from the signed difference between the
@@ -152,5 +154,6 @@ class Transaction {
     );
   }
 
-  String get formattedAmount => '${currency.symbol}${amount.toStringAsFixed(2)}';
+  String formattedAmount([Locale? locale]) =>
+      formatAmountWithSymbol(amount, currency, locale ?? deviceLocale());
 } 

@@ -1,3 +1,4 @@
+import '../services/amount_format.dart';
 import 'package:flutter/material.dart';
 import '../widgets/transaction_style.dart';
 import 'package:intl/intl.dart';
@@ -6,17 +7,19 @@ import 'edit_transaction_screen.dart';
 
 class TransactionDetailScreen extends StatelessWidget {
   final Transaction transaction;
+  final LocaleLookup localeLookup;
 
   const TransactionDetailScreen({
     super.key,
     required this.transaction,
+    this.localeLookup = deviceLocale,
   });
 
   Future<void> _navigateToEdit(BuildContext context) async {
     final result = await Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => EditTransactionScreen(transaction: transaction),
+        builder: (context) => EditTransactionScreen(transaction: transaction, localeLookup: localeLookup),
       ),
     );
 
@@ -94,7 +97,7 @@ class TransactionDetailScreen extends StatelessWidget {
                           ),
                           const SizedBox(height: 8),
                           Text(
-                            transaction.formattedAmountWithSign,
+                            transaction.formattedAmountWithSign(localeLookup()),
                             style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                               fontWeight: FontWeight.bold,
                               color: _transactionTypeColor,

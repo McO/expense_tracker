@@ -1,6 +1,7 @@
 import 'dart:ui';
 
 import 'package:intl/intl.dart';
+import 'package:intl/number_symbols.dart';
 
 import '../models/currency.dart';
 
@@ -11,19 +12,24 @@ typedef LocaleLookup = Locale Function();
 /// `Localizations.localeOf` would always be en_US).
 Locale deviceLocale() => PlatformDispatcher.instance.locale;
 
-/// The decimal separator of [locale] (`,` for de_DE, `.` for en_US).
-String decimalSeparator(Locale locale) {
+NumberSymbols? _symbols(Locale locale) {
   final candidates = [
     locale.toLanguageTag().replaceAll('-', '_'),
     locale.languageCode,
   ];
   for (final name in candidates) {
     try {
-      return NumberFormat.decimalPattern(name).symbols.DECIMAL_SEP;
+      return NumberFormat.decimalPattern(name).symbols;
     } catch (_) {}
   }
-  return '.';
+  return null;
 }
+
+/// The decimal separator of [locale] (`,` for de_DE, `.` for en_US).
+String decimalSeparator(Locale locale) => _symbols(locale)?.DECIMAL_SEP ?? '.';
+
+/// The grouping separator of [locale] (`.` for de_DE, `,` for en_US).
+String groupSeparator(Locale locale) => _symbols(locale)?.GROUP_SEP ?? ',';
 
 /// Parses user-typed [text] into an amount, or null when invalid.
 ///
@@ -63,17 +69,40 @@ double? parseAmount(
 }
 
 /// Formats [amount] in [locale]'s decimal separator with exactly the
-/// currency's decimals, no symbol, no grouping (e.g. `12,50`, `1500`).
-String formatAmount(double amount, Currency currency, Locale locale) {
+/// currency's decimals, no symbol (e.g. `12,50`, `1500`). Without [grouping]
+/// (input fields) there are no thousands separators; with it (display) the
+/// locale's grouping is applied (`1.234,50`).
+String formatAmount(double amount, Currency currency, Locale locale,
+    {bool grouping = false}) {
   final fixed = currency.roundAmount(amount).toStringAsFixed(currency.decimalPlaces);
-  return fixed.replaceFirst('.', decimalSeparator(locale));
+  final negative = fixed.startsWith('-');
+  final unsigned = negative ? fixed.substring(1) : fixed;
+  final dot = unsigned.indexOf('.');
+  var whole = dot < 0 ? unsigned : unsigned.substring(0, dot);
+  final frac = dot < 0 ? '' : unsigned.substring(dot + 1);
+  if (grouping) {
+    final sep = groupSeparator(locale);
+    final buf = StringBuffer();
+    for (var i = 0; i < whole.length; i++) {
+      if (i > 0 && (whole.length - i) % 3 == 0) buf.write(sep);
+      buf.write(whole[i]);
+    }
+    whole = buf.toString();
+  }
+  return '${negative ? '-' : ''}$whole${frac.isEmpty ? '' : decimalSeparator(locale) + frac}';
 }
 
-/// Like [formatAmount] but prefixed with the currency symbol (`€12,50`).
+/// Display form: the currency symbol before the locale-grouped number
+/// (`€1.234,50`, `-€2,00`). A value that rounds to zero shows no minus.
 String formatAmountWithSymbol(double amount, Currency currency, Locale locale) {
-  final body = formatAmount(amount.abs(), currency, locale);
-  return '${amount < 0 ? '-' : ''}${currency.symbol}$body';
+  final rounded = currency.roundAmount(amount);
+  final body = formatAmount(rounded.abs(), currency, locale, grouping: true);
+  return '${rounded < 0 ? '-' : ''}${currency.symbol}$body';
 }
+
+/// A percentage with one decimal in [locale]'s decimal separator (`12,5%`).
+String formatPercent(double value, Locale locale) =>
+    '${value.toStringAsFixed(1).replaceFirst('.', decimalSeparator(locale))}%';
 
 /// Placeholder for an empty field: `0,00` (de_DE EUR), `0` (JPY).
 String amountHint(Currency currency, Locale locale) =>

@@ -51,4 +51,28 @@ void main() {
     expect(amountHint(Currency.eur, de), '0,00');
     expect(amountHint(Currency.jpy, de), '0');
   });
+  group('display formatting', () {
+    test('grouping and symbol', () {
+      expect(formatAmountWithSymbol(1234.5, Currency.eur, de), '€1.234,50');
+      expect(formatAmountWithSymbol(1234.5, Currency.eur, us), '€1,234.50');
+      expect(formatAmountWithSymbol(1500, Currency.jpy, de), '¥1.500');
+      expect(formatAmountWithSymbol(1500, Currency.jpy, us), '¥1,500');
+      expect(formatAmountWithSymbol(1234567.891, dinar, de), 'KD1.234.567,891');
+    });
+    test('negative keeps the minus before the symbol', () {
+      expect(formatAmountWithSymbol(-2, Currency.eur, de), '-€2,00');
+      expect(formatAmountWithSymbol(-1234.5, Currency.eur, us), '-€1,234.50');
+    });
+    test('no minus on a value that rounds to zero', () {
+      expect(formatAmountWithSymbol(-0.004, Currency.eur, de), '€0,00');
+      expect(formatAmountWithSymbol(-0.4, Currency.jpy, us), '¥0');
+    });
+    test('input formatting stays ungrouped', () {
+      expect(formatAmount(1234.5, Currency.eur, de), '1234,50');
+    });
+    test('percent follows the decimal separator', () {
+      expect(formatPercent(12.5, de), '12,5%');
+      expect(formatPercent(12.5, us), '12.5%');
+    });
+  });
 }
