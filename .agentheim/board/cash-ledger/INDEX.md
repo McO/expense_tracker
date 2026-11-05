@@ -12,8 +12,8 @@ Catalog of this bounded context's tasks by status.
 <!-- task-counts:start -->
 - **Backlog:** 0
 - **Todo:** 0
-- **Doing:** 1
-- **Done:** 9
+- **Doing:** 0
+- **Done:** 10
 <!-- task-counts:end -->
 
 ### Todo
@@ -22,11 +22,11 @@ Catalog of this bounded context's tasks by status.
 
 ### Doing
 <!-- doing-list:start -->
-- **cash-ledger-k6d4w** — Store transactions under the `transactions` key, migrating the old `expenses` key once (feature) — `doing/cash-ledger-k6d4w-migrate-expenses-key-to-transactions.md`
 <!-- doing-list:end -->
 
 ### Done (most recent first; older entries kept for prior-art search)
 <!-- done-list:start -->
+- **cash-ledger-k6d4w** — Store transactions under the `transactions` key, migrating the old `expenses` key once (feature) — `done/cash-ledger-k6d4w-migrate-expenses-key-to-transactions.md`
 - **cash-ledger-ydqbw** — Use Account and Transaction consistently in code and on screen (no Wallet, Movement or Expense-for-record) (refactor) — `done/cash-ledger-ydqbw-account-and-transaction-naming.md`
 - **cash-ledger-f150f** — Account and currency management screens use the category list style (popup menu per item, extended add button) (refactor) — `done/cash-ledger-f150f-management-lists-category-style.md`
 - **cash-ledger-p53v9** — Make the summary card's money colors work in dark mode (bug) — `done/cash-ledger-p53v9-summary-card-dark-mode-colors.md`

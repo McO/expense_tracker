@@ -1,7 +1,7 @@
 ---
 id: cash-ledger-k6d4w
 title: Store transactions under the `transactions` key, migrating the old `expenses` key once
-status: doing
+status: done
 type: feature
 context: cash-ledger
 created: 2026-11-05
@@ -9,7 +9,7 @@ completed:
 depends_on: [cash-ledger-ydqbw]
 blocks: []
 tags: [persistence, migration, naming, ubiquitous-language]
-related_adrs: [ADR-0004]
+related_adrs: [ADR-0004, ADR-0008]
 related_research: []
 prior_art: [cash-ledger-ydqbw]
 ---
@@ -52,3 +52,24 @@ in SharedPreferences JSON lists *without schema migration*, so this needs a deci
 - Owner decision 2026-11-05: migrate `expenses` → `transactions` (not keep the old key).
 - Data loss is the main risk on the owner's real install: copy before delete, never transform the
   entries, and keep the migration idempotent.
+
+## Verifier note (iteration 1)
+
+**REASONS:**
+- Check 6c (mechanize-or-drop, ADR-0059): ADR-0008 sets a rule for all future key renames. The task ships no enforcement for that rule and has no explicit "prose-only, unenforced" marker.
+- Checks 1–5, 6b and 7 pass:
+  - All four migration scenarios are asserted.
+  - Copy-before-delete ordering holds and entries are copied verbatim.
+  - The only `'expenses'` literal left is `TransactionsStore.legacyKey`.
+  - 57 tests pass and analyze is clean.
+- Check 6 is only partly verified, because the verifier saw only a summary of the ADR (the full body was in the worker's return).
+
+**SUGGESTED_FIX:** Add an explicit "prose-only, unenforced" marker for the ADR-0008 key-rename rule to the Outcome (and to the ADR's Consequences), or ship a check. Optionally, strengthen the no-re-migration test: put `expenses` back after the first load and assert it is not copied again.
+
+**ITERATION_HINT:** likely-fixable
+
+## Outcome
+
+Added `TransactionsStore` (`lib/services/transactions_store.dart`). It owns the `transactions` key and the one-time copy-then-delete migration from `expenses`, guarded by the `transactions_key_migrated_v1` flag. If both keys exist, `transactions` is kept; a fresh install writes only `transactions`. `TransactionService` and `AccountService` (account deletion) both go through it.
+
+Tests in `test/transactions_key_migration_test.dart` cover all four cases, including that an `expenses` list reappearing after the migration is not copied in. `test/account_currency_test.dart` uses the new key, and the `AGENTS.md` key table is updated. ADR-0008 (amends ADR-0004) records the key-rename rule. That rule is prose-only, unenforced: no lint or test catches a future rename that bypasses it. `flutter test` (57 tests) and `flutter analyze` pass. Passed verification on iteration 2, after the prose-only marker was added and the no-re-migration test strengthened.

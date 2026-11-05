@@ -1,21 +1,19 @@
 import 'dart:convert';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:intl/intl.dart';
 import '../models/transaction.dart';
 import '../models/category.dart';
 import 'category_service.dart';
 import 'currency_service.dart';
 import 'account_service.dart';
+import 'transactions_store.dart';
 
 class TransactionService {
-  static const String _expensesKey = 'expenses';
   final CategoryService _categoryService = CategoryService();
   final CurrencyService _currencyService = CurrencyService();
   final AccountService _accountService = AccountService();
 
   Future<List<Transaction>> getTransactions() async {
-    final prefs = await SharedPreferences.getInstance();
-    final transactionsJson = prefs.getStringList(_expensesKey) ?? [];
+    final transactionsJson = await TransactionsStore.read();
     final categories = await _categoryService.getCategories();
     final customCurrencies = await _currencyService.getCustomCurrencies();
     
@@ -61,9 +59,8 @@ class TransactionService {
   }
 
   Future<void> _saveTransactions(List<Transaction> transactions) async {
-    final prefs = await SharedPreferences.getInstance();
     final transactionsJson = transactions.map((transaction) => jsonEncode(transaction.toJson())).toList();
-    await prefs.setStringList(_expensesKey, transactionsJson);
+    await TransactionsStore.write(transactionsJson);
   }
 
   Future<Map<Category, double>> getTransactionsByCategory() async {

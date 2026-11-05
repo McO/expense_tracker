@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/account.dart';
 import '../models/currency.dart';
+import 'transactions_store.dart';
 
 class AccountService {
   static const String _accountsKey = 'accounts';
@@ -121,13 +122,12 @@ class AccountService {
     await _saveAccounts(accounts);
 
     // Deleting an account deletes its transactions too
-    final prefs = await SharedPreferences.getInstance();
-    final stored = prefs.getStringList('expenses') ?? [];
+    final stored = await TransactionsStore.read();
     final kept = stored
         .where((j) => (jsonDecode(j) as Map<String, dynamic>)['accountId'] != accountId)
         .toList();
     if (kept.length != stored.length) {
-      await prefs.setStringList('expenses', kept);
+      await TransactionsStore.write(kept);
     }
     
     // If deleted account was selected, select the default or first account

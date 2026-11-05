@@ -29,7 +29,7 @@ Future<void> _seed(List<Map<String, dynamic>> txs) async {
   SharedPreferences.setMockInitialValues({
     'accounts': [eur, gbp].map((a) => jsonEncode(a.toJson())).toList(),
     'selected_account_id': 'w1',
-    'expenses': txs.map(jsonEncode).toList(),
+    'transactions': txs.map(jsonEncode).toList(),
   });
 }
 
@@ -79,7 +79,7 @@ void main() {
     await tester.enterText(find.widgetWithText(TextFormField, 'Amount'), '3');
     await tester.tap(find.widgetWithText(ElevatedButton, 'Add transaction'));
     await tester.pumpAndSettle();
-    final raw = (await SharedPreferences.getInstance()).getStringList('expenses')!;
+    final raw = (await SharedPreferences.getInstance()).getStringList('transactions')!;
     expect(jsonDecode(raw.single)['currency'], 'EUR');
   });
 
@@ -91,7 +91,7 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(find.widgetWithText(ElevatedButton, 'Update transaction'));
     await tester.pumpAndSettle();
-    final raw = (await SharedPreferences.getInstance()).getStringList('expenses')!;
+    final raw = (await SharedPreferences.getInstance()).getStringList('transactions')!;
     expect(jsonDecode(raw.single)['currency'], 'EUR');
   });
 

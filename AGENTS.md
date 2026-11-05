@@ -83,7 +83,8 @@ All data is stored in **SharedPreferences as JSON strings**. No SQLite, Hive, or
 
 | Key | Type | Contents |
 |---|---|---|
-| `expenses` | `List<String>` | JSON-encoded `Transaction` objects |
+| `transactions` | `List<String>` | JSON-encoded `Transaction` objects (renamed from `expenses`; migrated once by `TransactionsStore`) |
+| `transactions_key_migrated_v1` | `bool` | Flag: the `expenses` → `transactions` key migration has run |
 | `accounts` | `List<String>` | JSON-encoded `Account` objects |
 | `selected_account_id` | `String` | Currently selected account ID |
 | `categories` | `List<String>` | JSON-encoded `Category` objects |

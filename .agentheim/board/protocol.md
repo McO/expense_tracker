@@ -5,6 +5,30 @@ Newest entries on top.
 
 ---
 
+## 2026-11-05 10:16 -- Task verified and completed: cash-ledger-k6d4w - Store transactions under the `transactions` key, migrating the old `expenses` key once
+
+**Type:** Work / Task completion
+**Task:** cash-ledger-k6d4w - Store transactions under the `transactions` key, migrating the old `expenses` key once
+**Summary:** Transactions stored under the transactions key, migrated once from expenses (flag-guarded copy-then-delete in TransactionsStore); ADR-0008 amends ADR-0004
+**Duration:** 9m
+**Verification:** PASS (iteration 2)
+**Files changed:** 6
+**Tests added:** 3
+**ADRs written:** ADR-0008
+
+---
+
+## 2026-11-05 10:14 -- Verification failed: cash-ledger-k6d4w - Store transactions under the transactions key
+
+**Type:** Work / Verification failure
+**Task:** cash-ledger-k6d4w
+**Iteration:** 1 of 3
+**Reasons:** ADR-0008 convention lacks enforcement or an explicit prose-only, unenforced marker (ADR-0059)
+**Iteration hint:** likely-fixable
+**Next:** re-dispatched worker
+
+---
+
 ## 2026-11-05 10:10 -- Batch started: [cash-ledger-k6d4w]
 
 **Type:** Work / Batch start
