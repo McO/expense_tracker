@@ -5,6 +5,15 @@ Newest entries on top.
 
 ---
 
+## 2026-11-05 09:09 -- Batch started: [cash-ledger-bktw5]
+
+**Type:** Work / Batch start
+**Tasks:** cash-ledger-bktw5 - Add a Statistics screen with the four quick-glance cash statistics for the selected wallet
+**Parallel:** no (1 worker) — the only ready task
+**Planning advisory:** whats-next (current): model and build the quick-glance statistics — this task
+
+---
+
 ## 2026-11-05 09:09 -- Modeling / Captured: cash-ledger-bktw5 - Add a Statistics screen with the four quick-glance cash statistics for the selected wallet
 
 **Type:** Modeling / Capture

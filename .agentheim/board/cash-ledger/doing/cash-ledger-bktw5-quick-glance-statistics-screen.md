@@ -1,7 +1,7 @@
 ---
 id: cash-ledger-bktw5
 title: Add a Statistics screen with the four quick-glance cash statistics for the selected wallet
-status: todo
+status: doing
 type: feature
 context: cash-ledger
 created: 2026-11-05
