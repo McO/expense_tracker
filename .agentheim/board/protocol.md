@@ -5,6 +5,14 @@ Newest entries on top.
 
 ---
 
+## 2026-11-05 10:37 -- Batch started: [cash-ledger-hzqaa]
+
+**Type:** Work / Batch start
+**Tasks:** cash-ledger-hzqaa - Import a CSV file the app exported into a chosen account, skipping exact duplicates
+**Parallel:** no (1 worker — only ready task)
+
+---
+
 ## 2026-11-05 10:37 -- Modeling / Captured: cash-ledger-hzqaa - Import a CSV file the app exported into a chosen account, skipping exact duplicates
 
 **Type:** Modeling / Capture

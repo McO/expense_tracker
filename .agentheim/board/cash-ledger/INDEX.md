@@ -11,18 +11,18 @@ Catalog of this bounded context's tasks by status.
 
 <!-- task-counts:start -->
 - **Backlog:** 0
-- **Todo:** 1
-- **Doing:** 0
+- **Todo:** 0
+- **Doing:** 1
 - **Done:** 10
 <!-- task-counts:end -->
 
 ### Todo
 <!-- todo-list:start -->
-- **cash-ledger-hzqaa** — Import a CSV file the app exported into a chosen account, skipping exact duplicates (feature) — `todo/cash-ledger-hzqaa-import-own-csv-export.md`
 <!-- todo-list:end -->
 
 ### Doing
 <!-- doing-list:start -->
+- **cash-ledger-hzqaa** — Import a CSV file the app exported into a chosen account, skipping exact duplicates (feature) — `doing/cash-ledger-hzqaa-import-own-csv-export.md`
 <!-- doing-list:end -->
 
 ### Done (most recent first; older entries kept for prior-art search)

@@ -1,7 +1,7 @@
 ---
 id: cash-ledger-hzqaa
 title: Import a CSV file the app exported into a chosen account, skipping exact duplicates
-status: todo
+status: doing
 type: feature
 context: cash-ledger
 created: 2026-11-05
