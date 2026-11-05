@@ -5,6 +5,19 @@ Newest entries on top.
 
 ---
 
+## 2026-11-05 19:51 -- Task verified and completed: infrastructure-es0rg - Commit pubspec.lock so every checkout and release builds the tested dependency versions
+
+**Type:** Work / Task completion
+**Task:** infrastructure-es0rg - Commit pubspec.lock so every checkout and release builds the tested dependency versions
+**Summary:** pubspec.lock committed and freshly resolved; checkouts, verifiers and release builds use the same tested versions
+**Duration:** 8m
+**Verification:** PASS (iteration 1)
+**Files changed:** 3
+**Tests added:** 0
+**ADRs written:** none
+
+---
+
 ## 2026-11-05 19:47 -- Batch started: [infrastructure-es0rg]
 
 **Type:** Work / Batch start

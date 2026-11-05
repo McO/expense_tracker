@@ -201,6 +201,7 @@ The app declares **no** permissions in `AndroidManifest.xml`. CSV export saves t
 
 ## Known Gotchas
 
+- **`pubspec.lock` is committed** so every checkout, test run and release build uses the same tested dependency versions; refresh it deliberately with `flutter pub upgrade`.
 - **No CI/CD.** Releases are cut locally by `tool/release.sh` (see Releasing); never tag, push or publish a release by hand.
 - **Release builds need `android/key.properties`.** Run `tool/create-release-key.sh` once; it creates the release keystore at `~/.android-keys/expense-tracker-release.jks` (outside the repo) and writes the gitignored `android/key.properties`. `flutter build apk --release` fails without it and never falls back to the debug key. Back up the keystore and its password. Changing the key or app ID forces a reinstall (export, reinstall, import).
 - **The README is outdated** — it documents the original simpler version. The codebase has since added accounts, income/expense types, custom categories, custom currencies, and CSV export.

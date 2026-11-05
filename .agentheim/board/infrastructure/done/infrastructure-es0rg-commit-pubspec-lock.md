@@ -1,7 +1,7 @@
 ---
 id: infrastructure-es0rg
 title: Commit pubspec.lock so every checkout and release builds the tested dependency versions
-status: doing
+status: done
 type: chore
 context: infrastructure
 created: 2026-11-05
@@ -43,3 +43,22 @@ So tests and verification run against different packages than the ones `tool/rel
 - Owner approved on 2026-11-05 after `flutter pub get` showed the stale versions.
 - The owner's local untracked `pubspec.lock` in the main checkout will conflict with the tracked one when this merges. The conductor removes it before the squash-merge.
 - Packages held back by the Flutter SDK, such as `material_color_utilities`, `cross_file` and `objective_c`, stay behind until a Flutter update. That is expected, not a defect.
+
+## Outcome
+
+`pubspec.lock` is now committed.
+- **`.gitignore`:** `!pubspec.lock` was added right after `*.lock`. `*.lock` is the stock Flutter template entry for stray tool lock files, so it stays.
+- **Lock file:** resolved fresh with `flutter pub upgrade`. It has `shared_preferences` 2.5.6 and `shared_preferences_android` 2.5.4, and no 2.4.x of the Android plugin. The 2.4.x versions applied `kotlin-android` and broke the owner's release build once `android.builtInKotlin=true` was set.
+- **`pubspec.yaml`:** unchanged.
+- **`AGENTS.md`:** a Known Gotchas line records that the lock file is committed.
+
+Checks:
+- `flutter pub get` leaves the committed lock file unchanged.
+- Analyze is clean and 92 tests pass.
+- The debug build and the release dry run pass.
+
+The owner's stale untracked lock file was moved aside before the merge.
+
+Verification passed on iteration 1.
+
+Follow-up: `tool/release.sh` stages only `pubspec.yaml` and `CHANGELOG.md`. This is harmless today, because a release refuses to start on a dirty tree.
