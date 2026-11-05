@@ -5,6 +5,15 @@ Newest entries on top.
 
 ---
 
+## 2026-11-05 09:32 -- Batch started: [cash-ledger-apzzm, cash-ledger-p53v9]
+
+**Type:** Work / Batch start
+**Tasks:** cash-ledger-apzzm - A movement's currency is always its wallet's; drop the global default currency; deleting a wallet deletes its movements after a confirm, cash-ledger-p53v9 - Make the summary card's money colors work in dark mode
+**Parallel:** yes (2 workers — cash-ledger-f150f blocked on cash-ledger-apzzm, follows next wave)
+**Planning advisory:** whats-next (stale — background context): model the currency and category cleanup; done, these tasks are its output
+
+---
+
 ## 2026-11-05 09:29 -- Modeling / Promoted: cash-ledger-p53v9 - Make the summary card's money colors work in dark mode
 
 **Type:** Modeling / Promote

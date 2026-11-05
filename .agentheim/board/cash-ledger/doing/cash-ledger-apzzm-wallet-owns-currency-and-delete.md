@@ -1,7 +1,7 @@
 ---
 id: cash-ledger-apzzm
 title: A movement's currency is always its wallet's; drop the global default currency; deleting a wallet deletes its movements after a confirm
-status: todo
+status: doing
 type: feature
 context: cash-ledger
 created: 2026-11-05

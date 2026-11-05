@@ -11,20 +11,20 @@ Catalog of this bounded context's tasks by status.
 
 <!-- task-counts:start -->
 - **Backlog:** 0
-- **Todo:** 3
-- **Doing:** 0
+- **Todo:** 1
+- **Doing:** 2
 - **Done:** 5
 <!-- task-counts:end -->
 
 ### Todo
 <!-- todo-list:start -->
-- **cash-ledger-p53v9** — Make the summary card's money colors work in dark mode (bug) — `todo/cash-ledger-p53v9-summary-card-dark-mode-colors.md`
 - **cash-ledger-f150f** — Account and currency management screens use the category list style (popup menu per item, extended add button) (refactor) — `todo/cash-ledger-f150f-management-lists-category-style.md`
-- **cash-ledger-apzzm** — A movement's currency is always its wallet's; drop the global default currency; deleting a wallet deletes its movements after a confirm (feature) — `todo/cash-ledger-apzzm-wallet-owns-currency-and-delete.md`
 <!-- todo-list:end -->
 
 ### Doing
 <!-- doing-list:start -->
+- **cash-ledger-p53v9** — Make the summary card's money colors work in dark mode (bug) — `doing/cash-ledger-p53v9-summary-card-dark-mode-colors.md`
+- **cash-ledger-apzzm** — A movement's currency is always its wallet's; drop the global default currency; deleting a wallet deletes its movements after a confirm (feature) — `doing/cash-ledger-apzzm-wallet-owns-currency-and-delete.md`
 <!-- doing-list:end -->
 
 ### Done (most recent first; older entries kept for prior-art search)
