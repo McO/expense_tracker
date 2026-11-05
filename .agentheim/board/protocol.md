@@ -5,6 +5,14 @@ Newest entries on top.
 
 ---
 
+## 2026-11-05 21:34 -- Batch started: [cash-ledger-ajxaq]
+
+**Type:** Work / Batch start
+**Tasks:** cash-ledger-ajxaq - Each currency has its own number of decimal places (ISO for built-ins, editable for custom currencies)
+**Parallel:** no (1 worker — yc1h3 and my7ez wait on ajxaq)
+
+---
+
 ## 2026-11-05 21:33 -- Modeling / Captured: cash-ledger-my7ez - Every amount on screen follows the phone's number format and the currency's decimals
 
 **Type:** Modeling / Capture

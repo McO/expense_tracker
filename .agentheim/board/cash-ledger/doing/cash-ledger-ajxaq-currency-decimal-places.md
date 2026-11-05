@@ -1,7 +1,7 @@
 ---
 id: cash-ledger-ajxaq
 title: Each currency has its own number of decimal places (ISO for built-ins, editable for custom currencies)
-status: todo
+status: doing
 type: feature
 context: cash-ledger
 created: 2026-11-05
