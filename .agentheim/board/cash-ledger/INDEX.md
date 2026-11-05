@@ -11,13 +11,14 @@ Catalog of this bounded context's tasks by status.
 
 <!-- task-counts:start -->
 - **Backlog:** 0
-- **Todo:** 0
+- **Todo:** 1
 - **Doing:** 0
 - **Done:** 12
 <!-- task-counts:end -->
 
 ### Todo
 <!-- todo-list:start -->
+- **cash-ledger-ssybq** — Show the app version and build number at the bottom of the home drawer (feature) — `todo/cash-ledger-ssybq-show-version-in-drawer.md`
 <!-- todo-list:end -->
 
 ### Doing

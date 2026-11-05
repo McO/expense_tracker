@@ -5,6 +5,15 @@ Newest entries on top.
 
 ---
 
+## 2026-11-05 19:35 -- Modeling / Captured: cash-ledger-ssybq - Show the app version and build number at the bottom of the home drawer
+
+**Type:** Modeling / Capture
+**BC:** cash-ledger
+**Filed to:** todo
+**Summary:** Show Version X.Y.Z (N) at the bottom of the home drawer, read at runtime from the installed package
+
+---
+
 ## 2026-11-05 19:24 -- Work session ended
 
 **Type:** Work / Session end
