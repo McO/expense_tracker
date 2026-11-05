@@ -33,11 +33,18 @@ class TotalExpenseCard extends StatelessWidget {
       displayCurrency = sortedCurrencies.first.key;
     }
     
+    final scheme = Theme.of(context).colorScheme;
+    final income = _Tone(Colors.green, scheme);
+    final expense = _Tone(Colors.red, scheme);
+    final net = netBalance >= 0
+        ? _Tone(scheme.primary, scheme)
+        : _Tone(Colors.orange, scheme);
+
     return Column(
       children: [
         // Net Balance Card - Larger
         Card(
-          color: netBalance >= 0 ? Colors.blue.shade50 : Colors.orange.shade50,
+          color: net.fill,
           elevation: 2,
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
@@ -48,14 +55,14 @@ class TotalExpenseCard extends StatelessWidget {
                   children: [
                     Icon(
                       netBalance >= 0 ? Icons.trending_up : Icons.trending_down,
-                      color: netBalance >= 0 ? Colors.blue.shade700 : Colors.orange.shade700,
+                      color: net.fg,
                       size: 24,
                     ),
                     const SizedBox(width: 8),
                     Text(
                       'Net Balance',
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                            color: netBalance >= 0 ? Colors.blue.shade700 : Colors.orange.shade700,
+                            color: net.fg,
                             fontWeight: FontWeight.w600,
                           ),
                     ),
@@ -66,7 +73,7 @@ class TotalExpenseCard extends StatelessWidget {
                   '${netBalance >= 0 ? '+' : ''}${displayCurrency.symbol}${netBalance.toStringAsFixed(2)}',
                   style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                         fontWeight: FontWeight.bold,
-                        color: netBalance >= 0 ? Colors.blue.shade700 : Colors.orange.shade700,
+                        color: net.fg,
                       ),
                 ),
                 if (totalIncome > 0 && currencyTotals.length <= 1) ...[
@@ -74,7 +81,7 @@ class TotalExpenseCard extends StatelessWidget {
                   Text(
                     'Savings Rate: ${((totalIncome - totalExpenses) / totalIncome * 100).toStringAsFixed(1)}%',
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: (netBalance >= 0 ? Colors.blue.shade700 : Colors.orange.shade700).withValues(alpha: 0.7),
+                      color: net.fg.withValues(alpha: 0.7),
                     ),
                   ),
                 ],
@@ -83,7 +90,7 @@ class TotalExpenseCard extends StatelessWidget {
                   Text(
                     'Combined from ${currencyTotals.length} currencies',
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: (netBalance >= 0 ? Colors.blue.shade700 : Colors.orange.shade700).withValues(alpha: 0.7),
+                      color: net.fg.withValues(alpha: 0.7),
                     ),
                   ),
                 ],
@@ -98,7 +105,7 @@ class TotalExpenseCard extends StatelessWidget {
             // Income Card
             Expanded(
               child: Card(
-                color: Colors.green.shade50,
+                color: income.fill,
                 elevation: 2,
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -109,14 +116,14 @@ class TotalExpenseCard extends StatelessWidget {
                         children: [
                           Icon(
                             Icons.arrow_upward,
-                            color: Colors.green.shade700,
+                            color: income.fg,
                             size: 18,
                           ),
                           const SizedBox(width: 6),
                           Text(
                             'Income',
                             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                  color: Colors.green.shade700,
+                                  color: income.fg,
                                   fontWeight: FontWeight.w600,
                                 ),
                           ),
@@ -127,7 +134,7 @@ class TotalExpenseCard extends StatelessWidget {
                         '+${displayCurrency.symbol}${totalIncome.toStringAsFixed(2)}',
                         style: Theme.of(context).textTheme.titleLarge?.copyWith(
                               fontWeight: FontWeight.bold,
-                              color: Colors.green.shade700,
+                              color: income.fg,
                             ),
                       ),
                     ],
@@ -139,7 +146,7 @@ class TotalExpenseCard extends StatelessWidget {
             // Expenses Card
             Expanded(
               child: Card(
-                color: Colors.red.shade50,
+                color: expense.fill,
                 elevation: 2,
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -150,14 +157,14 @@ class TotalExpenseCard extends StatelessWidget {
                         children: [
                           Icon(
                             Icons.arrow_downward,
-                            color: Colors.red.shade700,
+                            color: expense.fg,
                             size: 18,
                           ),
                           const SizedBox(width: 6),
                           Text(
                             'Expenses',
                             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                  color: Colors.red.shade700,
+                                  color: expense.fg,
                                   fontWeight: FontWeight.w600,
                                 ),
                           ),
@@ -168,7 +175,7 @@ class TotalExpenseCard extends StatelessWidget {
                         '-${displayCurrency.symbol}${totalExpenses.toStringAsFixed(2)}',
                         style: Theme.of(context).textTheme.titleLarge?.copyWith(
                               fontWeight: FontWeight.bold,
-                              color: Colors.red.shade700,
+                              color: expense.fg,
                             ),
                       ),
                     ],
@@ -181,4 +188,15 @@ class TotalExpenseCard extends StatelessWidget {
       ],
     );
   }
+}
+
+/// Scheme-aware fill + foreground pair derived from a semantic colour, so the
+/// card reads well in light and dark mode (no fixed Colors.x.shadeNN tints).
+class _Tone {
+  final Color fill;
+  final Color fg;
+
+  _Tone(Color base, ColorScheme scheme)
+      : fill = Color.alphaBlend(base.withValues(alpha: 0.16), scheme.surface),
+        fg = Color.lerp(base, scheme.onSurface, 0.3)!;
 }

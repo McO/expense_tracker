@@ -16,13 +16,13 @@ This documents the look as it exists in `lib/` today, plus one proposal (section
 
 ### Color
 - Brand and surfaces come from the seed `ColorScheme` (e.g. account selector uses `secondaryContainer` / `onSecondaryContainer`; the active page dot uses `primaryColor`).
-- Semantic money colors are hard-coded Material `Colors`, not scheme roles:
-  - Income: `Colors.green` (tint `green.shade50`, text `green.shade700`)
-  - Expense: `Colors.red` (tint `red.shade50`, text `red.shade700`)
-  - Net balance: positive `Colors.blue.shade50/700`, negative `Colors.orange.shade50/700`
+- Semantic money colors on the summary card (`total_expense_card.dart`) are scheme-aware: each card fill is the semantic colour as an alpha tint (0.16) blended over `colorScheme.surface`, and its text/icon colour is the semantic colour mixed 30% toward `colorScheme.onSurface`, so both adapt to light and dark mode:
+  - Income: green (`Colors.green`)
+  - Expense: red (`Colors.red`)
+  - Net balance: positive `colorScheme.primary`, negative orange (`Colors.orange`)
   - Inactive/empty hints: `Colors.grey[300..600]`
 - Category color: each `Category` carries its own hex color (`category.toColor()`); used as alpha tints and borders; `category_breakdown.dart` uses 0.03 and 0.08 (gradient), 0.15 (fill), 0.3 and 0.4 (borders), and `recent_expenses.dart` uses 0.1 (fill) and 0.3 (border).
-- Known inconsistency: the `shadeNN` tints in `total_expense_card.dart` are light-only and do not adapt to dark mode. New components should prefer scheme roles or alpha tints (`color.withValues(alpha: ...)`), as the category and movement widgets do.
+- New components should prefer scheme roles or alpha tints (`color.withValues(alpha: ...)`) over fixed `Colors.x.shadeNN` tints, as the summary card, category and movement widgets do.
 
 ### Typography
 Theme text styles used, with bold added by hand:

@@ -5,6 +5,19 @@ Newest entries on top.
 
 ---
 
+## 2026-11-05 09:40 -- Task verified and completed: cash-ledger-p53v9 - Make the summary card's money colors work in dark mode
+
+**Type:** Work / Task completion
+**Task:** cash-ledger-p53v9 - Make the summary card's money colors work in dark mode
+**Summary:** Summary card money colours come from scheme-aware alpha tints so they work in dark mode; styleguide Color section updated
+**Duration:** 14m
+**Verification:** PASS (iteration 3)
+**Files changed:** 3
+**Tests added:** 4
+**ADRs written:** none
+
+---
+
 ## 2026-11-05 09:39 -- Batch started: [cash-ledger-f150f]
 
 **Type:** Work / Batch start

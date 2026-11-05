@@ -12,8 +12,8 @@ Catalog of this bounded context's tasks by status.
 <!-- task-counts:start -->
 - **Backlog:** 0
 - **Todo:** 0
-- **Doing:** 2
-- **Done:** 6
+- **Doing:** 1
+- **Done:** 7
 <!-- task-counts:end -->
 
 ### Todo
@@ -23,11 +23,11 @@ Catalog of this bounded context's tasks by status.
 ### Doing
 <!-- doing-list:start -->
 - **cash-ledger-f150f** — Account and currency management screens use the category list style (popup menu per item, extended add button) (refactor) — `doing/cash-ledger-f150f-management-lists-category-style.md`
-- **cash-ledger-p53v9** — Make the summary card's money colors work in dark mode (bug) — `doing/cash-ledger-p53v9-summary-card-dark-mode-colors.md`
 <!-- doing-list:end -->
 
 ### Done (most recent first; older entries kept for prior-art search)
 <!-- done-list:start -->
+- **cash-ledger-p53v9** — Make the summary card's money colors work in dark mode (bug) — `done/cash-ledger-p53v9-summary-card-dark-mode-colors.md`
 - **cash-ledger-apzzm** — A movement's currency is always its wallet's; drop the global default currency; deleting a wallet deletes its movements after a confirm (feature) — `done/cash-ledger-apzzm-wallet-owns-currency-and-delete.md`
 - **cash-ledger-bktw5** — Add a Statistics screen with the four quick-glance cash statistics for the selected wallet (feature) — `done/cash-ledger-bktw5-quick-glance-statistics-screen.md`
 - **cash-ledger-vsszp** — Enter movements as a signed amount with a ± toggle, correct a wallet's balance from the counted cash, and flag categories that don't count in statistics (feature) — `done/cash-ledger-vsszp-movement-kinds-ui.md`
