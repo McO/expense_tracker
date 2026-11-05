@@ -1,7 +1,7 @@
 ---
 id: cash-ledger-my7ez
 title: Every amount on screen follows the phone's number format and the currency's decimals
-status: todo
+status: doing
 type: feature
 context: cash-ledger
 created: 2026-11-05

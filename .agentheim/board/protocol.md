@@ -5,6 +5,14 @@ Newest entries on top.
 
 ---
 
+## 2026-11-05 21:44 -- Batch started: [cash-ledger-my7ez]
+
+**Type:** Work / Batch start
+**Tasks:** cash-ledger-my7ez - Every amount on screen follows the phone's number format and the currency's decimals
+**Parallel:** no (1 worker — last of the amount-format chain)
+
+---
+
 ## 2026-11-05 21:44 -- Task verified and completed: cash-ledger-yc1h3 - Amount input follows the phone's number format and the currency's decimals, tolerating the other separator, symbols and spaces
 
 **Type:** Work / Task completion

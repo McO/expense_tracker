@@ -11,18 +11,18 @@ Catalog of this bounded context's tasks by status.
 
 <!-- task-counts:start -->
 - **Backlog:** 0
-- **Todo:** 1
-- **Doing:** 0
+- **Todo:** 0
+- **Doing:** 1
 - **Done:** 15
 <!-- task-counts:end -->
 
 ### Todo
 <!-- todo-list:start -->
-- **cash-ledger-my7ez** — Every amount on screen follows the phone's number format and the currency's decimals (feature) — `todo/cash-ledger-my7ez-locale-aware-amount-display.md`
 <!-- todo-list:end -->
 
 ### Doing
 <!-- doing-list:start -->
+- **cash-ledger-my7ez** — Every amount on screen follows the phone's number format and the currency's decimals (feature) — `doing/cash-ledger-my7ez-locale-aware-amount-display.md`
 <!-- doing-list:end -->
 
 ### Done (most recent first; older entries kept for prior-art search)
