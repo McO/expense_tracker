@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.2.1 (2026-11-15)
+
+### Features
+- tool/release.sh optionally uploads each signed APK to Firebase App Distribution (gitignored local config, tester group, no Firebase code in the app); ADR-0012 (infrastructure-acmpv)
+
 ## 1.2.0 (2026-11-15)
 
 ### Features
