@@ -5,6 +5,14 @@ Newest entries on top.
 
 ---
 
+## 2026-11-15 19:21 -- Batch started: [infrastructure-acmpv]
+
+**Type:** Work / Batch start
+**Tasks:** infrastructure-acmpv - tool/release.sh also uploads each signed APK to Firebase App Distribution, so the owner installs and updates through App Tester
+**Parallel:** no (1 worker — only ready task)
+
+---
+
 ## 2026-11-15 19:14 -- Modeling / Captured: infrastructure-acmpv - tool/release.sh also uploads each signed APK to Firebase App Distribution, so the owner installs and updates through App Tester
 
 **Type:** Modeling / Capture

@@ -1,7 +1,7 @@
 ---
 id: infrastructure-acmpv
 title: tool/release.sh also uploads each signed APK to Firebase App Distribution, so the owner installs and updates through App Tester
-status: todo
+status: doing
 type: feature
 context: infrastructure
 created: 2026-11-15
