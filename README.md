@@ -43,6 +43,24 @@ asks you to allow installs from your browser or file manager the first time.
 Each release is signed with the same key, so new versions install over the old one and keep your
 data.
 
+### Install and update through Firebase App Tester (optional)
+
+If you run your own copy of the release process, `tool/release.sh` can also upload each signed APK
+to Firebase App Distribution, so it shows up in the Firebase **App Tester** app on your phone with a
+notification and installs with one tap. The upload is a release-script step only: the app contains no
+Firebase code and still needs no permissions. One-time setup:
+
+1. Create a Firebase project at console.firebase.google.com.
+2. Add an Android app with package `io.github.mco.expensetracker` (skip the `google-services.json`
+   download, it is not needed).
+3. In App Distribution, create a tester group (for example `owner`) containing your own email.
+4. Run `firebase login` on the computer that cuts releases.
+5. Copy `tool/release.local.env.example` to `tool/release.local.env` (gitignored) and fill in the
+   app ID (Project settings) and the group alias.
+6. Install **Firebase App Tester** on the phone and accept the invite.
+
+Without `tool/release.local.env` the release skips this step.
+
 ## Build from source
 
 You need the [Flutter](https://docs.flutter.dev/get-started/install) SDK (stable channel) and the
@@ -66,7 +84,8 @@ script:
 2. runs the tests;
 3. writes the changelog;
 4. builds the signed APK;
-5. tags the version and publishes the GitHub Release.
+5. tags the version and publishes the GitHub Release;
+6. uploads the APK to Firebase App Distribution, if configured.
 
 See [CHANGELOG.md](CHANGELOG.md) for the history.
 

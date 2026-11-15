@@ -12,8 +12,8 @@ Catalog of this bounded context's tasks by status.
 <!-- task-counts:start -->
 - **Backlog:** 0
 - **Todo:** 0
-- **Doing:** 1
-- **Done:** 8
+- **Doing:** 0
+- **Done:** 9
 <!-- task-counts:end -->
 
 ### Todo
@@ -22,11 +22,11 @@ Catalog of this bounded context's tasks by status.
 
 ### Doing
 <!-- doing-list:start -->
-- **infrastructure-acmpv** — tool/release.sh also uploads each signed APK to Firebase App Distribution, so the owner installs and updates through App Tester (feature) — `doing/infrastructure-acmpv-firebase-app-distribution.md`
 <!-- doing-list:end -->
 
 ### Done (most recent first; older entries kept for prior-art search)
 <!-- done-list:start -->
+- **infrastructure-acmpv** — tool/release.sh also uploads each signed APK to Firebase App Distribution, so the owner installs and updates through App Tester (feature) — `done/infrastructure-acmpv-firebase-app-distribution.md`
 - **infrastructure-es0rg** — Commit pubspec.lock so every checkout and release builds the tested dependency versions (chore) — `done/infrastructure-es0rg-commit-pubspec-lock.md`
 - **infrastructure-tf3qk** — Migrate the Android app module from the Kotlin Gradle Plugin to Flutter's Built-in Kotlin (chore) — `done/infrastructure-tf3qk-migrate-to-built-in-kotlin.md`
 - **infrastructure-dx7t4** — One local release script that bumps the SemVer version and build number, writes the changelog from done tasks, tags, and publishes a GitHub Release with the signed APK (feature) — `done/infrastructure-dx7t4-release-script-versioning-changelog.md`

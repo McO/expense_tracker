@@ -124,3 +124,6 @@ app.*.symbols
 .agentheim/.dashboard/
 .worktrees/
 .DS_Store
+
+# Local release configuration (Firebase App Distribution app ID and tester group)
+tool/release.local.env

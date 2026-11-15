@@ -10,6 +10,7 @@ Catalog of ADRs, research, and concept synthesis pages scoped to this bounded co
 ## ADRs scoped to this BC
 
 <!-- adr-local:start -->
+- **ADR-0012** — Firebase App Distribution as an optional, locally configured last step of `tool/release.sh` (amends ADR-0011); no Firebase code or permission in the app. — `decisions/0012-firebase-app-distribution-release-step.md`
 <!-- adr-local:end -->
 
 ## Research touching this BC

@@ -8,7 +8,12 @@
 # commits, tags, pushes and publishes nothing (analyze/test/build are not run).
 #
 # Testing seam (honoured ONLY together with --dry-run): RELEASE_DRY_RUN_SKIP_CHECKS
-# is a comma list of precondition names to skip: branch,clean,sync,gh,key.
+# is a comma list of precondition names to skip: branch,clean,sync,gh,key,firebase.
+# RELEASE_LOCAL_ENV (also dry-run only) points at an alternative config file.
+#
+# Optional Firebase App Distribution (ADR-0011 amendment): if tool/release.local.env
+# (gitignored; see tool/release.local.env.example) sets FIREBASE_APP_ID and
+# FIREBASE_TESTER_GROUP, the signed APK is also uploaded after the GitHub Release.
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
@@ -36,7 +41,16 @@ refuse() { echo "Refusing to release: $1" >&2; exit 1; }
 step() { echo "==> $*"; }
 run() { if [ "$DRY_RUN" = 1 ]; then echo "    [dry-run] would run: $*"; else "$@"; fi; }
 
-step "1/7 Preconditions"
+# Optional Firebase config (never sourced as code: plain KEY=value lines only).
+LOCAL_ENV="tool/release.local.env"
+[ "$DRY_RUN" = 1 ] && LOCAL_ENV="${RELEASE_LOCAL_ENV:-$LOCAL_ENV}"
+env_value() { [ -f "$LOCAL_ENV" ] && sed -n "s/^$1=//p" "$LOCAL_ENV" | tail -1 | sed "s/^[\"']//; s/[\"']\$//" || true; }
+FIREBASE_APP_ID="$(env_value FIREBASE_APP_ID)"
+FIREBASE_TESTER_GROUP="$(env_value FIREBASE_TESTER_GROUP)"
+FIREBASE_ON=0
+[ -n "$FIREBASE_APP_ID" ] && [ -n "$FIREBASE_TESTER_GROUP" ] && FIREBASE_ON=1
+
+step "1/8 Preconditions"
 skipped branch || [ "$(git rev-parse --abbrev-ref HEAD)" = "main" ] \
   || refuse "not on main (on '$(git rev-parse --abbrev-ref HEAD)')."
 skipped clean || [ -z "$(git status --porcelain)" ] \
@@ -50,9 +64,17 @@ skipped gh || gh auth status >/dev/null 2>&1 \
   || refuse "gh is not authenticated (run 'gh auth login')."
 skipped key || [ -f android/key.properties ] \
   || refuse "android/key.properties is missing (run tool/create-release-key.sh)."
+if [ "$FIREBASE_ON" = 1 ]; then
+  skipped firebase || {
+    command -v firebase >/dev/null 2>&1 \
+      || refuse "Firebase distribution is configured but the firebase CLI is not installed."
+    firebase login:list >/dev/null 2>&1 \
+      || refuse "Firebase distribution is configured but the firebase CLI is not logged in (run 'firebase login')."
+  }
+fi
 echo "    ok"
 
-step "2/7 Version"
+step "2/8 Version"
 CURRENT="$(sed -n 's/^version:[[:space:]]*//p' pubspec.yaml)"
 NEW_VERSION_FULL="$(dart tool/release_notes.dart next pubspec.yaml "$BUMP")"
 NEW_VERSION="${NEW_VERSION_FULL%%+*}"
@@ -90,11 +112,11 @@ else
   sed -i.bak "s/^version:.*/version: $NEW_VERSION_FULL/" pubspec.yaml && rm -f pubspec.yaml.bak
 fi
 
-step "3/7 Checks"
+step "3/8 Checks"
 run flutter analyze
 run flutter test
 
-step "4/7 Changelog (commits ${RANGE})"
+step "4/8 Changelog (commits ${RANGE})"
 if [ "$DRY_RUN" = 1 ]; then
   echo "    [dry-run] would prepend to CHANGELOG.md:"
   sed 's/^/    | /' "$SECTION_FILE"
@@ -102,7 +124,7 @@ else
   dart tool/release_notes.dart prepend CHANGELOG.md "$SECTION_FILE"
 fi
 
-step "5/7 Build"
+step "5/8 Build"
 APK_OUT="build/release/expense-tracker-$NEW_VERSION.apk"
 run flutter build apk --release
 if [ "$DRY_RUN" = 1 ]; then
@@ -112,7 +134,7 @@ else
   cp build/app/outputs/flutter-apk/app-release.apk "$APK_OUT"
 fi
 
-step "6/7 Commit and tag"
+step "6/8 Commit and tag"
 if [ "$DRY_RUN" = 1 ]; then
   echo "    [dry-run] would run: git add pubspec.yaml CHANGELOG.md"
   echo "    [dry-run] would run: git commit -m 'chore(release): $TAG'"
@@ -135,8 +157,22 @@ else
   fi
 fi
 
-step "7/7 Publish"
+step "7/8 Publish"
 run gh release create "$TAG" "$APK_OUT" --repo "$GH_REPO" --title "$TAG" --notes-file "$SECTION_FILE" \
   || { echo "The commit and tag are pushed but publishing failed; rerun the gh release create command by hand." >&2; exit 1; }
+
+step "8/8 Distribute"
+if [ "$FIREBASE_ON" = 1 ]; then
+  FB_CMD=(firebase appdistribution:distribute "$APK_OUT" --app "$FIREBASE_APP_ID" --groups "$FIREBASE_TESTER_GROUP" --release-notes-file "$SECTION_FILE")
+  if [ "$DRY_RUN" = 1 ]; then
+    echo "    [dry-run] would run: ${FB_CMD[*]}"
+  elif ! "${FB_CMD[@]}"; then
+    echo "The GitHub Release is published but the Firebase upload failed; nothing was rolled back." >&2
+    echo "  Retry:  ${FB_CMD[*]}" >&2
+    exit 1
+  fi
+else
+  echo "    Firebase distribution not configured; skipped"
+fi
 rm -f "$SECTION_FILE"
 echo "Done: $TAG"

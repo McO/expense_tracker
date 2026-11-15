@@ -5,6 +5,30 @@ Newest entries on top.
 
 ---
 
+## 2026-11-15 19:28 -- Task verified and completed: infrastructure-acmpv - tool/release.sh also uploads each signed APK to Firebase App Distribution, so the owner installs and updates through App Tester
+
+**Type:** Work / Task completion
+**Task:** infrastructure-acmpv - tool/release.sh also uploads each signed APK to Firebase App Distribution, so the owner installs and updates through App Tester
+**Summary:** tool/release.sh optionally uploads each signed APK to Firebase App Distribution (gitignored local config, tester group, no Firebase code in the app); ADR-0012
+**Duration:** 25m
+**Verification:** PASS (iteration 2)
+**Files changed:** 6
+**Tests added:** 3
+**ADRs written:** ADR-0012
+
+---
+
+## 2026-11-15 19:25 -- Verification failed: infrastructure-acmpv - Firebase App Distribution step in tool/release.sh
+
+**Type:** Work / Verification failure
+**Task:** infrastructure-acmpv
+**Iteration:** 1 of 3
+**Reasons:** empty README_DELTA despite new infrastructure terms; ADR-0012 draft lacks Consequences section
+**Iteration hint:** likely-fixable
+**Next:** re-dispatched worker
+
+---
+
 ## 2026-11-15 19:21 -- Batch started: [infrastructure-acmpv]
 
 **Type:** Work / Batch start
