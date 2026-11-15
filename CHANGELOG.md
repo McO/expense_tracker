@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.2.0 (2026-11-15)
+
+### Features
+- every on-screen amount follows the phone locale (grouping and decimal separator) and the currency decimals through the shared formatter; CSV unchanged (cash-ledger-my7ez)
+- amount input follows the phone locale and the currency decimals in Add, Edit and Correct balance; tolerant of the other separator, symbols and spaces; normalized on leave (cash-ledger-yc1h3)
+- currencies carry decimal places (ISO for built-ins, editable for custom ones) with a shared rounding helper; custom currencies can be edited (cash-ledger-ajxaq)
+
 ## 1.1.2 (2026-11-05)
 
 _No task changes._
