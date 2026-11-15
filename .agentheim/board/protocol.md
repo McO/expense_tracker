@@ -5,6 +5,15 @@ Newest entries on top.
 
 ---
 
+## 2026-11-15 19:14 -- Modeling / Captured: infrastructure-acmpv - tool/release.sh also uploads each signed APK to Firebase App Distribution, so the owner installs and updates through App Tester
+
+**Type:** Modeling / Capture
+**BC:** infrastructure
+**Filed to:** todo
+**Summary:** release.sh also uploads the signed APK to Firebase App Distribution (opt-in via gitignored local config, tester group, no Firebase code in the app); owner installs/updates via App Tester
+
+---
+
 ## 2026-11-05 21:53 -- Work session ended
 
 **Type:** Work / Session end

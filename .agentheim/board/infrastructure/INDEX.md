@@ -11,13 +11,14 @@ Catalog of this bounded context's tasks by status.
 
 <!-- task-counts:start -->
 - **Backlog:** 0
-- **Todo:** 0
+- **Todo:** 1
 - **Doing:** 0
 - **Done:** 8
 <!-- task-counts:end -->
 
 ### Todo
 <!-- todo-list:start -->
+- **infrastructure-acmpv** — tool/release.sh also uploads each signed APK to Firebase App Distribution, so the owner installs and updates through App Tester (feature) — `todo/infrastructure-acmpv-firebase-app-distribution.md`
 <!-- todo-list:end -->
 
 ### Doing
